@@ -44,7 +44,7 @@ eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
 # Aliases
-alias ls="ls -A --color"
+alias ls="ls -lA --color"
 alias cc="clear"
 alias cd..="cd .."
 alias zshrc="code ~/.zshrc"
