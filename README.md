@@ -19,3 +19,21 @@ In addition to the above, also install:
 - `stow`
 - `zoxide`
 - `fzf`
+
+## Instructions
+To activate these configurations, run the commands below:
+```bash
+# Be sure to clone into your home folder
+cd && git clone https://github.com/fsiraj/dotfiles.git
+cd dotfiles
+# Creates symlinks for all configs
+stow .
+```
+
+VS Code removes symlinks on the `settings.json` file, so is a bit more tedious to work with:
+```bash
+# Check to see if it's actually a symlink
+ln -f .config/vscode/settings.json ~/.config/Code/User/settings.json
+# Install extensions manually
+cat .config/vscode/extensions.txt
+```
