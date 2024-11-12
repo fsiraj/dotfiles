@@ -1,9 +1,13 @@
+# Set XDG paths
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+
 # Oh My Posh - Prompt
 POSH_CONFIG_NAME="custom"
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.toml)"
 
 # Zinit - plugin manager - install if unavailable
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
     mkdir -p "$(dirname $ZINIT_HOME)"
     git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
@@ -44,7 +48,8 @@ eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
 # Aliases
-alias ls="ls -lA --color"
+alias ls="ls -A --color"
+alias ll="ls -Al --color"
 alias cc="clear"
 alias cd..="cd .."
 alias zshrc="code ~/.zshrc"
