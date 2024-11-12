@@ -45,3 +45,13 @@ ln -f .config/vscode/settings.json ~/.config/Code/User/settings.json
 # Install extensions with VS Code's CLI tool
 cat .config/vscode/extensions.txt | xargs -n 1 code --install-extension
 ```
+
+Install tmux plugins:
+```bash
+tmux
+# prefix + I
+```
+
+Notes:
+- `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
+- Move installation to setup script for quicker `zsh` loading.
