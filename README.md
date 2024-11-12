@@ -13,14 +13,22 @@ A summary of my setup:
 - Color Scheme: [Catppuccin Mocha](https://catppuccin.com/palette)
 - Font: [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/JetBrainsMono)
 
-## Requirements
-In addition to the above, also install:
-- `git`
-- `stow`
-- `zoxide`
-- `fzf`
 
 ## Instructions
+
+### Installation
+
+First install VS Code however you like, then run the command appropriate for your OS.
+```bash 
+sudo apt install zsh stow fzf zoxide tmux git # Ubuntu
+brew install zsh stow fzf zoxide tmux git font-jetbrains-mono-nerd-font # MacOS (requires homebrew)
+# Make zsh default shell (same for any POSIX OS)
+chsh -s $(which zsh)
+```
+Install the font manually on Linux. Oh My Posh and Zinit are installed automatically by `.zshrc`. TPM is installed automatically by `tmux.conf`
+
+### Activation
+
 To activate these configurations, run the commands below:
 ```bash
 # Be sure to clone into your home folder
@@ -32,8 +40,8 @@ stow .
 
 VS Code removes symlinks on the `settings.json` file, so is a bit more tedious to work with:
 ```bash
-# Check to see if it's actually a symlink
+# Likely won't be symlink but will copy file over
 ln -f .config/vscode/settings.json ~/.config/Code/User/settings.json
-# Install extensions manually
-cat .config/vscode/extensions.txt
+# Install extensions with VS Code's CLI tool
+cat .config/vscode/extensions.txt | xargs -n 1 code --install-extension
 ```
