@@ -36,7 +36,7 @@ zinit cdreplay -q
 bindkey "^[[Z" autosuggest-accept # shift + tab
 zstyle ":completion:*" matcher-list "m:{[:lower:]}={[:upper:]}" # case insensitive matching
 zstyle ":completion:*" list-colors "${(s.:.)LS_COLORS}" # show color for matches
-zstyle ":completion:*" menu no # disable defualt in favcor of fzf-tab
+zstyle ":completion:*" menu no # disable defualt in favour of fzf-tab
 zstyle ":fzf-tab:complete:cd:*" fzf-preview "ls --color=always $realpath" # preview for cd
 zstyle ":fzf-tab:complete:__zoxide_z:*" fzf-preview "ls --color=always $realpath" # preview for zoxide
 
@@ -53,8 +53,14 @@ setopt hist_ignore_dups
 setopt hist_find_no_dups
 
 # Shell Integrations
-eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
+if [ "$OS" = "Linux" ]; then
+    # Outdated package doesn't support --zsh
+    source /usr/share/doc/fzf/examples/completion.zsh
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+elif [ "$OS" = "Darwin" ]; then
+    eval "$(fzf --zsh)"
+fi
 
 # Aliases
 alias ls="ls -A --color"
