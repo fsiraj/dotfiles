@@ -1,8 +1,17 @@
+OS=$(uname -s)
+
 # Set XDG paths
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 
-# Oh My Posh - Prompt
+# Oh My Posh - Prompt - install if unavailable
+if ! command -v oh-my-posh &> /dev/null; then
+    if [ "$OS" = "Linux" ]; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    elif [ "$OS" = "Darwin" ]; then
+        brew install jandedobbeleer/oh-my-posh/oh-my-posh
+    fi
+fi
 POSH_CONFIG_NAME="custom"
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.toml)"
 
