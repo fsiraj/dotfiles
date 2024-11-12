@@ -5,8 +5,10 @@ final_space = true
 # Catppuccin Mocha
 [palette]
 blue = '#89B4FA'
-red = '#F38BA8'
+teal = '#94e2d5'
 green = '#A6E3A1'
+red = '#F38BA8'
+peach = '#F5A97F'
 lavendar = '#B4BEFE'
 mauve = '#CBA6F7'
 pink = '#F5C2E7'
@@ -21,10 +23,10 @@ alignment = 'left'
 newline = true
 
 [[blocks.segments]]
-type = 'os'
+type = 'text'
 style = 'plain'
-template = '{{.Icon}} '
-foreground = 'p:os'
+template = '󰤄 '
+foreground = 'p:teal'
 
 [[blocks.segments]]
 type = 'session'
@@ -95,6 +97,15 @@ template = " ({{ .FormattedMs }}) "
 threshold = 500
 style = "austin"
 always_enabled = true
+
+[[blocks.segments]]
+type = 'os'
+style = 'plain'
+template = '{{ .Icon }} '
+foreground = 'p:os'
+foreground_templates = [
+    '{{ if eq .OS "ubuntu" }}p:peach{{ end }}'
+]
 
 
 # Prompt - Second Line
