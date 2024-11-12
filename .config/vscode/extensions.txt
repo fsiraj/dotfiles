@@ -5,6 +5,13 @@ github.copilot-chat
 ms-python.debugpy
 ms-python.python
 ms-python.vscode-pylance
+ms-python.black-formatter
+ms-vscode-remote.remote-ssh
+ms-vscode-remote.remote-ssh-edit
+ms-vscode.live-server
+ms-vscode.remote-explorer
 tamasfe.even-better-toml
+trond-snekvik.simple-rst
 tetradresearch.vscode-h2o
 usernamehw.errorlens
+vincent-templier.vscode-netron
