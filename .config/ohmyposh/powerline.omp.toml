@@ -1,17 +1,18 @@
 version = 3
 final_space = true
 
-
 # Catppuccin Mocha
 [palette]
 blue = '#89B4FA'
-red = '#F38BA8'
+teal = '#94e2d5'
 green = '#A6E3A1'
+red = '#F38BA8'
+peach = '#F5A97F'
 lavendar = '#B4BEFE'
 mauve = '#CBA6F7'
 pink = '#F5C2E7'
 os = '#ACB0BE'
-
+black = '#000000'
 
 # Prompt - First Line
 # OS - User - [@Host if SHH] - Path - Python Env - Git
@@ -21,22 +22,29 @@ alignment = 'left'
 newline = true
 
 [[blocks.segments]]
-type = 'os'
-style = 'plain'
-template = '{{.Icon}} '
-foreground = 'p:os'
+type = 'text'
+style = 'diamond'
+leading_diamond = ''
+trailing_diamond = ''
+template = '󰒸 '
+foreground = 'p:black'
+background = 'p:teal'
 
 [[blocks.segments]]
 type = 'session'
-style = 'plain'
-template = '{{ .UserName }}{{ if .SSHSession }}@{{ .HostName }}{{ end }} '
-foreground = 'p:blue'
+style = 'powerline'
+powerline_symbol = ''
+template = ' {{ .UserName }}{{ if .SSHSession }}@{{ index (splitList "." .HostName) 0 }}{{ end }} '
+foreground = 'p:black'
+background = 'p:blue'
 
 [[blocks.segments]]
 type = 'path'
-style = 'plain'
-template = '{{ .Path }} '
-foreground = 'p:pink'
+style = 'powerline'
+powerline_symbol = ''
+template = ' {{ .Path }} '
+foreground = 'p:black'
+background = 'p:pink'
 
 [blocks.segments.properties]
 folder_icon = '....'
@@ -46,25 +54,29 @@ max_depth = 3
 
 [[blocks.segments]]
 type = 'python'
-style = 'plain'
+style = 'powerline'
+powerline_symbol = ''
 template = """\
-    {{ if .Error }}{{ .Error }} {{ else }}\
-    {{ if .Venv }}({{ .Venv }}) {{ end }}\
+    {{ if .Error }} {{ .Error }} {{ else }}\
+    {{ if .Venv }} ({{ .Venv }}) {{ end }}\
      {{ .Major }}.{{ .Minor }} \
     {{ end }}\
     """
-foreground = 'p:lavendar'
+foreground = 'p:black'
+background = 'p:lavendar'
 
 [[blocks.segments]]
 type = 'git'
-style = 'plain'
-template = """\
+style = 'powerline'
+template = """ \
     {{ .HEAD }}\
     {{if .BranchStatus }} {{ .BranchStatus }}{{ end }}\
     {{ if .Working.Changed }}  {{ .Working.String }}{{ end }}\
     {{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}\
     """
-foreground = 'p:mauve'
+foreground = 'p:black'
+background = 'p:mauve'
+powerline_symbol = ''
 
 [blocks.segments.properties]
 branch_icon = ' '
@@ -77,7 +89,6 @@ no_commits_icon = ' '
 rebase_icon = ' '
 revert_icon = ' '
 tag_icon = ' '
-
 
 # Right Prompt
 # Execution Time
@@ -96,6 +107,16 @@ threshold = 500
 style = "austin"
 always_enabled = true
 
+[[blocks.segments]]
+type = 'os'
+style = 'diamond'
+leading_diamond = ''
+trailing_diamond = ''
+template = '{{ .Icon }} '
+foreground = 'p:black'
+background_templates = [
+    '{{ if eq .OS "ubuntu" }}p:peach{{ end }}'
+]
 
 # Prompt - Second Line
 # 
@@ -107,12 +128,11 @@ newline = true
 [[blocks.segments]]
 type = 'text'
 style = 'plain'
-template = ''
+template = ' 󱞩'
 foreground = 'p:green'
-
 
 # Transient Prompt
 # 
 [transient_prompt]
-template = ' '
+template = ' 󱞫 '
 foreground = 'p:mauve'
