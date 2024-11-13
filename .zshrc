@@ -1,10 +1,8 @@
 OS=$(uname -s)
-
-# Set XDG paths
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 
-# Oh My Posh - Prompt - install if unavailable
+# Oh My Posh - Prompt
 if ! command -v oh-my-posh &> /dev/null; then
     if [ "$OS" = "Linux" ]; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
@@ -15,7 +13,7 @@ fi
 POSH_CONFIG_NAME="simple"
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.omp.toml)"
 
-# Zinit - plugin manager - install if unavailable
+# Zinit - plugin manager
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
     mkdir -p "$(dirname $ZINIT_HOME)"
@@ -23,24 +21,24 @@ if [ ! -d "$ZINIT_HOME" ]; then
 fi
 source "${ZINIT_HOME}/zinit.zsh"
 
-# Plugins
+# Load plugins
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 
-# Autocomplete and suggestions
+# Load completions
 autoload -U compinit && compinit
 zinit cdreplay -q
 
+# Configure completion behavior
 bindkey "^[[Z" autosuggest-accept # shift + tab
-zstyle ":completion:*" matcher-list "m:{[:lower:]}={[:upper:]}" # case insensitive matching
-zstyle ":completion:*" list-colors "${(s.:.)LS_COLORS}" # show color for matches
-zstyle ":completion:*" menu no # disable defualt in favour of fzf-tab
-zstyle ":fzf-tab:complete:cd:*" fzf-preview "ls --color=always $realpath" # preview for cd
-zstyle ":fzf-tab:complete:__zoxide_z:*" fzf-preview "ls --color=always $realpath" # preview for zoxide
+zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' # case insensitive matching
+zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}' # show color for matches
+zstyle ':completion:*' menu no # disable defualt in favour of fzf-tab
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color=always $realpath' # preview for zoxide
 
-# History
+# Configure history
 HISTSIZE=5000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
@@ -52,7 +50,7 @@ setopt hist_ignore_all_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
-# Shell Integrations
+# Load shell integrations
 eval "$(zoxide init --cmd cd zsh)"
 if [ "$OS" = "Linux" ]; then
     # Outdated package doesn't support --zsh
@@ -62,7 +60,7 @@ elif [ "$OS" = "Darwin" ]; then
     eval "$(fzf --zsh)"
 fi
 
-# Aliases
+# Define aliases
 
 ## Common
 alias ls="ls -A --color"
@@ -86,7 +84,7 @@ alias gp="git pull"
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
 
-# Helpers
+# Define helpers
 
 src() {
     source "$1/bin/activate"
