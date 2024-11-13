@@ -63,8 +63,8 @@ fi
 # Define aliases
 
 ## Common
-alias ls="ls -A --color"
-alias ll="ls -Al --color"
+alias ls="eza -a"
+alias ll="eza -al --group-directories-first"
 alias cc="clear"
 alias cd..="cd .."
 alias py="python3"
@@ -79,6 +79,7 @@ alias gl="git log --oneline -n 10"
 alias gch="git checkout"
 alias gchb="git checkout -b"
 alias gp="git pull"
+alias gd="git diff"
 
 # Edit ZSH
 alias zshrc="code ~/.zshrc"

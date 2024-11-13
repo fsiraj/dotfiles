@@ -20,8 +20,8 @@ A summary of my setup:
 
 First install VS Code however you like, then run the command appropriate for your OS.
 ```bash 
-sudo apt install zsh stow fzf zoxide tmux git # Ubuntu
-brew install zsh stow fzf zoxide tmux git font-jetbrains-mono-nerd-font # MacOS (requires homebrew)
+sudo apt install zsh stow fzf zoxide eza tmux git # Ubuntu
+brew install zsh stow fzf zoxide eza tmux git font-jetbrains-mono-nerd-font # MacOS (requires homebrew)
 # Make zsh default shell (same for any POSIX OS)
 chsh -s $(which zsh)
 ```
