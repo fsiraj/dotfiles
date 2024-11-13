@@ -63,9 +63,23 @@ elif [ "$OS" = "Darwin" ]; then
 fi
 
 # Aliases
+
+## Common
 alias ls="ls -A --color"
 alias ll="ls -Al --color"
 alias cc="clear"
 alias cd..="cd .."
+alias py="python3"
+
+## Git
+alias ga="git add -v"
+alias gc="git commit -vm"
+alias gs="git status -sb"
+alias gl="git log --oneline -n 10"
+alias gch="git checkout"
+alias gchb="git checkout -b"
+alias gp="git pull"
+
+# Edit ZSH
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
