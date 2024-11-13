@@ -27,6 +27,8 @@ chsh -s $(which zsh)
 ```
 Install the font manually on Linux. Oh My Posh and Zinit are installed automatically by `.zshrc`. TPM is installed automatically by `tmux.conf`
 
+Catppuccin Mocha is included in `extensions.txt` for VS Code. To install in the terminal follow the links for [`iterm2`](https://github.com/catppuccin/iterm), [`gnome-terminal`](https://github.com/catppuccin/gnome-terminal), or [other ports](https://catppuccin.com/ports).
+
 ### Activation
 
 To activate these configurations, run the commands below:
