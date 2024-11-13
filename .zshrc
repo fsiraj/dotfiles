@@ -12,8 +12,8 @@ if ! command -v oh-my-posh &> /dev/null; then
         brew install jandedobbeleer/oh-my-posh/oh-my-posh
     fi
 fi
-POSH_CONFIG_NAME="custom"
-eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.toml)"
+POSH_CONFIG_NAME="simple"
+eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.omp.toml)"
 
 # Zinit - plugin manager - install if unavailable
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
