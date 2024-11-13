@@ -25,7 +25,7 @@ newline = true
 [[blocks.segments]]
 type = 'text'
 style = 'plain'
-template = '󰤄 '
+template = '󰒸 '
 foreground = 'p:teal'
 
 [[blocks.segments]]
@@ -118,12 +118,12 @@ newline = true
 [[blocks.segments]]
 type = 'text'
 style = 'plain'
-template = ''
+template = '󱞩'
 foreground = 'p:green'
 
 
 # Transient Prompt
 # 
 [transient_prompt]
-template = ' '
+template = '󱞫 '
 foreground = 'p:mauve'
