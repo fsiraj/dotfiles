@@ -70,6 +70,8 @@ alias ll="ls -Al --color"
 alias cc="clear"
 alias cd..="cd .."
 alias py="python3"
+alias pyv="python3 --version"
+alias d="deactivate"
 
 ## Git
 alias ga="git add -v"
@@ -83,3 +85,14 @@ alias gp="git pull"
 # Edit ZSH
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
+
+# Helpers
+
+src() {
+    source "$1/bin/activate"
+}
+
+pyvenv() {
+    python3 -m venv "$1"
+    src "$1"
+}
