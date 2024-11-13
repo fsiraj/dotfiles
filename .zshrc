@@ -36,7 +36,7 @@ bindkey "^[[Z" autosuggest-accept # shift + tab
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' # case insensitive matching
 zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}' # show color for matches
 zstyle ':completion:*' menu no # disable defualt in favour of fzf-tab
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color=always $realpath' # preview for zoxide
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -a $realpath' # preview for zoxide
 
 # Configure history
 HISTSIZE=5000
