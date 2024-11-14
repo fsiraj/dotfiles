@@ -61,8 +61,6 @@ elif [ "$OS" = "Darwin" ]; then
 fi
 
 # Define aliases
-
-## Common
 alias ls="eza -a"
 alias ll="eza -al --group-directories-first"
 alias cc="clear"
@@ -71,7 +69,6 @@ alias py="python3"
 alias pyv="python3 --version"
 alias d="deactivate"
 
-## Git
 alias ga="git add -v"
 alias gc="git commit -vm"
 alias gs="git status -sb"
@@ -80,17 +77,15 @@ alias gch="git checkout"
 alias gchb="git checkout -b"
 alias gp="git pull"
 alias gd="git diff"
+alias grhh="git reset --hard HEAD"
 
-# Edit ZSH
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
 
 # Define helpers
-
 src() {
     source "$1/bin/activate"
 }
-
 pyvenv() {
     python3 -m venv "$1"
     src "$1"
