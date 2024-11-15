@@ -4,11 +4,8 @@ export XDG_DATA_HOME="$HOME/.local/share"
 
 # Oh My Posh - Prompt
 if ! command -v oh-my-posh &> /dev/null; then
-    if [ "$OS" = "Linux" ]; then
-        curl -s https://ohmyposh.dev/install.sh | bash -s
-    elif [ "$OS" = "Darwin" ]; then
-        brew install jandedobbeleer/oh-my-posh/oh-my-posh
-    fi
+    [ "$OS" = "Linux" ] && curl -s https://ohmyposh.dev/install.sh | bash -s
+    [ "$OS" = "Darwin" ] && brew install jandedobbeleer/oh-my-posh/oh-my-posh
 fi
 POSH_CONFIG_NAME="simple"
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/$POSH_CONFIG_NAME.omp.toml)"
@@ -79,10 +76,8 @@ alias gp="git pull"
 alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 
-# Copilot
 alias suggest="gh copilot suggest"
 alias explain="gh copilot explain"
-
 
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
