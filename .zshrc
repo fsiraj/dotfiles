@@ -58,7 +58,7 @@ elif [ "$OS" = "Darwin" ]; then
 fi
 
 # Define aliases
-alias ls="eza -a"
+alias ls="eza -a --group-directories-first"
 alias ll="eza -al --group-directories-first"
 alias cc="clear"
 alias cd..="cd .."
