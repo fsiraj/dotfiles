@@ -79,6 +79,11 @@ alias gp="git pull"
 alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 
+# Copilot
+alias suggest="gh copilot suggest"
+alias explain="gh copilot explain"
+
+
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
 
