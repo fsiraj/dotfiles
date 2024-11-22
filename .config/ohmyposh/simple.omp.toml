@@ -14,9 +14,24 @@ mauve = '#CBA6F7'
 pink = '#F5C2E7'
 os = '#ACB0BE'
 
+# Prompt - 'Zero-th' Line
+[[blocks]]
+type = 'prompt'
+alignment = 'left'
+newline = false
+
+[[blocks.segments]]
+type = "executiontime"
+style = "plain"
+foreground = "p:os"
+template = "󱞽 {{ .FormattedMs }}\n"
+
+[blocks.segments.properties]
+threshold = 500
+style = "austin"
+always_enabled = true
 
 # Prompt - First Line
-# OS - User - [@Host if SHH] - Path - Python Env - Git
 [[blocks]]
 type = 'prompt'
 alignment = 'left'
@@ -82,21 +97,9 @@ tag_icon = ' '
 
 
 # Right Prompt
-# Execution Time
 [[blocks]]
 type = 'prompt'
 alignment = 'right'
-
-[[blocks.segments]]
-type = "executiontime"
-style = "plain"
-foreground = "p:os"
-template = "(󱞽 {{ .FormattedMs }}) "
-
-[blocks.segments.properties]
-threshold = 500
-style = "austin"
-always_enabled = true
 
 [[blocks.segments]]
 type = 'os'
@@ -109,7 +112,6 @@ foreground_templates = [
 
 
 # Prompt - Second Line
-# 
 [[blocks]]
 type = 'prompt'
 alignment = 'left'
@@ -123,7 +125,6 @@ foreground = 'p:green'
 
 
 # Transient Prompt
-# 
 [transient_prompt]
 template = "<p:os>󱞽 {{ .Segments.Executiontime.FormattedMs }}</>\n\n󱞫 "
 foreground = 'p:mauve'
