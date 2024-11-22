@@ -91,7 +91,7 @@ alignment = 'right'
 type = "executiontime"
 style = "plain"
 foreground = "p:os"
-template = " ({{ .FormattedMs }}) "
+template = "(󱞽 {{ .FormattedMs }}) "
 
 [blocks.segments.properties]
 threshold = 500
@@ -125,5 +125,5 @@ foreground = 'p:green'
 # Transient Prompt
 # 
 [transient_prompt]
-template = '󱞫 '
+template = "<p:os>󱞽 {{ .Segments.Executiontime.FormattedMs }}</>\n\n󱞫 "
 foreground = 'p:mauve'
