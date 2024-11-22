@@ -57,3 +57,9 @@ tmux
 Notes:
 - `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
 - Move installation to setup script for quicker `zsh` loading.
+
+## Nvim Migration
+
+- Requirements: git make unzip gcc ripgrep xsel neovim lua5.4 
+- Copilot: gh, gh auth login, gh extension install github/gh-copilot
+- sudo add-apt-repository ppa:neovim-ppa/unstable -y

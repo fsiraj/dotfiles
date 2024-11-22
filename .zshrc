@@ -82,6 +82,8 @@ alias explain="gh copilot explain"
 alias zshrc="code ~/.zshrc"
 alias reload="source ~/.zshrc"
 
+alias vim="nvim"
+
 # Define helpers
 src() {
     source "$1/bin/activate"
