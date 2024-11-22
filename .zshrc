@@ -58,8 +58,8 @@ elif [ "$OS" = "Darwin" ]; then
 fi
 
 # Define aliases
-alias ls="eza -a --group-directories-first"
-alias ll="eza -al --group-directories-first"
+alias ls="eza -a --group-directories-first --color=auto --icons=auto"
+alias ll="eza -al --group-directories-first --color=auto --icons=auto"
 alias cc="clear"
 alias cd..="cd .."
 alias py="python3"
