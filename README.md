@@ -61,5 +61,8 @@ Notes:
 ## Nvim Migration
 
 - Requirements: git make unzip gcc ripgrep xsel neovim lua5.4 
+- Additional:
+    - luarocks
+    - fd-find, ln -s $(which fdfind) ~/.local/bin/fd
 - Copilot: gh, gh auth login, gh extension install github/gh-copilot
 - sudo add-apt-repository ppa:neovim-ppa/unstable -y
