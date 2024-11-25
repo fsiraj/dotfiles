@@ -1,0 +1,23 @@
+# Vim Tricks and Tips
+
+- Recording macros:
+  - `qq{...}q` then `[count]Q`
+  - Record ... into register q, then repeat last recorded register.
+- Format multi-line code to single-line:
+  - `V[count]{motion}J`
+  - Visually select lines and Join them.
+- Block indent/unindent:
+  - `V[count]{motion}[count]{>|<}`
+  - Visually select lines and Shift them.
+- Selecting based on AST:
+  - `grn` and `grm` (in visual mode)
+  - Select next/previous node in AST with nvim-treesitter.
+- Selecting based on textobject:
+  - `v{a|i}{TextObject}`
+  - Visually around/in textobject (function, parentheses, ...).
+- Modifying surrounding (parentheses, quotes, ...)
+  - `s{action}{input}[output]`
+  - Surround with mini.surround.
+- Window operations (swap, resize)
+  - `<C-w>{action}`
+  - Useful actions are `[s]plit`, `[v]split`, `[x]change`, bind to other keys.
