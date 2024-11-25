@@ -64,5 +64,6 @@ Notes:
 - Additional:
     - luarocks
     - fd-find, ln -s $(which fdfind) ~/.local/bin/fd
+    - nodejs, npm
 - Copilot: gh, gh auth login, gh extension install github/gh-copilot
 - sudo add-apt-repository ppa:neovim-ppa/unstable -y
