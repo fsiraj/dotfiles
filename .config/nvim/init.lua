@@ -1,9 +1,6 @@
--- Set <space> as the leader key
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+-- Set before loading plugins
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
--- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
 -- [[ Options ]]
@@ -17,5 +14,9 @@ require 'autocommands'
 
 -- [[ Plugins ]]
 require 'lazy-plugins'
+
+-- [[ Theme ]]
+vim.cmd.colorscheme 'tokyonight-night'
+vim.cmd.hi 'Comment gui=none'
 
 -- vim: ts=2 sts=2 sw=2 et
