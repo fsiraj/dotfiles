@@ -1,6 +1,4 @@
--- autopairs
--- https://github.com/windwp/nvim-autopairs
-
+-- Autopairs automatically adds matching parentheses, quotes, etc.
 return {
   'windwp/nvim-autopairs',
   event = 'InsertEnter',
