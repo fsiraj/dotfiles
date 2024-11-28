@@ -15,9 +15,11 @@ return { -- Autoformat
   opts = {
     notify_on_error = false,
     format_on_save = function(bufnr)
-      -- Disable "format_on_save lsp_fallback" for languages that don't
-      -- have a well standardized coding style. You can add additional
-      -- languages here or re-enable it for the disabled ones.
+      -- Don't do anything if disabled globally
+      if vim.g.disable_autoformat then
+        return
+      end
+      -- Disable for languages that don't have a well standardized coding style.
       local disable_filetypes = { c = true, cpp = true }
       local lsp_format_opt
       if disable_filetypes[vim.bo[bufnr].filetype] then
@@ -32,11 +34,19 @@ return { -- Autoformat
     end,
     formatters_by_ft = {
       lua = { 'stylua' },
-      -- Conform can also run multiple formatters sequentially
       python = { 'isort', 'black' },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
     },
   },
+  config = function(_, opts)
+    require('conform').setup(opts)
+
+    -- Toggle format on save
+    vim.api.nvim_create_user_command('ToggleFormatOnSave', function()
+      vim.g.disable_autoformat = not vim.g.disable_autoformat
+      vim.print('Format On Save: ' .. tostring(not vim.g.disable_autoformat))
+    end, {
+      desc = 'Toggle autoformat-on-save with conform',
+    })
+    vim.keymap.set('n', '<leader>tf', ':ToggleFormatOnSave<CR>', { desc = '[T]oggle [F]ormat on save' })
+  end,
 }
