@@ -15,5 +15,6 @@ return {
     if vim.fn.executable 'npx' then
       vim.g.mkdp_filetypes = { 'markdown' }
     end
+    vim.keymap.set('n', '<Leader>p', ':MarkdownPreviewToggle<CR>', { desc = 'Markdown Preview: Toggle' })
   end,
 }
