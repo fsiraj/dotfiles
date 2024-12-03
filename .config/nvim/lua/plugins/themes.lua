@@ -1,4 +1,4 @@
--- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+-- Use `<Leader>st` to see and switch themes.
 return {
   {
     'folke/tokyonight.nvim',
@@ -8,6 +8,5 @@ return {
   {
     'catppuccin/nvim',
     name = 'catppuccin',
-    priority = 1000,
   },
 }
