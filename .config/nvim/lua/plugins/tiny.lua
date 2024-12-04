@@ -17,6 +17,17 @@ return {
       { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
   },
+  -- Session management
+  {
+    'rmagatti/auto-session',
+    lazy = false,
+    keys = {
+      { '<leader>wr', '<cmd>SessionSearch<CR>', desc = '[W]orkspace [R]estore' },
+    },
+    opts = {
+      suppressed_dirs = { '~/', '~/Downloads', '/' },
+    },
+  },
   -- Add indentation guides even on blank lines
   {
     'lukas-reineke/indent-blankline.nvim',
@@ -25,12 +36,7 @@ return {
     main = 'ibl',
     config = function()
       require('ibl').setup()
-      vim.keymap.set(
-        'n',
-        '<leader>ti',
-        ':IBLToggle<CR>',
-        { desc = '[T]oggle [I]ndent blank lines' }
-      )
+      vim.keymap.set('n', '<leader>ti', ':IBLToggle<CR>', { desc = '[T]oggle [I]ndent blank lines' })
     end,
   },
   -- Autopairs automatically adds matching parentheses, quotes, etc.
