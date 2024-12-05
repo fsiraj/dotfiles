@@ -9,8 +9,8 @@ return {
           enabled = true,
           auto_trigger = true,
           keymap = {
-            accept = '<M-l>',
-            accept_word = '<M-h>',
+            accept = '<S-l>',
+            accept_word = '<S-h>',
           },
         },
         panel = {

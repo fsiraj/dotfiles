@@ -1,4 +1,4 @@
--- Install `lazy.nvim` plugin manager if needed
+-- Bootstrap lazy
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
@@ -7,5 +7,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
---  To check the current status of your plugins, run :Lazy
+-- Setup plugins, use `:Lazy` and `:che` to debug
 require('lazy').setup('plugins')
+vim.cmd.colorscheme('catppuccin-mocha')

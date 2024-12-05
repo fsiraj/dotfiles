@@ -7,6 +7,7 @@
 return {
   {
     'neovim/nvim-lspconfig',
+
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -17,11 +18,19 @@ return {
       { 'j-hui/fidget.nvim', opts = {} },
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
+      'ray-x/lsp_signature.nvim',
     },
+
     config = function()
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
+          -- Adds signature help
+          require('lsp_signature').setup({
+            hint_enable = false,
+            handler_opts = { border = 'none' },
+          })
+
           -- Helper to define keymaps
           local map = function(keys, func, desc, mode)
             mode = mode or 'n'
@@ -161,18 +170,16 @@ return {
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
         mapping = cmp.mapping.preset.insert({
-
+          -- `:help ins-completion`
           ['<C-n>'] = cmp.mapping.select_next_item(),
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),
           ['<C-y>'] = cmp.mapping.confirm({ select = true }),
           ['<C-Space>'] = cmp.mapping.complete({}),
-
           ['<M-n>'] = cmp.mapping(function()
             if luasnip.expand_or_locally_jumpable() then luasnip.expand_or_jump() end
           end, { 'i', 's' }),
-
           ['<M-p>'] = cmp.mapping(function()
             if luasnip.locally_jumpable(-1) then luasnip.jump(-1) end
           end, { 'i', 's' }),
