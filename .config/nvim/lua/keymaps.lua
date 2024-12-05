@@ -1,6 +1,3 @@
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
-
 -- Buffer keymaps
 vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>', { desc = '[B]uffer [D]elete' })
 vim.keymap.set('n', '<leader>bt', '<cmd>e #<CR>', { desc = '[Buffer] [T]oggle Alternative (#)' })
