@@ -4,7 +4,7 @@ return {
     cmd = 'Copilot',
     event = 'InsertEnter',
     config = function()
-      require('copilot').setup {
+      require('copilot').setup({
         suggestion = {
           enabled = true,
           auto_trigger = true,
@@ -27,7 +27,7 @@ return {
             ratio = 0.4,
           },
         },
-      }
+      })
     end,
   },
   {
@@ -42,17 +42,25 @@ return {
     },
     build = 'make tiktoken',
     config = function()
-      require('CopilotChat').setup()
+      require('CopilotChat').setup({
+        auto_insert_mode = true,
+      })
 
       -- Toggle Floating Chat
-      vim.keymap.set({ 'n', 'v' }, '<Leader>cc', function()
-        require('CopilotChat').toggle { window = { layout = 'float' } }
-      end, { desc = 'Toggle Inline Copilot Chat' })
+      vim.keymap.set(
+        { 'n', 'v' },
+        '<Leader>cc',
+        function() require('CopilotChat').toggle({ window = { layout = 'float' } }) end,
+        { desc = 'Toggle Inline Copilot Chat' }
+      )
 
       -- Toggle Tabbed Chat
-      vim.keymap.set({ 'n', 'v' }, '<Leader>cw', function()
-        require('CopilotChat').toggle { window = { layout = 'vertical' } }
-      end, { desc = 'Toggle Vertical Copilot Chat' })
+      vim.keymap.set(
+        { 'n', 'v' },
+        '<Leader>cw',
+        function() require('CopilotChat').toggle({ window = { layout = 'vertical' } }) end,
+        { desc = 'Toggle Vertical Copilot Chat' }
+      )
     end,
   },
 }

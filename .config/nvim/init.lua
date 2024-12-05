@@ -5,19 +5,17 @@ vim.g.have_nerd_font = true
 vim.g.disable_autoformat = false
 
 -- [[ Options ]]
-require 'options'
+require('options')
 
 -- [[ Keymaps ]]
-require 'keymaps'
+require('keymaps')
 
 -- [[ Autocommands ]]
-require 'autocommands'
+require('autocommands')
 
 -- [[ Plugins ]]
-require 'lazy-plugins'
+require('lazy-plugins')
 
 -- [[ Theme ]]
-vim.cmd.colorscheme 'tokyonight-night'
-vim.cmd.hi 'Comment gui=none'
-
--- vim: ts=2 sts=2 sw=2 et
+vim.cmd.colorscheme('catppuccin-mocha')
+vim.cmd.hi('Comment gui=none')

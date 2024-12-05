@@ -37,6 +37,11 @@ return {
         live_grep = {
           additional_args = function(_) return { '--hidden' } end,
         },
+        help_tags = {
+          mappings = {
+            i = { ['<CR>'] = 'select_vertical' },
+          },
+        },
       },
 
       extensions = {
