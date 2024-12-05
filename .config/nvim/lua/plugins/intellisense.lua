@@ -141,7 +141,7 @@ return {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
-      -- Snippet Engine & its associated nvim-cmp source
+      -- Snippet Engine
       {
         'L3MON4D3/LuaSnip',
         build = (function() return 'make install_jsregexp' end)(),
@@ -152,11 +152,12 @@ return {
           },
         },
       },
+      -- Sources
       'saadparwaiz1/cmp_luasnip',
-
-      -- Adds other completion capabilities.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      -- Show icons in completion menu
+      'onsails/lspkind.nvim',
     },
     config = function()
       -- See `:help cmp`
@@ -168,31 +169,61 @@ return {
         snippet = {
           expand = function(args) luasnip.lsp_expand(args.body) end,
         },
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
+        formatting = {
+          fields = { 'kind', 'abbr' },
+          format = require('lspkind').cmp_format({ mode = 'symbol' }),
+        },
         completion = { completeopt = 'menu,menuone,noinsert' },
-        mapping = cmp.mapping.preset.insert({
-          -- `:help ins-completion`
-          ['<C-n>'] = cmp.mapping.select_next_item(),
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-d>'] = cmp.mapping.scroll_docs(4),
-          ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-          ['<C-Space>'] = cmp.mapping.complete({}),
-          ['<M-n>'] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then luasnip.expand_or_jump() end
-          end, { 'i', 's' }),
-          ['<M-p>'] = cmp.mapping(function()
-            if luasnip.locally_jumpable(-1) then luasnip.jump(-1) end
-          end, { 'i', 's' }),
-        }),
+        performance = { max_view_entries = 10 },
         sources = {
-          {
-            name = 'lazydev',
-            group_index = 0,
-          },
+          { name = 'lazydev', group_index = 0 },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
         },
+        mapping = cmp.mapping.preset.insert({
+          ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),
+          ['<C-Space>'] = cmp.mapping.complete({}),
+
+          ['<CR>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              if luasnip.expand_or_locally_jumpable() then
+                luasnip.expand_or_jump()
+              else
+                cmp.confirm({ select = true })
+              end
+            else
+              fallback()
+            end
+          end),
+
+          ['<Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.locally_jumpable(1) then
+              luasnip.jump(1)
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+
+          ['<S-Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.locally_jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+        }),
       })
     end,
   },

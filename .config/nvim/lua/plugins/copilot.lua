@@ -44,6 +44,14 @@ return {
     config = function()
       require('CopilotChat').setup({
         auto_insert_mode = true,
+        mappings = {
+          submit_prompt = {
+            insert = '<C-s>',
+          },
+          complete = {
+            insert = '<C-y>',
+          },
+        },
       })
 
       -- Toggle Floating Chat
