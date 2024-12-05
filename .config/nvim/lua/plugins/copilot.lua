@@ -37,20 +37,20 @@ return {
       { 'nvim-lua/plenary.nvim' },
     },
     keys = {
-      { '<C-i>', mode = { 'n', 'v' }, desc = 'Toggle Inline Copilot Chat' },
-      { '<M-i>', mode = { 'n', 'v' }, desc = 'Toggle Vertical Copilot Chat' },
+      { '<Leader>cc', mode = { 'n', 'v' }, desc = 'Toggle Inline [C]opilot [C]hat' },
+      { '<Leader>cw', mode = { 'n', 'v' }, desc = 'Toggle Vertical [C]opilot [W]indow' },
     },
     build = 'make tiktoken',
     config = function()
       require('CopilotChat').setup()
 
       -- Toggle Floating Chat
-      vim.keymap.set({ 'n', 'v' }, '<C-i>', function()
+      vim.keymap.set({ 'n', 'v' }, '<Leader>cc', function()
         require('CopilotChat').toggle { window = { layout = 'float' } }
       end, { desc = 'Toggle Inline Copilot Chat' })
 
       -- Toggle Tabbed Chat
-      vim.keymap.set({ 'n', 'v' }, '<M-i>', function()
+      vim.keymap.set({ 'n', 'v' }, '<Leader>cw', function()
         require('CopilotChat').toggle { window = { layout = 'vertical' } }
       end, { desc = 'Toggle Vertical Copilot Chat' })
     end,

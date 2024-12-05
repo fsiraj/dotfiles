@@ -14,23 +14,16 @@ return {
     ft = { 'markdown' },
     build = function(plugin)
       -- Install markdown preview, use npx if available.
-      if vim.fn.executable 'npx' then
+      if vim.fn.executable('npx') then
         vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
       else
-        vim.cmd [[Lazy load markdown-preview.nvim]]
+        vim.cmd([[Lazy load markdown-preview.nvim]])
         vim.fn['mkdp#util#install']()
       end
     end,
     init = function()
-      if vim.fn.executable 'npx' then
-        vim.g.mkdp_filetypes = { 'markdown' }
-      end
-      vim.keymap.set(
-        'n',
-        '<Leader>p',
-        ':MarkdownPreviewToggle<CR>',
-        { desc = 'Markdown Preview: Toggle' }
-      )
+      if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
+      vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = 'Markdown [P]review: [T]oggle' })
     end,
   },
 }

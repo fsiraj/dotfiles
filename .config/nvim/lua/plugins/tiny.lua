@@ -14,7 +14,6 @@ return {
       { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
       { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
       { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
-      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
   },
   -- Session management
@@ -26,6 +25,7 @@ return {
     },
     opts = {
       suppressed_dirs = { '~/', '~/Downloads', '/' },
+      pre_save_cmds = { 'Neotree close' },
     },
   },
   -- Add indentation guides even on blank lines
@@ -46,10 +46,10 @@ return {
     -- Optional dependency
     dependencies = { 'hrsh7th/nvim-cmp' },
     config = function()
-      require('nvim-autopairs').setup {}
+      require('nvim-autopairs').setup({})
       -- If you want to automatically add `(` after selecting a function or method
-      local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
-      local cmp = require 'cmp'
+      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+      local cmp = require('cmp')
       cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end,
   },
@@ -61,5 +61,18 @@ return {
     event = 'VimEnter',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false },
+  },
+  { -- Collection of various small independent plugins/modules
+    'echasnovski/mini.nvim',
+    config = function()
+      -- Better Around/Inside textobjects
+      require('mini.ai').setup({ n_lines = 500 })
+
+      -- Add/delete/replace surroundings (brackets, quotes, etc.)
+      require('mini.surround').setup()
+
+      -- Simple and easy statusline.
+      require('mini.statusline').setup({ use_icons = vim.g.have_nerd_font })
+    end,
   },
 }

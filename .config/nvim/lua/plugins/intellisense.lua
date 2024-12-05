@@ -33,9 +33,9 @@ return {
           map('gr', require('telescope.builtin').lsp_references, 'LSP: [G]oto [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, 'LSP: [G]oto [I]mplementation')
           -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'LSP: Type [D]efinition')
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, 'LSP: [D]ocument [S]ymbols')
+          map('<leader>bs', require('telescope.builtin').lsp_document_symbols, 'LSP: [B]uffer [S]ymbols')
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'LSP: [W]orkspace [S]ymbols')
-          map('<leader>rn', vim.lsp.buf.rename, 'LSP: [R]e[n]ame')
+          map('<leader>cr', vim.lsp.buf.rename, 'LSP: [C]ode [R]ename')
           map('<leader>ca', vim.lsp.buf.code_action, 'LSP: [C]ode [A]ction', { 'n', 'x' })
 
           -- The following two autocommands are used to highlight references of the
@@ -59,7 +59,7 @@ return {
               group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
               callback = function(event2)
                 vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+                vim.api.nvim_clear_autocmds({ group = 'kickstart-lsp-highlight', buffer = event2.buf })
               end,
             })
           end
@@ -67,9 +67,7 @@ return {
           -- The following code creates a keymap to toggle inlay hints in your
           -- code, if the language server you are using supports them
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, 'LSP: [T]oggle Inlay [H]ints')
+            map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })) end, 'LSP: [T]oggle Inlay [H]ints')
           end
         end,
       })
@@ -81,7 +79,7 @@ return {
         for type, icon in pairs(signs) do
           diagnostic_signs[vim.diagnostic.severity[type]] = icon
         end
-        vim.diagnostic.config { signs = { text = diagnostic_signs } }
+        vim.diagnostic.config({ signs = { text = diagnostic_signs } })
       end
 
       -- Add cmp_nvim_lsp capabilities to the default capabilities of Neovim
@@ -115,9 +113,9 @@ return {
         'isort',
         'markdownlint',
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      require('mason-tool-installer').setup({ ensure_installed = ensure_installed })
 
-      require('mason-lspconfig').setup {
+      require('mason-lspconfig').setup({
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -126,7 +124,7 @@ return {
             require('lspconfig')[server_name].setup(server)
           end,
         },
-      }
+      })
     end,
   },
 
@@ -137,15 +135,11 @@ return {
       -- Snippet Engine & its associated nvim-cmp source
       {
         'L3MON4D3/LuaSnip',
-        build = (function()
-          return 'make install_jsregexp'
-        end)(),
+        build = (function() return 'make install_jsregexp' end)(),
         dependencies = {
           {
             'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
+            config = function() require('luasnip.loaders.from_vscode').lazy_load() end,
           },
         },
       },
@@ -157,38 +151,32 @@ return {
     },
     config = function()
       -- See `:help cmp`
-      local cmp = require 'cmp'
-      local luasnip = require 'luasnip'
-      luasnip.config.setup {}
+      local cmp = require('cmp')
+      local luasnip = require('luasnip')
+      luasnip.config.setup({})
 
-      cmp.setup {
+      cmp.setup({
         snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
+          expand = function(args) luasnip.lsp_expand(args.body) end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-        mapping = cmp.mapping.preset.insert {
+        mapping = cmp.mapping.preset.insert({
 
           ['<C-n>'] = cmp.mapping.select_next_item(),
           ['<C-p>'] = cmp.mapping.select_prev_item(),
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
-          ['<C-Space>'] = cmp.mapping.complete {},
+          ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+          ['<C-Space>'] = cmp.mapping.complete({}),
 
           ['<M-n>'] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            end
+            if luasnip.expand_or_locally_jumpable() then luasnip.expand_or_jump() end
           end, { 'i', 's' }),
 
           ['<M-p>'] = cmp.mapping(function()
-            if luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            end
+            if luasnip.locally_jumpable(-1) then luasnip.jump(-1) end
           end, { 'i', 's' }),
-        },
+        }),
         sources = {
           {
             name = 'lazydev',
@@ -198,7 +186,7 @@ return {
           { name = 'luasnip' },
           { name = 'path' },
         },
-      }
+      })
     end,
   },
 
@@ -208,21 +196,17 @@ return {
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
-        end,
+        '<leader>cf',
+        function() require('conform').format({ async = true, lsp_format = 'fallback' }) end,
         mode = '',
-        desc = '[F]ormat buffer',
+        desc = '[C]ode [F]ormat buffer',
       },
     },
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
         -- Don't do anything if disabled globally
-        if vim.g.disable_autoformat then
-          return
-        end
+        if vim.g.disable_autoformat then return end
         -- Disable for languages that don't have a well standardized coding style.
         local disable_filetypes = { c = true, cpp = true }
         local lsp_format_opt
@@ -260,7 +244,7 @@ return {
     'mfussenegger/nvim-lint',
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
-      local lint = require 'lint'
+      local lint = require('lint')
       -- Enables default linters which may cause errors if unavailable.
       -- Set them to `nil` here to disable.
       lint.linters_by_ft = lint.linters_by_ft or {}
@@ -275,9 +259,7 @@ return {
           -- Only run the linter in buffers that you can modify in order to
           -- avoid superfluous noise, notably within the handy LSP pop-ups that
           -- describe the hovered symbol using Markdown.
-          if vim.opt_local.modifiable:get() then
-            lint.try_lint()
-          end
+          if vim.opt_local.modifiable:get() then lint.try_lint() end
         end,
       })
     end,
