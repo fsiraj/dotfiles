@@ -9,3 +9,12 @@
 - Block indent/unindent:
   - `V[count]{motion}[count]{>|<}`
   - Visually select lines and Shift them.
+- Selecting based on AST:
+  - `grn` and `grm` (in visual mode)
+  - Select next/previous node in AST with nvim-treesitter.
+- Selecting based on textobject:
+  - `v{a|i}{TextObject}`
+  - Visually around/in textobject (function, parentheses, ...).
+- Modifying surrounding (parentheses, quotes, ...)
+  - `s{action}{input}[output]`
+  - Surround with mini.surround.
