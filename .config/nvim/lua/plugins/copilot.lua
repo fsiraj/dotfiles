@@ -9,8 +9,8 @@ return {
           enabled = true,
           auto_trigger = true,
           keymap = {
-            accept = '<M-l>',
-            accept_word = '<M-h>',
+            accept = '<C-h>',
+            accept_word = '<C-l>',
           },
         },
         panel = {
@@ -45,12 +45,9 @@ return {
       require('CopilotChat').setup({
         auto_insert_mode = true,
         mappings = {
-          submit_prompt = {
-            insert = '<C-s>',
-          },
-          complete = {
-            insert = '<C-y>',
-          },
+          submit_prompt = { insert = '<CR>' },
+          complete = { insert = '<CR>' },
+          close = { normal = '<Esc>' },
         },
       })
 

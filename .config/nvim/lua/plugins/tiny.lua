@@ -1,8 +1,19 @@
 -- Collection of small convenience plugins with minimal configuration.
-
 return {
   -- Themes
-  { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+    opts = {
+      integrations = {
+        -- Most common plugins enabled by default
+        noice = true,
+        which_key = true,
+        mason = true,
+      },
+    },
+  },
   { 'folke/tokyonight.nvim', priority = 1000 },
 
   -- Plugin to show pending keybinds.
@@ -39,6 +50,23 @@ return {
     },
   },
 
+  -- Nicer LSP messages and command line
+  {
+    'folke/noice.nvim',
+    event = 'VeryLazy',
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+    },
+    opts = {
+      lsp = {
+        override = {
+          ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+          ['vim.lsp.util.stylize_markdown'] = true,
+          ['cmp.entry.get_documentation'] = true,
+        },
+      },
+    },
+  },
   -- Navigate between tmux and neovim seamlessly
   {
     'christoomey/vim-tmux-navigator',
@@ -146,12 +174,22 @@ return {
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.surround').setup()
-
-      -- Simple and easy statusline.
-      require('mini.statusline').setup({ use_icons = vim.g.have_nerd_font })
     end,
   },
-
+  {
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('lualine').setup({
+        options = {
+          icons = vim.g.have_nerd_font,
+          theme = 'catppuccin',
+          section_separators = { left = '', right = '' },
+          component_separators = { left = '', right = '' },
+        },
+      })
+    end,
+  },
   -- Render markdown nicely
   {
     'MeanderingProgrammer/render-markdown.nvim',

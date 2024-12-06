@@ -1,8 +1,6 @@
 -- Buffer keymaps
-vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>', { desc = '[B]uffer [D]elete' })
+vim.keymap.set('n', '<leader>bd', '<cmd>bp<bar>sp<bar>bn<bar>bd<CR>', { desc = '[B]uffer [D]elete (without deleting window)' })
 vim.keymap.set('n', '<leader>bt', '<cmd>e #<CR>', { desc = '[Buffer] [T]oggle Alternative (#)' })
-vim.keymap.set('n', '<S-l>', '<cmd>bnext<CR>', { desc = 'Next buffer' })
-vim.keymap.set('n', '<S-h>', '<cmd>bprevious<CR>', { desc = 'Previous buffer' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')

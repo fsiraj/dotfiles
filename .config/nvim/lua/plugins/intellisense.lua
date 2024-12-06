@@ -14,8 +14,6 @@ return {
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
-      -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
       'ray-x/lsp_signature.nvim',
@@ -28,7 +26,9 @@ return {
           -- Adds signature help
           require('lsp_signature').setup({
             hint_enable = false,
-            handler_opts = { border = 'none' },
+            handler_opts = { border = 'rounded' },
+            wrap = false,
+            doc_lines = 0,
           })
 
           -- Helper to define keymaps
