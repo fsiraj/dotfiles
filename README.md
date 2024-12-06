@@ -46,23 +46,28 @@ stow .
 
 ### Install Plugins
 
-#### Zsh
+#### Zsh and Tmux
 
 If you ran the `chsh` command above, your default terminal should now be `zsh` so open a new terminal to check. Oh My Posh and Zinit are installed automatically by `.zshrc`. TPM is installed automatically by `tmux.conf`. To install tmux plugins, open a session with `tmux` and press `<C-a> I`. To update, press `<C-a> U`.
 
 #### Neovim
 
-Open a session with `nvim`. Lazy is automatically installed by `lazy-plugins.lua` which also installs all neovim plugins. Open a neovim session and run the command `:checkhealth` to diagnose your configuration, use `:Lazy` to manage plugins, and use `:Mason` to manage plugin dependencies.
+Open a session with `nvim`. Lazy is automatically installed by `lazy-plugins.lua` which also installs all neovim plugins. Open a neovim session and run the command `:checkhealth` to diagnose your configuration, use `:Lazy` to manage plugins, and use `:Mason` to manage plugin dependencies. To see keybinds: `<Space>?`.
 
 #### Theme and Font
 
-A combination of Tokyo Night Storm and Catppuccin Mocha are used in this setup. Neovim uses Tokyo Night Storm and Zsh (and it's children) use Catppuccin Mocha. The themes are installed and set automatically in all cases except the terminal emulator. To install the theme in your terminal, find the relevant port from [Catppuccin Ports](https://catppuccin.com/ports).
+Catppuccin Mocha is the primary theme, Tokyo Night is second. The themes are installed and set automatically in all cases except the terminal emulator. To install the theme in your terminal, find the relevant port from [Catppuccin Ports](https://catppuccin.com/ports).
 
 The JetbrainsMono Nerd Font has to be installed manually, download and install it using the instructions [here](https://gist.github.com/matthewjberger/7dd7e079f282f8138a9dc3b045ebefa0).
 
-### Deprecated
+### Notes
 
-#### VS Code Setup
+#### Future
+
+- `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
+- Could move installation to setup script for quicker `zsh` loading.
+
+#### VS Code Setup (if noevim doesn't work out...)
 
 VS Code removes symlinks on the `settings.json` file, so is a bit more tedious to work with:
 
@@ -72,8 +77,3 @@ ln -f .config/vscode/settings.json ~/.config/Code/User/settings.json
 # Install extensions with VS Code's CLI tool
 cat .config/vscode/extensions.txt | xargs -n 1 code --install-extension
 ```
-
-Notes:
-
-- `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
-- Move installation to setup script for quicker `zsh` loading.
