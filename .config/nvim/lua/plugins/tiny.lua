@@ -95,7 +95,7 @@ return {
     },
     cmd = 'Neotree',
     keys = {
-      { '<Leader>wt', ':Neotree reveal<CR>', desc = 'NeoTree: [Workspace] [R]eveal tree', silent = true },
+      { '<Leader>tn', ':Neotree toggle<CR>', desc = '[T]oggle [N]eotree', silent = true },
     },
     opts = {
       close_if_last_window = true,
@@ -104,11 +104,6 @@ return {
           visible = true,
           hide_dotfiles = false,
           never_show = { '.git' },
-        },
-        window = {
-          mappings = {
-            ['\\'] = 'close_window',
-          },
         },
       },
     },
@@ -228,7 +223,7 @@ return {
     end,
     init = function()
       if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-      vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = 'Markdown [P]review: [T]oggle' })
+      vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = '[T]oggle Markdown [P]review' })
     end,
   },
 }

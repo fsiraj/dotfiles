@@ -51,8 +51,8 @@ return {
         map('n', '<leader>gd', gitsigns.diffthis, { desc = '[G]it [D]iff against index' })
         map('n', '<leader>gD', function() gitsigns.diffthis('@') end, { desc = '[G]it [D]iff against last commit' })
         -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [B]lame line' })
-        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
+        map('n', '<leader>tgb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle [G]it show [B]lame line' })
+        map('n', '<leader>tgd', gitsigns.toggle_deleted, { desc = '[T]oggle [G]it show [D]eleted' })
       end,
     },
   },
