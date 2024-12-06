@@ -3,6 +3,9 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 
+-- Set these manually when loading vim-tmux-navigator
+vim.g.tmux_navigator_no_mappings = 1
+
 -- Enable relative line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
