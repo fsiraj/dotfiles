@@ -5,7 +5,7 @@ return {
   branch = '0.1.x',
   dependencies = {
     'nvim-lua/plenary.nvim',
-    { -- If encountering errors, see telescope-fzf-native README for installation instructions
+    {
       'nvim-telescope/telescope-fzf-native.nvim',
       build = 'make',
       cond = function() return vim.fn.executable('make') == 1 end,
@@ -15,7 +15,6 @@ return {
   },
   config = function()
     require('telescope').setup({
-      --  All the info you're looking for is in `:help telescope.setup()`
       --  To see bindings in picker: i = <C-h>, n = ?
       defaults = {
         winblend = 5,
@@ -34,14 +33,9 @@ return {
 
       pickers = {
         find_files = { hidden = true },
-        live_grep = {
-          additional_args = function(_) return { '--hidden' } end,
-        },
-        help_tags = {
-          mappings = {
-            i = { ['<CR>'] = 'select_vertical' },
-          },
-        },
+        live_grep = { additional_args = function(_) return { '--hidden' } end },
+        help_tags = { mappings = { i = { ['<CR>'] = 'select_vertical' } } },
+        colorscheme = { enable_preview = true },
       },
 
       extensions = {
@@ -55,7 +49,6 @@ return {
     pcall(require('telescope').load_extension, 'fzf')
     pcall(require('telescope').load_extension, 'ui-select')
 
-    -- See `:help telescope.builtin`
     local builtin = require('telescope.builtin')
     vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = 'Telescope: [S]earch [H]elp' })
     vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = 'Telescope: [S]earch [K]eymaps' })
@@ -69,9 +62,6 @@ return {
     vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = 'Telescope: [ ] Find existing buffers' })
     vim.keymap.set('n', '<leader>st', builtin.colorscheme, { desc = 'Telescope: [S]earch [T]hemes' })
     vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = 'Telescope: [/] Fuzzily search in current buffer' })
-
-    -- It's also possible to pass additional configuration options.
-    --  See `:help telescope.builtin.live_grep()` for information about particular keys
     vim.keymap.set(
       'n',
       '<leader>s/',
@@ -83,8 +73,6 @@ return {
       end,
       { desc = 'Telescope: [S]earch [/] in Open Files' }
     )
-
-    -- Shortcut for searching your Neovim configuration files
     vim.keymap.set('n', '<leader>sn', function() builtin.find_files({ cwd = vim.fn.stdpath('config') }) end, { desc = 'Telescope: [S]earch [N]eovim files' })
   end,
 }

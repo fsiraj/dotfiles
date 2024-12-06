@@ -143,7 +143,7 @@ return {
 
     -- Python specific config
     local python_path = vim.fs.joinpath(
-      vim.fn.stdpath('data'), ---@diagnostic disable-line: param-type-mismatch
+      vim.fn.stdpath('data'), ---@diagnostic disable-line
       'mason',
       'packages',
       'debugpy',

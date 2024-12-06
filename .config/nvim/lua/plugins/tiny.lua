@@ -39,7 +39,7 @@ return {
         keys = {},
       },
       spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'azure' } },
+        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
         { '<leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
         { '<leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
         { '<leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
@@ -96,7 +96,7 @@ return {
     },
     cmd = 'Neotree',
     keys = {
-      { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
+      { '<Leader>wt', ':Neotree reveal<CR>', desc = 'NeoTree: [Workspace] [R]eveal tree', silent = true },
     },
     opts = {
       close_if_last_window = true,
@@ -178,14 +178,28 @@ return {
   },
   {
     'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    dependencies = { 'nvim-tree/nvim-web-devicons', 'folke/noice.nvim' },
     config = function()
+      local noice = require('noice')
       require('lualine').setup({
         options = {
           icons = vim.g.have_nerd_font,
           theme = 'catppuccin',
           section_separators = { left = '', right = '' },
-          component_separators = { left = '', right = '' },
+          component_separators = { left = '|', right = '|' },
+        },
+        extensions = { 'neo-tree', 'nvim-dap-ui' },
+        sections = {
+          lualine_a = { 'mode' },
+          lualine_b = { 'branch', 'diff', 'diagnostics' },
+          lualine_c = { 'filename' },
+          lualine_x = {
+            { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
+            { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
+            'filetype',
+          },
+          lualine_y = { 'progress' },
+          lualine_z = { 'location' },
         },
       })
     end,
