@@ -57,6 +57,7 @@ elif [ "$OS" = "Darwin" ]; then
     eval "$(fzf --zsh)"
 fi
 
+
 # Define aliases
 alias ls="eza -a --group-directories-first --color=auto --icons=auto"
 alias ll="eza -al --group-directories-first --color=auto --icons=auto"

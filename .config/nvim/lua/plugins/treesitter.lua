@@ -37,12 +37,5 @@ return {
   },
   {
     'nvim-treesitter/nvim-treesitter-context',
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-  },
-  {
-    'folke/twilight.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    keys = { { '<Leader>tt', '<Cmd>Twilight<CR>', desc = '[T]oggle [T]wilight' } },
-    opts = { context = 20 },
   },
 }
