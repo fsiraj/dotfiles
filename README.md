@@ -22,14 +22,13 @@ Install all the packages below using your OS's package manager. The commands bel
 
 ```bash
 # Essentials
-sudo apt install git make unzip gcc 
-# Shell
-sudo apt install zsh stow fzf zoxide eza tmux
+sudo apt install git make unzip
+# Shell (and plugins)
+sudo apt install zsh tmux stow fzf zoxide eza fd-find
 chsh -s $(which zsh)
-# Neovim
+# Neovim (and plugins)
 sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt install neovim lua5.4 luarocks ripgrep xsel nodejs npm fd-find
-ln -s $(which fdfind) ~/.local/bin/fd
+sudo apt install neovim lua xsel ripgrep nodejs npm 
 ```
 
 ### Activate Configs with Symlinks
@@ -65,7 +64,7 @@ The JetbrainsMono Nerd Font has to be installed manually, download and install i
 #### Future
 
 - `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
-- Could move installation to setup script for quicker `zsh` loading.
+- `nodejs` and `npm` required by `mason.nvim` and `copilot.lua`, want to remove this dependency.
 
 #### VS Code Setup (if noevim doesn't work out...)
 
