@@ -23,4 +23,4 @@ vim.keymap.set('n', '<M-Left>', '<cmd>vertical resize -1<CR>', { desc = 'Decreas
 vim.keymap.set('n', '<M-Right>', '<cmd>vertical resize +1<CR>', { desc = 'Increase window width' })
 
 -- Easier pasting in insert mode
-vim.keymap.set('i', '<C-p>', '<C-r>*', { desc = 'Paste from register +' })
+vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })

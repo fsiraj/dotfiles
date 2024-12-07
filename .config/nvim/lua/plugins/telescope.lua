@@ -22,6 +22,7 @@ return {
         file_ignore_patterns = { '%.git/' },
         mappings = {
           i = {
+            ['<C-y>'] = 'select_default',
             ['<C-Bslash>'] = 'select_vertical',
             ['<C-_>'] = 'select_horizontal',
             ['<C-h>'] = 'which_key',

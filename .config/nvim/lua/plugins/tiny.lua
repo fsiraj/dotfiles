@@ -84,31 +84,6 @@ return {
     },
   },
 
-  -- Neo-tree is a Neovim plugin to browse the file system
-  {
-    'nvim-neo-tree/neo-tree.nvim',
-    version = '*',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons',
-      'MunifTanjim/nui.nvim',
-    },
-    cmd = 'Neotree',
-    keys = {
-      { '<Leader>tn', ':Neotree toggle<CR>', desc = '[T]oggle [N]eotree', silent = true },
-    },
-    opts = {
-      close_if_last_window = true,
-      filesystem = {
-        filtered_items = {
-          visible = true,
-          hide_dotfiles = false,
-          never_show = { '.git' },
-        },
-      },
-    },
-  },
-
   -- Session management
   {
     'rmagatti/auto-session',
@@ -118,7 +93,6 @@ return {
     },
     opts = {
       suppressed_dirs = { '~/', '~/Downloads', '/' },
-      pre_save_cmds = { 'Neotree close' },
       session_lens = { mappings = { delete_session = { 'i', '<C-x>' } } },
     },
   },
@@ -168,8 +142,23 @@ return {
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.surround').setup()
+
+      -- Git tools, also used with codecompanion.nvim for single buffer diffs
+      require('mini.diff').setup({
+        view = { style = 'sign', signs = { add = '+', change = '~', delete = '-' } },
+        mappings = {
+          apply = '<Leader>ga',
+          reset = '<Leader>gr',
+          goto_prev = '<Leader>gp',
+          goto_next = '<Leader>gn',
+          goto_first = '<Leader>gg',
+          goto_last = '<Leader>gG',
+        },
+      })
+      vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it overlay' })
     end,
   },
+
   {
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons', 'folke/noice.nvim' },
@@ -201,6 +190,7 @@ return {
   -- Render markdown nicely
   {
     'MeanderingProgrammer/render-markdown.nvim',
+    ft = { 'markdown', 'codecompanion' },
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
     ---@module 'render-markdown'
     ---@type render.md.UserConfig
