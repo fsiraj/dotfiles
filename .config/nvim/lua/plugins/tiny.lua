@@ -1,4 +1,4 @@
--- Collection of small convenience plugins with minimal configuration.
+-- Colletion of small convenience plugins with minimal configuration.
 return {
   -- Themes
   {
@@ -66,6 +66,10 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require('noice').setup(opts)
+      vim.keymap.set('ca', 'messages', 'Noice')
+    end,
   },
   -- Navigate between tmux and neovim seamlessly
   {

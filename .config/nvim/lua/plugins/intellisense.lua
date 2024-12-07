@@ -281,20 +281,16 @@ return {
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require('lint')
-      -- Enables default linters which may cause errors if unavailable.
-      -- Set them to `nil` here to disable.
+      -- Enables default linters, set to nil to disable
       lint.linters_by_ft = lint.linters_by_ft or {}
       lint.linters_by_ft['markdown'] = { nil }
 
-      -- Create autocommand which carries out the actual linting
-      -- on the specified events.
+      -- Autocommand to start linting
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
       vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
         callback = function()
-          -- Only run the linter in buffers that you can modify in order to
-          -- avoid superfluous noise, notably within the handy LSP pop-ups that
-          -- describe the hovered symbol using Markdown.
+          -- Only run in modifiable buffers
           if vim.opt_local.modifiable:get() then lint.try_lint() end
         end,
       })
@@ -306,7 +302,6 @@ return {
     ft = 'lua',
     opts = {
       library = {
-        -- Load luvit types when the `vim.uv` word is found
         { path = 'luvit-meta/library', words = { 'vim%.uv' } },
       },
     },

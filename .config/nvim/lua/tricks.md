@@ -18,6 +18,9 @@
 - Modifying surrounding (parentheses, quotes, ...)
   - `s{action}{input}[output]`
   - Surround with mini.surround.
-- Window operations (swap, resize)
+- Window operations (swap, resize):
   - `<C-w>{action}`
   - Useful actions are `[s]plit`, `[v]split`, `[x]change`, bind to other keys.
+- See command line outputs and logging messages:
+  - `:messages`
+  - Mapped to `:Noice`
