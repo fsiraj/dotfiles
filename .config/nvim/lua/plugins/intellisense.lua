@@ -21,7 +21,7 @@ return {
 
     config = function()
       vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+        group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
         callback = function(event)
           -- Adds signature help
           require('lsp_signature').setup({
@@ -37,20 +37,28 @@ return {
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          map('gd', require('telescope.builtin').lsp_definitions, 'LSP: [G]oto [D]efinition')
-          map('gD', vim.lsp.buf.declaration, 'LSP: [G]oto [D]eclaration')
-          map('gr', require('telescope.builtin').lsp_references, 'LSP: [G]oto [R]eferences')
-          map('gI', require('telescope.builtin').lsp_implementations, 'LSP: [G]oto [I]mplementation')
-          -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'LSP: Type [D]efinition')
-          map('<leader>bs', require('telescope.builtin').lsp_document_symbols, 'LSP: [B]uffer [S]ymbols')
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'LSP: [W]orkspace [S]ymbols')
-          map('<leader>cr', vim.lsp.buf.rename, 'LSP: [C]ode [R]ename')
-          map('<leader>ca', vim.lsp.buf.code_action, 'LSP: [C]ode [A]ction', { 'n', 'x' })
+          map('gd', require('telescope.builtin').lsp_definitions, '[C]ode [D]efinition')
+          map('gD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
+          map('gr', require('telescope.builtin').lsp_references, '[C]ode [R]eferences')
+          map('gI', require('telescope.builtin').lsp_implementations, '[C]ode [I]mplementation')
+          -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
+          map(
+            '<leader>ws',
+            require('telescope.builtin').lsp_dynamic_workspace_symbols,
+            '[W]orkspace [S]ymbols'
+          )
+          map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
+          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- Highliht references on hover
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+          if
+            client
+            and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight)
+          then
+            local highlight_augroup =
+              vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
               group = highlight_augroup,
@@ -64,17 +72,25 @@ return {
             })
 
             vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+              group = vim.api.nvim_create_augroup('lsp-detach', { clear = true }),
               callback = function(event2)
                 vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds({ group = 'kickstart-lsp-highlight', buffer = event2.buf })
+                vim.api.nvim_clear_autocmds({
+                  group = 'lsp-highlight',
+                  buffer = event2.buf,
+                })
               end,
             })
           end
 
           -- If LSP supports inlay hints, enable them
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })) end, '[T]oggle Inlay [H]ints')
+            vim.lsp.inlay_hint.enable(true)
+            map('<leader>th', function()
+              local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
+              vim.lsp.inlay_hint.enable(not is_enabled)
+              vim.print('Inlay Hints: ' .. tostring(not is_enabled))
+            end, '[T]oggle Inlay [H]ints')
           end
         end,
       })
@@ -91,11 +107,18 @@ return {
 
       -- Add cmp_nvim_lsp capabilities to the default capabilities of Neovim
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      capabilities =
+        vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
       local servers = {
-        pyright = {},
+        basedpyright = {
+          settings = {
+            basedpyright = {
+              typeCheckingMode = 'standard',
+            },
+          },
+        },
         marksman = {},
         lua_ls = {
           settings = {
@@ -127,7 +150,8 @@ return {
           function(server_name)
             local server = servers[server_name] or {}
             -- Override capabilities with server-specific capabilities
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+            server.capabilities =
+              vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
         },
@@ -175,15 +199,18 @@ return {
         },
         formatting = {
           fields = { 'kind', 'abbr' },
-          format = require('lspkind').cmp_format({ mode = 'symbol', symbol_map = { Copilot = '' } }),
+          format = require('lspkind').cmp_format({
+            mode = 'symbol',
+            symbol_map = { Copilot = '' },
+          }),
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-        performance = { max_view_entries = 100 },
+        performance = { max_view_entries = 10 },
         sources = {
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
-          { name = 'copilot', max_item_count = 1 },
+          { name = 'copilot', max_item_count = 1, keyword_length = 2 },
           { name = 'lazydev', group_index = 0 },
         },
         sorting = {
@@ -223,9 +250,7 @@ return {
           end),
 
           ['<Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.locally_jumpable(1) then
+            if luasnip.locally_jumpable(1) then
               luasnip.jump(1)
             else
               fallback()
@@ -233,9 +258,7 @@ return {
           end, { 'i', 's' }),
 
           ['<S-Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.locally_jumpable(-1) then
+            if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
             else
               fallback()
@@ -292,7 +315,12 @@ return {
       end, {
         desc = 'Toggle autoformat-on-save with conform',
       })
-      vim.keymap.set('n', '<leader>tf', ':ToggleFormatOnSave<CR>', { desc = '[T]oggle [F]ormat on save' })
+      vim.keymap.set(
+        'n',
+        '<leader>tf',
+        ':ToggleFormatOnSave<CR>',
+        { desc = '[T]oggle [F]ormat on save' }
+      )
     end,
   },
 

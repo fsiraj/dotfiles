@@ -24,3 +24,10 @@ vim.keymap.set('n', '<M-Right>', '<cmd>vertical resize +1<CR>', { desc = 'Increa
 
 -- Easier pasting in insert mode
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
+
+-- Delete default LSP bindings
+vim.keymap.del('n', 'gra')
+vim.keymap.del('n', 'grn')
+vim.keymap.del('n', 'gri')
+vim.keymap.del('n', 'grr')
+vim.keymap.del('n', 'gO')

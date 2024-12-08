@@ -39,13 +39,23 @@ return {
         keys = {},
       },
       spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
+        {
+          '<leader>c',
+          group = '[C]ode',
+          mode = { 'n', 'x' },
+          icon = { icon = ' ', color = 'orange' },
+        },
         { '<leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
         { '<leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
         { '<leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
         { '<leader>w', group = '[W]orkspace', icon = { icon = '󰈢 ', color = 'azure' } },
         { '<leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
-        { '<leader>g', group = '[G]it', mode = { 'n', 'v' }, icon = { cat = 'filetype', name = 'git' } },
+        {
+          '<leader>g',
+          group = '[G]it',
+          mode = { 'n', 'v' },
+          icon = { cat = 'filetype', name = 'git' },
+        },
       },
     },
   },
@@ -107,7 +117,12 @@ return {
     main = 'ibl',
     config = function()
       require('ibl').setup()
-      vim.keymap.set('n', '<leader>ti', ':IBLToggle<CR>', { desc = '[T]oggle [I]ndent blank lines' })
+      vim.keymap.set(
+        'n',
+        '<leader>ti',
+        ':IBLToggle<CR>',
+        { desc = '[T]oggle [I]ndent blank lines' }
+      )
     end,
   },
 
@@ -159,7 +174,12 @@ return {
           goto_last = '<Leader>gG',
         },
       })
-      vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it overlay' })
+      vim.keymap.set(
+        'n',
+        '<Leader>tg',
+        MiniDiff.toggle_overlay,
+        { desc = '[T]oggle [G]it overlay' }
+      )
     end,
   },
 
@@ -175,7 +195,7 @@ return {
           section_separators = { left = '', right = '' },
           component_separators = { left = '|', right = '|' },
         },
-        extensions = { 'neo-tree', 'nvim-dap-ui' },
+        extensions = { 'nvim-dap-ui' },
         sections = {
           lualine_a = { 'mode' },
           lualine_b = { 'branch', 'diff', 'diagnostics' },
@@ -218,7 +238,12 @@ return {
     end,
     init = function()
       if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-      vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = '[T]oggle Markdown [P]review' })
+      vim.keymap.set(
+        'n',
+        '<Leader>tp',
+        ':MarkdownPreviewToggle<CR>',
+        { desc = '[T]oggle Markdown [P]review' }
+      )
     end,
   },
 }
