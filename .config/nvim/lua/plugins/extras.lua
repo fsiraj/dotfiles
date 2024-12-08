@@ -102,9 +102,6 @@ return {
   {
     'rmagatti/auto-session',
     lazy = false,
-    keys = {
-      { '<leader>wr', '<cmd>SessionSearch<CR>', desc = '[W]orkspace [R]estore' },
-    },
     opts = {
       suppressed_dirs = { '~/', '~/Downloads', '/' },
       session_lens = { mappings = { delete_session = { 'i', '<C-x>' } } },
