@@ -3,6 +3,11 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 
+-- Tabs and spaces
+vim.g.tabstop = 4
+vim.g.shiftwidth = 4
+vim.g.expandtab = true
+
 -- Set these manually when loading vim-tmux-navigator
 vim.g.tmux_navigator_no_mappings = 1
 
@@ -61,4 +66,5 @@ vim.opt.scrolloff = 12
 vim.g.disable_autoformat = false
 
 -- For better session management with auto-session
-vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
+vim.opt.sessionoptions =
+  'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
