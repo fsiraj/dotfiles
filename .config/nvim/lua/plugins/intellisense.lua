@@ -45,7 +45,7 @@ return {
           map('<leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
           map(
             '<leader>ws',
-            require('telescope.builtin').lsp_dynamic_workspace_symbols,
+            require('telescope.builtin').lsp_workspace_symbols,
             '[W]orkspace [S]ymbols'
           )
           map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
