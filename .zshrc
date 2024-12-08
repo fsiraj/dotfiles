@@ -56,6 +56,7 @@ if [ "$OS" = "Linux" ]; then
 elif [ "$OS" = "Darwin" ]; then
     eval "$(fzf --zsh)"
 fi
+ln -s $(which fdfind) ~/.local/bin/fd
 
 # Define aliases
 alias ls="eza -a --group-directories-first --color=auto --icons=auto"

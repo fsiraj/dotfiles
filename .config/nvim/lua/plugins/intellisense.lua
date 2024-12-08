@@ -151,6 +151,7 @@ return {
         },
       },
       -- Sources
+      'zbirenbaum/copilot-cmp',
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
@@ -160,6 +161,7 @@ return {
     config = function()
       -- See `:help cmp`
       local cmp = require('cmp')
+      local compare = cmp.config.compare
       local luasnip = require('luasnip')
       luasnip.config.setup({})
 
@@ -173,15 +175,33 @@ return {
         },
         formatting = {
           fields = { 'kind', 'abbr' },
-          format = require('lspkind').cmp_format({ mode = 'symbol' }),
+          format = require('lspkind').cmp_format({ mode = 'symbol', symbol_map = { Copilot = '' } }),
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-        performance = { max_view_entries = 10 },
+        performance = { max_view_entries = 100 },
         sources = {
-          { name = 'lazydev', group_index = 0 },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'copilot', max_item_count = 1 },
+          { name = 'lazydev', group_index = 0 },
+        },
+        sorting = {
+          priority_weight = 2,
+          comparators = {
+            require('copilot_cmp.comparators').prioritize,
+            -- https://github.com/hrsh7th/nvim-cmp/blob/ca4d3330d386e76967e53b85953c170658255ecb/lua/cmp/config/default.lua#L66
+            compare.offset,
+            compare.exact,
+            -- compare.scopes,
+            compare.score,
+            compare.recently_used,
+            compare.locality,
+            compare.kind,
+            -- compare.sort_text,
+            compare.length,
+            compare.order,
+          },
         },
         mapping = cmp.mapping.preset.insert({
           ['<C-n>'] = cmp.mapping.select_next_item(),

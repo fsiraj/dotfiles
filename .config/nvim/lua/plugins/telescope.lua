@@ -22,6 +22,8 @@ return {
         file_ignore_patterns = { '%.git/' },
         mappings = {
           i = {
+            ['<C-n>'] = 'move_selection_previous',
+            ['<C-p>'] = 'move_selection_next',
             ['<C-y>'] = 'select_default',
             ['<C-Bslash>'] = 'select_vertical',
             ['<C-_>'] = 'select_horizontal',
@@ -34,7 +36,7 @@ return {
 
       pickers = {
         find_files = { hidden = true },
-        live_grep = { additional_args = function(_) return { '--hidden' } end },
+        live_grep = { additional_args = { '--hidden' } },
         help_tags = { mappings = { i = { ['<CR>'] = 'select_vertical' } } },
         colorscheme = { enable_preview = true },
       },

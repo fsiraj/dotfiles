@@ -5,21 +5,19 @@ return {
     event = 'InsertEnter',
     config = function()
       require('copilot').setup({
-        suggestion = {
-          enabled = true,
-          auto_trigger = true,
-          keymap = { accept = '<C-h>', accept_word = '<C-l>' },
-        },
-        panel = {
-          enabled = true,
-          keymap = { jump_prev = '[[', jump_next = ']]', accept = '<cr>', refresh = 'gr', open = '<m-cr>' },
-          layout = { position = 'bottom', ratio = 0.4 },
-        },
+        suggestion = { enabled = false },
+        panel = { enabled = false },
       })
     end,
   },
   {
+    'zbirenbaum/copilot-cmp',
+    config = function() require('copilot_cmp').setup() end,
+    dependencies = { 'zbirenbaum/copilot.lua' },
+  },
+  {
     'olimorris/codecompanion.nvim',
+    event = 'VeryLazy',
     dependencies = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.diff' },
     opts = {
       display = { diff = { provider = 'mini_diff' }, chat = { show_header_separator = false } },

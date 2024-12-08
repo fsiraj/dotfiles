@@ -24,7 +24,7 @@ return {
       {
         '<leader>?',
         function() require('which-key').show({ global = false }) end,
-        desc = 'Buffer Local Keymaps (which-key)',
+        desc = 'Which Key: Buffer Local Keymaps',
       },
     },
     opts = {
@@ -68,7 +68,7 @@ return {
     },
     config = function(_, opts)
       require('noice').setup(opts)
-      vim.keymap.set('ca', 'messages', 'Noice')
+      vim.keymap.set('ca', 'messages', 'NoiceAll')
     end,
   },
   -- Navigate between tmux and neovim seamlessly
@@ -192,6 +192,7 @@ return {
     end,
   },
   -- Render markdown nicely
+
   {
     'MeanderingProgrammer/render-markdown.nvim',
     ft = { 'markdown', 'codecompanion' },
