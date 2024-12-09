@@ -176,11 +176,15 @@ return {
         },
       },
       -- Sources
-      'zbirenbaum/copilot-cmp',
       'rcarriga/cmp-dap',
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      {
+        'zbirenbaum/copilot-cmp',
+        config = function() require('copilot_cmp').setup() end,
+        dependencies = { 'zbirenbaum/copilot.lua' },
+      },
       -- Show icons in completion menu
       'onsails/lspkind.nvim',
     },

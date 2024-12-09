@@ -11,21 +11,25 @@ return {
     end,
   },
   {
-    'zbirenbaum/copilot-cmp',
-    config = function() require('copilot_cmp').setup() end,
-    dependencies = { 'zbirenbaum/copilot.lua' },
-  },
-  {
     'olimorris/codecompanion.nvim',
     event = 'VeryLazy',
-    dependencies = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.diff' },
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      'echasnovski/mini.diff',
+    },
     opts = {
       display = { diff = { provider = 'mini_diff' }, chat = { show_header_separator = false } },
     },
     config = function(_, opts)
       require('codecompanion').setup(opts)
       vim.keymap.set('ca', 'cc', 'CodeCompanion')
-      vim.keymap.set({ 'n', 'v' }, '<Leader>cc', '<Cmd>CodeCompanionChat Toggle<CR>', { desc = 'Toggle [C]ode [C]ompanion chat' })
+      vim.keymap.set(
+        { 'n', 'v' },
+        '<Leader>cc',
+        '<Cmd>CodeCompanionChat Toggle<CR>',
+        { desc = 'Toggle [C]ode [C]ompanion chat' }
+      )
     end,
   },
 }

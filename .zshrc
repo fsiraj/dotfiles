@@ -53,10 +53,14 @@ if [ "$OS" = "Linux" ]; then
     # Outdated package doesn't support --zsh
     source /usr/share/doc/fzf/examples/completion.zsh
     source /usr/share/doc/fzf/examples/key-bindings.zsh
+    # Need to manually create fd symlink
+    if [ ! -f ~/.local/bin/fd ]; then
+        ln -s $(which fdfind) ~/.local/bin/fd
+    fi
 elif [ "$OS" = "Darwin" ]; then
     eval "$(fzf --zsh)"
 fi
-ln -s $(which fdfind) ~/.local/bin/fd
+
 
 # Define aliases
 alias ls="eza -a --group-directories-first --color=auto --icons=auto"
