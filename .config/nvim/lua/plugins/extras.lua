@@ -15,6 +15,12 @@ return {
     },
   },
   { 'folke/tokyonight.nvim', priority = 1000 },
+  {
+    'rachartier/tiny-devicons-auto-colors.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    event = 'VeryLazy',
+    config = function() require('tiny-devicons-auto-colors').setup() end,
+  },
 
   {
     'nvimdev/dashboard-nvim',
@@ -80,6 +86,7 @@ return {
   -- Status Line
   {
     'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
     dependencies = {
       'nvim-tree/nvim-web-devicons',
       'folke/noice.nvim',
