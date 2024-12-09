@@ -186,12 +186,16 @@ return {
     },
     config = function()
       -- See `:help cmp`
-      local cmp = require('cmp')
-      local compare = cmp.config.compare
       local luasnip = require('luasnip')
       luasnip.config.setup({})
 
-      cmp.setup({
+      local cmp = require('cmp')
+      local compare = cmp.config.compare
+      local opts = {
+        enabled = function()
+          return vim.api.nvim_get_option_value('buftype', { buf = 0 }) ~= 'prompt'
+            or require('cmp_dap').is_dap_buffer()
+        end,
         snippet = {
           expand = function(args) luasnip.lsp_expand(args.body) end,
         },
@@ -219,7 +223,7 @@ return {
           priority_weight = 2,
           comparators = {
             require('copilot_cmp.comparators').prioritize,
-            -- https://github.com/hrsh7th/nvim-cmp/blob/ca4d3330d386e76967e53b85953c170658255ecb/lua/cmp/config/default.lua#L66
+            -- Defaults
             compare.offset,
             compare.exact,
             -- compare.scopes,
@@ -267,11 +271,10 @@ return {
             end
           end, { 'i', 's' }),
         }),
-      })
-      require('cmp').setup.filetype({ 'dap-repl', 'dapui_watches', 'dapui_hover' }, {
-        sources = {
-          { name = 'dap' },
-        },
+      }
+      cmp.setup(opts)
+      cmp.setup.filetype({ 'dap-repl', 'dapui_watches', 'dapui_hover' }, {
+        sources = { { name = 'dap' } },
       })
     end,
   },

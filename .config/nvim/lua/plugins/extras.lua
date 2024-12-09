@@ -99,16 +99,6 @@ return {
     },
   },
 
-  -- Session management
-  {
-    'rmagatti/auto-session',
-    lazy = false,
-    opts = {
-      suppressed_dirs = { '~/', '~/Downloads', '/' },
-      session_lens = { mappings = { delete_session = { 'i', '<C-x>' } } },
-    },
-  },
-
   -- Add indentation guides even on blank lines
   {
     'lukas-reineke/indent-blankline.nvim',
