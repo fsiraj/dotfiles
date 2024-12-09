@@ -16,6 +16,57 @@ return {
   },
   { 'folke/tokyonight.nvim', priority = 1000 },
 
+  {
+    'nvimdev/dashboard-nvim',
+    event = 'VimEnter',
+    config = function()
+      vim.api.nvim_set_hl(0, 'DashboardHeader', { fg = '#cba6f7' })
+      require('dashboard').setup({
+        theme = 'hyper',
+        config = {
+          header = {
+            '                               .::                              ',
+            '                          .:. .=%%%#=:                          ',
+            '                        -=:=- -#%%%%##*=.                       ',
+            '                      .=*:=*::*%%%%%%*#%=.                      ',
+            '                      :*=:*=:-==**%%%%%%#-                      ',
+            '                      =%=.=+**++**#%%%%%%=.                     ',
+            '                     :*#=+==*%%%%%%#*#%%%#:                     ',
+            '                     -*=-+%%%%%%%%%#*+*##%=.                    ',
+            '                    :=:*#*%%%%%#-      =*#%-                    ',
+            '                    .=%%+-##*#%#-.:=*%*+%##*:                   ',
+            '                    =%%%***%%#**-:*%%=:-#%##=.                  ',
+            '                    =%%%*#%%%%%#-  .:=+*%%##=.                  ',
+            '                    :*%%%*##%%%%=  .-**%%*+*:                   ',
+            '                     .=%%%#+#%%%*:::=#%%*=*-                    ',
+            '                  .:==--#%#==#%#+:..=%%*=**=:.                  ',
+            '               .-*%%%%#=-+%%*+#%=.:*%%**#%%%%%*=.               ',
+            '               .=#%%%%%#++=%%#*#**%%%*##%%%%%%#=.               ',
+            '                  .-#%%%#+*=%*#%%%%*##%%%%%#=.                  ',
+            '                     .:*%*+*=****#***#%%*-.                     ',
+            '                        .-=:=++==##*#*-.                        ',
+            '                           .=+======:.                          ',
+            '                           .====-:::                            ',
+            '                            :-::. ::                            ',
+            '                            ::.                                 ',
+            '                                                                ',
+            '                                                                ',
+          },
+          shortcut = {
+            { desc = '󰊳 Update', group = '@type', action = 'Lazy update', key = 'u' },
+            {
+              desc = ' Files',
+              group = 'Label',
+              action = 'Telescope find_files',
+              key = 'f',
+            },
+          },
+        },
+      })
+    end,
+    dependencies = { { 'nvim-tree/nvim-web-devicons' } },
+  },
+
   -- Plugin to show pending keybinds.
   {
     'folke/which-key.nvim',
@@ -104,7 +155,7 @@ return {
     'lukas-reineke/indent-blankline.nvim',
     main = 'ibl',
     config = function()
-      require('ibl').setup()
+      require('ibl').setup({ exclude = { filetypes = { 'help', 'dashboard' } } })
       vim.keymap.set(
         'n',
         '<leader>ti',
