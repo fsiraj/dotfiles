@@ -177,6 +177,7 @@ return {
       },
       -- Sources
       'zbirenbaum/copilot-cmp',
+      'rcarriga/cmp-dap',
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
@@ -266,6 +267,11 @@ return {
             end
           end, { 'i', 's' }),
         }),
+      })
+      require('cmp').setup.filetype({ 'dap-repl', 'dapui_watches', 'dapui_hover' }, {
+        sources = {
+          { name = 'dap' },
+        },
       })
     end,
   },
