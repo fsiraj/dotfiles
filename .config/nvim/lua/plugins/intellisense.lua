@@ -340,9 +340,8 @@ return {
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require('lint')
-      -- Enables default linters, set to nil to disable
-      lint.linters_by_ft = lint.linters_by_ft or {}
-      lint.linters_by_ft['markdown'] = { nil }
+      -- Disable all default linters, enable manually if needed
+      lint.linters_by_ft = {}
 
       -- Autocommand to start linting
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })

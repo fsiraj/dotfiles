@@ -53,10 +53,6 @@ if [ "$OS" = "Linux" ]; then
     # Outdated package doesn't support --zsh
     source /usr/share/doc/fzf/examples/completion.zsh
     source /usr/share/doc/fzf/examples/key-bindings.zsh
-    # Need to manually create fd symlink
-    if [ ! -f ~/.local/bin/fd ]; then
-        ln -s $(which fdfind) ~/.local/bin/fd
-    fi
 elif [ "$OS" = "Darwin" ]; then
     eval "$(fzf --zsh)"
 fi

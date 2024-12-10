@@ -10,5 +10,5 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Setup plugins, use `:Lazy` and `:che` to debug
 require('lazy').setup('plugins')
-vim.cmd.colorscheme('catppuccin-mocha')
+vim.cmd.colorscheme('tokyonight-night')
 vim.keymap.set('n', '<Leader>l', '<Cmd>Lazy<Cr>', { desc = '[L]azy' })

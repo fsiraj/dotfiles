@@ -28,7 +28,7 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
-      vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@conditional' })
+      vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@comment.note' })
       vim.api.nvim_set_hl(0, 'DashboardFooter', { link = '@constant' })
       vim.api.nvim_set_hl(0, 'DashboardFiles', { link = '@text' })
       vim.api.nvim_set_hl(0, 'DashboardShortcut', { link = '@string' })
