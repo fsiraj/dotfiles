@@ -8,9 +8,6 @@ vim.g.tabstop = 4
 vim.g.shiftwidth = 4
 vim.g.expandtab = true
 
--- Set these manually when loading vim-tmux-navigator
-vim.g.tmux_navigator_no_mappings = 1
-
 -- Enable relative line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -22,7 +19,6 @@ vim.opt.mouse = 'a'
 vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
 vim.schedule(function() vim.opt.clipboard = 'unnamedplus' end)
 
 -- Enable break indent
@@ -61,10 +57,3 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 12
-
--- Autoformat with conform
-vim.g.disable_autoformat = false
-
--- For better session management with auto-session
-vim.opt.sessionoptions =
-  'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'

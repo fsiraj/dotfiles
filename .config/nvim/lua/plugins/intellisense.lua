@@ -85,7 +85,6 @@ return {
 
           -- If LSP supports inlay hints, enable them
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            vim.lsp.inlay_hint.enable(true)
             map('<leader>th', function()
               local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
               vim.lsp.inlay_hint.enable(not is_enabled)
@@ -295,6 +294,7 @@ return {
         desc = '[C]ode [F]ormat buffer',
       },
     },
+    init = function() vim.g.disable_autoformat = false end,
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
