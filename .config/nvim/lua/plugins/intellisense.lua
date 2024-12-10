@@ -7,7 +7,6 @@
 return {
   {
     'neovim/nvim-lspconfig',
-
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -122,16 +121,14 @@ return {
         lua_ls = {
           settings = {
             Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
+              completion = { callSnippet = 'Replace' },
               diagnostics = { globals = { 'vim', 'require' }, disable = { 'missing-fields' } },
             },
           },
         },
       }
 
-      -- Use `:Mason` to check dependencies and install them, use `g?` to get help
+      -- Use `:Mason` to check dependencies and install them
       require('mason').setup()
 
       -- Add other tools here that you want Mason to install

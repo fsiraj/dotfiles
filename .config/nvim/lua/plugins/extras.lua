@@ -98,7 +98,7 @@ return {
 
       -- Git tools, also used with codecompanion.nvim for single buffer diffs
       require('mini.diff').setup({
-        view = { style = 'sign', signs = { add = '+', change = '~', delete = '-' } },
+        view = { style = 'sign', signs = { add = '+', change = '~', delete = '-' }, priority = 5 },
         mappings = {
           apply = '<Leader>ga',
           reset = '<Leader>gr',
