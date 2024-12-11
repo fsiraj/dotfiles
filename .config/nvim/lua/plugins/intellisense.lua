@@ -19,6 +19,7 @@ return {
     },
 
     config = function()
+      vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'L[S]P' })
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
         callback = function(event)
@@ -40,15 +41,15 @@ return {
           map('gD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
           map('gr', require('telescope.builtin').lsp_references, '[C]ode [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, '[C]ode [I]mplementation')
-          -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-          map('<leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
+          map('<Leader>gy', require('telescope.builtin').lsp_type_definitions, 'T[y]pe Definition')
+          map('<Leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
           map(
-            '<leader>ws',
+            '<Leader>ws',
             require('telescope.builtin').lsp_workspace_symbols,
             '[W]orkspace [S]ymbols'
           )
-          map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+          map('<Leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
+          map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- Highliht references on hover
           local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -84,7 +85,7 @@ return {
 
           -- If LSP supports inlay hints, enable them
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
+            map('<Leader>th', function()
               local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
               vim.lsp.inlay_hint.enable(not is_enabled)
               vim.print('Inlay Hints: ' .. tostring(not is_enabled))
@@ -126,10 +127,14 @@ return {
             },
           },
         },
+        bashls = {
+          filetypes = { 'bash', 'sh' },
+        },
       }
 
       -- Use `:Mason` to check dependencies and install them
       require('mason').setup()
+      vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = '[M]ason' })
 
       -- Add other tools here that you want Mason to install
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -139,9 +144,10 @@ return {
         'isort',
         'markdownlint',
         'jsonlint',
+        'shellcheck',
+        'shfmt',
       })
       require('mason-tool-installer').setup({ ensure_installed = ensure_installed })
-
       require('mason-lspconfig').setup({
         handlers = {
           function(server_name)
@@ -190,6 +196,8 @@ return {
       luasnip.config.setup({})
 
       local cmp = require('cmp')
+      vim.keymap.set('n', '<Leader>ic', '<Cmd>CmpStatus<CR>', { desc = '[C]ompletions' })
+
       local compare = cmp.config.compare
       local opts = {
         enabled = function()
@@ -222,10 +230,10 @@ return {
         sorting = {
           priority_weight = 2,
           comparators = {
+            compare.exact,
             require('copilot_cmp.comparators').prioritize,
             -- Defaults
             compare.offset,
-            compare.exact,
             -- compare.scopes,
             compare.score,
             compare.recently_used,
@@ -245,8 +253,8 @@ return {
 
           ['<CR>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              if luasnip.expand_or_locally_jumpable() then
-                luasnip.expand_or_jump()
+              if luasnip.expandable() then
+                luasnip.expand()
               else
                 cmp.confirm({ select = true })
               end
@@ -285,7 +293,7 @@ return {
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>cf',
+        '<Leader>cf',
         function() require('conform').format({ async = true, lsp_format = 'fallback' }) end,
         mode = '',
         desc = '[C]ode [F]ormat buffer',
@@ -294,26 +302,19 @@ return {
     init = function() vim.g.disable_autoformat = false end,
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Don't do anything if disabled globally
+      format_on_save = function(_)
         if vim.g.disable_autoformat then return end
-        -- Disable for languages that don't have a well standardized coding style.
-        local disable_filetypes = { c = true, cpp = true }
-        local lsp_format_opt
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
-        else
-          lsp_format_opt = 'fallback'
-        end
         return {
           timeout_ms = 500,
-          lsp_format = lsp_format_opt,
+          lsp_format = 'fallback',
         }
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
         python = { 'isort', 'black' },
         markdown = { 'markdownlint' },
+        zsh = { 'shfmt', 'shellcheck' },
+        sh = { 'shfmt', 'shellcheck' },
       },
     },
     config = function(_, opts)
@@ -328,7 +329,7 @@ return {
       })
       vim.keymap.set(
         'n',
-        '<leader>tf',
+        '<Leader>tf',
         ':ToggleFormatOnSave<CR>',
         { desc = '[T]oggle [F]ormat on save' }
       )

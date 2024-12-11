@@ -24,11 +24,12 @@ Install all the packages below using your OS's package manager. The commands bel
 # Essentials
 sudo apt install git make unzip
 # Shell (and plugins)
-sudo apt install zsh tmux stow fzf zoxide eza fd-find
+sudo apt install zsh tmux stow eza fd-find # fzf zoxide (installed in .zshrc)
+ln -s $(which fdfind) ~/.local/bin/fd
 chsh -s $(which zsh)
 # Neovim (and plugins)
 sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt install neovim lua xsel ripgrep nodejs npm 
+sudo apt install neovim lua xsel ripgrep nodejs npm # fzf fd (installed above)
 ```
 
 ### Activate Configs with Symlinks

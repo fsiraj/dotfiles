@@ -1,5 +1,6 @@
 return {
   -- Themes
+  { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
   {
     'catppuccin/nvim',
     name = 'catppuccin',
@@ -13,7 +14,6 @@ return {
       },
     },
   },
-  { 'folke/tokyonight.nvim', priority = 1000 },
 
   -- Apply theme colors to dev icons
   {
@@ -28,57 +28,41 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
-      vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@comment.note' })
-      vim.api.nvim_set_hl(0, 'DashboardFooter', { link = '@constant' })
-      vim.api.nvim_set_hl(0, 'DashboardFiles', { link = '@text' })
-      vim.api.nvim_set_hl(0, 'DashboardShortcut', { link = '@string' })
       require('dashboard').setup({
         theme = 'hyper',
         config = {
           header = {
-            '                                     .::                                     ',
-            '                                .:. .=%%%#=:                                 ',
-            '                              -=:=- -#%%%%##*=.                              ',
-            '                            .=*:=*::*%%%%%%*#%=.                             ',
-            '                            :*=:*=:-==**%%%%%%#-                             ',
-            '                    =%=.=+**++**#%%%%%%=.                    ',
-            '                          :*#=+==*%%%%%%#*#%%%#:                           ',
-            '                          -*=-+%%%       ++*##%=.                          ',
-            '                          -%#*==     -     ==*#%-                          ',
-            '                         :*##%+*%*=:.-.:=*%*+%##*:                         ',
-            '                        .=##%#-:=%%*:-:*%%=:-#%##=.                        ',
-            '                        .=##%%*+=:.  -  .:=+*%%##=.                        ',
-            '                         :*+*%%**-.  =  .-**%%*+*:                         ',
-            '                          -*=*%%#=:::*:::=#%%*=*-                          ',
-            '                       ..:=**=*%%=..:+:..=%%*=**=:.                        ',
-            '                    .-*%%%%%%#**%%*:.=.:*%%**#%%%%%*=.                     ',
-            '                    .=#%%%%%%%##*%%%***%%%*##%%%%%%#=.                     ',
-            '                ..=#%%%%%##*%%%%%*##%%%%%#=.                 ',
-            '                           .:*%*+*=****#***#%%*-.                            ',
-            '                              .-=:=++==##*#*-.                               ',
-            '                                 .=+======:.                                 ',
-            '                                 .====-:::                                   ',
-            '                                  :-::. ::                                   ',
-            '                                     :.                                      ',
-            '                                                                             ',
-            '                                                                             ',
+            '                                                                                   ',
+            '                                        ▒▓▓▓▓▒▒                                    ',
+            '                                    ▒   ▓▓▓▓▓▓▒▒▓▒                                 ',
+            '                               ▒  ▒▓   ▒▓▓▓▓▓▓▓▓▒▓▓                                ',
+            '                              ▓▒  ▓▓   ▒▒▒▒▓▓▓▓▓▒▓▓▓                               ',
+            '                              ▓▒  ▒  ▒▒▓▓▓▓▒▓▓▓▓▓▓▓▓▒                              ',
+            '     .:                      ▒▓▒  ▒▒▒   ▒▒▒▒▒▓▓▓▓▓▓▓▓                       :.     ',
+            '   -%#*:                     ▓▓ ▒▒ ▒▒▓▓▓▓▓▓▓▓▓▒▒▓▓▓▓▓▒                     :*#%=   ',
+            '   @+                       ▒▒   ▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▓                        +@.  ',
+            '   @*                         ▒▒▒▓▓▓▓▓▓▓▓         ▒▒▒▒▓                       +@.  ',
+            '   #%                        ▓▓▒ ▒▒▒▒▓▓▓▓       ▒  ▓▓▒▓▒                      %%   ',
+            '   *@                      ▒▓▓▓▒  ▓▓▓▒▒ ▓  ▒▒▓▓▓▓  ▓▓▓▒▓                      @*   ',
+            '   %%                      ▓▓▓▓ ▒▓▒▓▓▓▒▒▓    ▒▒    ▓▓▓▓▒▒                     #%   ',
+            ':#@#                       ▓▓▓▓▒▒▓▓▓▓▓▓▓▓       ▒▒▒▓▓▓▓▒▒                      #@#:',
+            ' .=@=                       ▓▓▓▓▒▒▒▒▓▓▓▓▓      ▒▒▓▓▓▓ ▒▓                      =@=: ',
+            '   *@                        ▓▓▓▓▓▒ ▒▓▓▓▓▓     ▒▓▓▓▓  ▒                       @*   ',
+            '   *@                          ▓▓▓▒  ▓▓▓▒      ▒▓▓▓  ▓▒                       @#   ',
+            '   @#                  ▒▒▓▓▓▒   ▒▓▓▓▒ ▒▓▓▒   ▒▓▓▓▒ ▒▒▓▓▓▓▒▒                   *@   ',
+            '  .@+                ▓▓▓▓▓▓▓▓▓ ▒ ▒▓▓▓▓ ▒▓   ▓▒▓▓▒▒▓▒▓▓▓▓▓▓▓▓▓                 =@.  ',
+            '   %#.                 ▒▒▓▓▓▓▓▓▒▒▒ ▓▓▒▒▓▓▓▓▓▓▒▓▒▓▒▒▓▓▓▓▓▓▓▒                  .#%   ',
+            '    =*#:                   ▒▓▓▓▓▒▒▒ ▓▒▒▓▓▓ ▓▒▒▒▓▒▓▓▓▓▓▓▒                   :#*=    ',
+            '                              ▒▒▓▒ ▒▒▒ ▓▒▒ ▓▒▒▓▒▓▓▓▒                               ',
+            '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
+            '                                    ▒▒ ▒   ▒▒                                      ',
+            '                                     ▒                                             ',
+            '                                                                                  ',
           },
-          shortcut = {
-            { desc = '󰦘 Update', group = '@type', action = 'Lazy update', key = 'u' },
-            {
-              desc = ' Files',
-              group = 'Label',
-              action = 'Telescope find_files',
-              key = 'f',
-            },
-          },
+          shortcut = {},
           project = { enable = true, limit = 3 },
           mru = { enable = true, limit = 5 },
-          footer = {
-            '',
-            '',
-            "```  It's about how hard you can get hit and keep moving forward  ```",
-          },
+          footer = {},
         },
       })
     end,
@@ -99,7 +83,7 @@ return {
       require('lualine').setup({
         options = {
           icons = vim.g.have_nerd_font,
-          theme = 'catppuccin',
+          theme = 'auto',
           section_separators = { left = '', right = '' },
           component_separators = { left = '|', right = '|' },
         },
@@ -111,8 +95,8 @@ return {
           lualine_x = {
             { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
             { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
-            'filetype',
             'copilot',
+            'filetype',
           },
           lualine_y = { 'progress' },
           lualine_z = { 'location' },
@@ -135,10 +119,25 @@ return {
           ['cmp.entry.get_documentation'] = true,
         },
       },
+      presets = { long_message_to_split = true },
     },
     config = function(_, opts)
+      -- Reroute common messages to mini
+      local keywords =
+        { 'B written', 'change', 'fewer line', 'line less', 'more line', 'lines yanked' }
+      opts.routes = {}
+      for _, keyword in ipairs(keywords) do
+        table.insert(opts.routes, {
+          filter = {
+            event = 'msg_show',
+            kind = '',
+            find = keyword,
+          },
+          view = 'mini',
+        })
+      end
       require('noice').setup(opts)
-      vim.keymap.set('ca', 'messages', 'NoiceAll')
+      vim.keymap.set('ca', 'messages', 'NoiceAll') -- Use :mes for nvim version
     end,
   },
 }

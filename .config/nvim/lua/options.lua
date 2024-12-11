@@ -1,6 +1,6 @@
 -- NOTE: Set these before plugins are loaded
 vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+vim.g.maplocalleader = ','
 vim.g.have_nerd_font = true
 
 -- Tabs and spaces
