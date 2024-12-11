@@ -34,6 +34,14 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      vim.opt.foldmethod = 'expr'
+      vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+      vim.opt.foldlevelstart = 99
+      vim.opt.foldtext = ''
+      local configs = require('nvim-treesitter.configs')
+      configs.setup(opts)
+    end,
   },
   {
     'nvim-treesitter/nvim-treesitter-context',

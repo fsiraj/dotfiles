@@ -7,7 +7,7 @@ return {
     event = 'VimEnter',
     keys = {
       {
-        '<leader>?',
+        '<Leader>?',
         function() require('which-key').show({ global = false }) end,
         desc = 'Which Key: Buffer Local Keymaps',
       },
@@ -24,25 +24,40 @@ return {
         keys = {},
       },
       spec = {
+        { '<Leader>i', group = '[I]nfo', icon = { icon = ' ', color = 'cyan' } },
         {
-          '<leader>c',
+          '<Leader>c',
           group = '[C]ode',
           mode = { 'n', 'x' },
           icon = { icon = ' ', color = 'orange' },
         },
-        { '<leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
-        { '<leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
-        { '<leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
-        { '<leader>w', group = '[W]orkspace', icon = { icon = '󰈢 ', color = 'azure' } },
-        { '<leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
+        { '<Leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
+        { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
+        { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
+        { '<Leader>w', group = '[W]orkspace', icon = { icon = '󰈢 ', color = 'azure' } },
+        { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
         {
-          '<leader>g',
+          '<Leader>g',
           group = '[G]it',
           mode = { 'n', 'v' },
           icon = { cat = 'filetype', name = 'git' },
         },
       },
     },
+  },
+
+  -- Find and replace
+  {
+    keys = {
+      {
+        '<Leader>wf',
+        ':GrugFar<CR>',
+        mode = { 'n', 'v' },
+        desc = '[W]orkspace [F]ind replace',
+      },
+    },
+    'MagicDuck/grug-far.nvim',
+    config = function() require('grug-far').setup({}) end,
   },
 
   -- Add indentation guides even on blank lines
@@ -53,7 +68,7 @@ return {
       require('ibl').setup({ exclude = { filetypes = { 'help', 'dashboard' } } })
       vim.keymap.set(
         'n',
-        '<leader>ti',
+        '<Leader>ti',
         ':IBLToggle<CR>',
         { desc = '[T]oggle [I]ndent blank lines' }
       )
@@ -128,10 +143,10 @@ return {
       'TmuxNavigateRight',
     },
     keys = {
-      { '<c-h>', '<cmd>TmuxNavigateLeft<cr>' },
-      { '<c-j>', '<cmd>TmuxNavigateDown<cr>' },
-      { '<c-k>', '<cmd>TmuxNavigateUp<cr>' },
-      { '<c-l>', '<cmd>TmuxNavigateRight<cr>' },
+      { '<c-h>', '<cmd>TmuxNavigateLeft<CR>' },
+      { '<c-j>', '<cmd>TmuxNavigateDown<CR>' },
+      { '<c-k>', '<cmd>TmuxNavigateUp<CR>' },
+      { '<c-l>', '<cmd>TmuxNavigateRight<CR>' },
     },
   },
 
