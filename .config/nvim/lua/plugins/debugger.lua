@@ -27,7 +27,7 @@ return {
       desc = '[D]ebug [R]estart session.',
     },
     {
-      '<leader>db',
+      '<Leader>db',
       function() require('dap').toggle_breakpoint() end,
       desc = '[D]ebug Toggle [B]reakpoint',
     },

@@ -25,6 +25,9 @@
 - Modifying surrounding (parentheses, quotes, ...)
   - `s{action}{input}[output]`
   - Surround with mini.surround.
+- Folds (with Treesitter):
+  - `z{a|A|R|M}`
+  - `a` - toggle 1, `A` - toggle all, `R` - open all, `M` - close all
 - See command line outputs and logging messages:
   - `:messages`
   - Mapped to `:Noice`

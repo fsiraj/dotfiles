@@ -1,5 +1,5 @@
 -- Buffer keymaps
-vim.keymap.set('n', '<leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
+vim.keymap.set('n', '<Leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
 vim.keymap.set('n', '<C-\\>', '<cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-_>', '<cmd>sp<CR>', { desc = 'Horizontal split' })
 
@@ -9,7 +9,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set(
   'n',
-  '<leader>cq',
+  '<Leader>cq',
   vim.diagnostic.setloclist,
   { desc = 'Open [C]ode diagnostic [Q]uickfix list' }
 )
@@ -29,9 +29,3 @@ vim.keymap.set('n', '<M-Right>', '<cmd>vertical resize +2<CR>', { desc = 'Increa
 -- Easier pasting in insert mode
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
--- Delete default LSP bindings
-vim.keymap.del('n', 'gra')
-vim.keymap.del('n', 'grn')
-vim.keymap.del('n', 'gri')
-vim.keymap.del('n', 'grr')
-vim.keymap.del('n', 'gO')
