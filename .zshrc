@@ -66,7 +66,7 @@ eval "$(zoxide init --cmd cd zsh)"
 source ~/.fzf.zsh
 
 # Define aliases
-if ! command -v eza &> /dev/null; then
+if command -v eza &> /dev/null; then
     alias ls="eza -a --group-directories-first --color=auto --icons=auto"
     alias ll="eza -al --group-directories-first --color=auto --icons=auto"
 else
