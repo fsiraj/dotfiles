@@ -230,10 +230,10 @@ return {
         sorting = {
           priority_weight = 2,
           comparators = {
+            compare.exact,
             require('copilot_cmp.comparators').prioritize,
             -- Defaults
             compare.offset,
-            compare.exact,
             -- compare.scopes,
             compare.score,
             compare.recently_used,
