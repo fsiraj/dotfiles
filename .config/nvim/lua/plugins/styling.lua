@@ -137,8 +137,22 @@ return {
       },
     },
     config = function(_, opts)
+      -- Reroute common messages to mini
+      local keywords =
+        { 'B written', 'change', 'fewer line', 'line less', 'more line', 'lines yanked' }
+      opts.routes = {}
+      for _, keyword in ipairs(keywords) do
+        table.insert(opts.routes, {
+          filter = {
+            event = 'msg_show',
+            kind = '',
+            find = keyword,
+          },
+          view = 'mini',
+        })
+      end
       require('noice').setup(opts)
-      vim.keymap.set('ca', 'messages', 'NoiceAll')
+      vim.keymap.set('ca', 'messages', 'NoiceAll') -- Use :mes for nvim version
     end,
   },
 }

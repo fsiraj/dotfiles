@@ -40,7 +40,7 @@ return {
           map('gD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
           map('gr', require('telescope.builtin').lsp_references, '[C]ode [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, '[C]ode [I]mplementation')
-          -- map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>gy', require('telescope.builtin').lsp_type_definitions, 'T[y]pe Definition')
           map('<leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
           map(
             '<leader>ws',
@@ -126,6 +126,9 @@ return {
             },
           },
         },
+        bashls = {
+          filetypes = { 'bash', 'sh' },
+        },
       }
 
       -- Use `:Mason` to check dependencies and install them
@@ -139,9 +142,10 @@ return {
         'isort',
         'markdownlint',
         'jsonlint',
+        'shellcheck',
+        'shfmt',
       })
       require('mason-tool-installer').setup({ ensure_installed = ensure_installed })
-
       require('mason-lspconfig').setup({
         handlers = {
           function(server_name)
@@ -294,26 +298,19 @@ return {
     init = function() vim.g.disable_autoformat = false end,
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Don't do anything if disabled globally
+      format_on_save = function(_)
         if vim.g.disable_autoformat then return end
-        -- Disable for languages that don't have a well standardized coding style.
-        local disable_filetypes = { c = true, cpp = true }
-        local lsp_format_opt
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
-        else
-          lsp_format_opt = 'fallback'
-        end
         return {
           timeout_ms = 500,
-          lsp_format = lsp_format_opt,
+          lsp_format = 'fallback',
         }
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
         python = { 'isort', 'black' },
         markdown = { 'markdownlint' },
+        zsh = { 'shfmt', 'shellcheck' },
+        sh = { 'shfmt', 'shellcheck' },
       },
     },
     config = function(_, opts)
