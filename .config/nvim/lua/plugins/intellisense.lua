@@ -249,8 +249,8 @@ return {
 
           ['<CR>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              if luasnip.expand_or_locally_jumpable() then
-                luasnip.expand_or_jump()
+              if luasnip.expandable() then
+                luasnip.expand()
               else
                 cmp.confirm({ select = true })
               end
