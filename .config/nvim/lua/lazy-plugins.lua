@@ -9,8 +9,7 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup plugins, use `:Lazy` and `:che` to debug
-require('lazy').setup({
-  spec = { import = 'plugins' },
+require('lazy').setup('plugins', {
   defaults = { version = '*' },
   change_detection = { notify = false },
 })
