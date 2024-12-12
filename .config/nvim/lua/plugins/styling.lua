@@ -29,7 +29,7 @@ return {
     event = 'VimEnter',
     config = function()
       vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@comment.note' })
-      vim.api.nvim_set_hl(0, 'DashboardFooter', { link = '@constant' })
+      vim.api.nvim_set_hl(0, 'DashboardFooter', { link = '@comment.error' })
       vim.api.nvim_set_hl(0, 'DashboardFiles', { link = '@text' })
       vim.api.nvim_set_hl(0, 'DashboardShortcut', { link = '@string' })
       require('dashboard').setup({
@@ -77,7 +77,8 @@ return {
           footer = {
             '',
             '',
-            "```  It's about how hard you can get hit and keep moving forward  ```",
+            'There are only two hard problems in software engineering,',
+            ' configuring neovim an Error detected while processing BufEnter Autocommands for "*"',
           },
         },
       })
