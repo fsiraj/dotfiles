@@ -19,6 +19,7 @@ return {
     },
 
     config = function()
+      vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<Cr>', { desc = 'L[S]P' })
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
         callback = function(event)
@@ -133,6 +134,7 @@ return {
 
       -- Use `:Mason` to check dependencies and install them
       require('mason').setup()
+      vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<Cr>', { desc = '[M]ason' })
 
       -- Add other tools here that you want Mason to install
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -194,6 +196,8 @@ return {
       luasnip.config.setup({})
 
       local cmp = require('cmp')
+      vim.keymap.set('n', '<Leader>ic', '<Cmd>CmpStatus<Cr>', { desc = '[C]ompletions' })
+
       local compare = cmp.config.compare
       local opts = {
         enabled = function()

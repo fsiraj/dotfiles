@@ -13,7 +13,7 @@ return {
       },
     },
   },
-  { 'folke/tokyonight.nvim', priority = 1000 },
+  { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
 
   -- Apply theme colors to dev icons
   {
@@ -135,6 +135,7 @@ return {
           ['cmp.entry.get_documentation'] = true,
         },
       },
+      presets = { long_message_to_split = true },
     },
     config = function(_, opts)
       -- Reroute common messages to mini

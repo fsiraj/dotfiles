@@ -24,6 +24,7 @@ return {
         keys = {},
       },
       spec = {
+        { '<leader>i', group = '[I]nfo', icon = { icon = ' ', color = 'cyan' } },
         {
           '<leader>c',
           group = '[C]ode',
