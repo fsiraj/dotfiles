@@ -1,5 +1,5 @@
 -- Buffer keymaps
-vim.keymap.set('n', '<leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
+vim.keymap.set('n', '<Leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
 vim.keymap.set('n', '<C-\\>', '<cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-_>', '<cmd>sp<CR>', { desc = 'Horizontal split' })
 
@@ -9,7 +9,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set(
   'n',
-  '<leader>cq',
+  '<Leader>cq',
   vim.diagnostic.setloclist,
   { desc = 'Open [C]ode diagnostic [Q]uickfix list' }
 )

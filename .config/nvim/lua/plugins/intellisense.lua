@@ -7,6 +7,7 @@
 return {
   {
     'neovim/nvim-lspconfig',
+    event = 'VeryLazy',
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -19,7 +20,7 @@ return {
     },
 
     config = function()
-      vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<Cr>', { desc = 'L[S]P' })
+      vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'L[S]P' })
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
         callback = function(event)
@@ -41,15 +42,15 @@ return {
           map('gD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
           map('gr', require('telescope.builtin').lsp_references, '[C]ode [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, '[C]ode [I]mplementation')
-          map('<leader>gy', require('telescope.builtin').lsp_type_definitions, 'T[y]pe Definition')
-          map('<leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
+          map('<Leader>gy', require('telescope.builtin').lsp_type_definitions, 'T[y]pe Definition')
+          map('<Leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
           map(
-            '<leader>ws',
+            '<Leader>ws',
             require('telescope.builtin').lsp_workspace_symbols,
             '[W]orkspace [S]ymbols'
           )
-          map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+          map('<Leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
+          map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- Highliht references on hover
           local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -85,7 +86,7 @@ return {
 
           -- If LSP supports inlay hints, enable them
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
+            map('<Leader>th', function()
               local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
               vim.lsp.inlay_hint.enable(not is_enabled)
               vim.print('Inlay Hints: ' .. tostring(not is_enabled))
@@ -134,7 +135,7 @@ return {
 
       -- Use `:Mason` to check dependencies and install them
       require('mason').setup()
-      vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<Cr>', { desc = '[M]ason' })
+      vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = '[M]ason' })
 
       -- Add other tools here that you want Mason to install
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -196,7 +197,7 @@ return {
       luasnip.config.setup({})
 
       local cmp = require('cmp')
-      vim.keymap.set('n', '<Leader>ic', '<Cmd>CmpStatus<Cr>', { desc = '[C]ompletions' })
+      vim.keymap.set('n', '<Leader>ic', '<Cmd>CmpStatus<CR>', { desc = '[C]ompletions' })
 
       local compare = cmp.config.compare
       local opts = {
@@ -293,7 +294,7 @@ return {
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>cf',
+        '<Leader>cf',
         function() require('conform').format({ async = true, lsp_format = 'fallback' }) end,
         mode = '',
         desc = '[C]ode [F]ormat buffer',
@@ -329,7 +330,7 @@ return {
       })
       vim.keymap.set(
         'n',
-        '<leader>tf',
+        '<Leader>tf',
         ':ToggleFormatOnSave<CR>',
         { desc = '[T]oggle [F]ormat on save' }
       )

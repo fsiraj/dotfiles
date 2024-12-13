@@ -14,4 +14,4 @@ require('lazy').setup('plugins', {
   change_detection = { notify = false },
 })
 vim.cmd.colorscheme('tokyonight-night')
-vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<Cr>', { desc = '[L]azy' })
+vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = '[L]azy' })
