@@ -1,5 +1,6 @@
 return {
   -- Themes
+  { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
   {
     'catppuccin/nvim',
     name = 'catppuccin',
@@ -13,7 +14,6 @@ return {
       },
     },
   },
-  { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
 
   -- Apply theme colors to dev icons
   {
@@ -69,21 +69,10 @@ return {
             '                                     ▒                                             ',
             '                                                                                  ',
           },
-          shortcut = {
-            {
-              desc = ' Files',
-              group = '@comment.note',
-              action = 'Telescope find_files',
-              key = 'f',
-            },
-          },
+          shortcut = {},
           project = { enable = true, limit = 3 },
           mru = { enable = true, limit = 5 },
-          footer = {
-            '',
-            'There are only two hard problems in software engineering,',
-            ' configuring neovim an Error detected while processing BufEnter Autocommands for "*"',
-          },
+          footer = {},
         },
       })
     end,
@@ -104,7 +93,7 @@ return {
       require('lualine').setup({
         options = {
           icons = vim.g.have_nerd_font,
-          theme = 'catppuccin',
+          theme = 'auto',
           section_separators = { left = '', right = '' },
           component_separators = { left = '|', right = '|' },
         },
@@ -116,8 +105,8 @@ return {
           lualine_x = {
             { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
             { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
-            'filetype',
             'copilot',
+            'filetype',
           },
           lualine_y = { 'progress' },
           lualine_z = { 'location' },
