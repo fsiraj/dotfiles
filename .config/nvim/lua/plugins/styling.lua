@@ -28,16 +28,6 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
-      -- Custom colors
-      local function set_hl(from, to) vim.api.nvim_set_hl(0, from, { link = to }) end
-
-      set_hl('DashboardHeader', '@type')
-      set_hl('DashboardFooter', '@comment.error')
-      set_hl('DashboardFiles', '@text')
-      set_hl('DashboardShortcut', '@comment.note')
-      set_hl('DashboardProjectTitleIcon', '@comment.note')
-      set_hl('DashboardMruIcon', '@comment.note')
-
       require('dashboard').setup({
         theme = 'hyper',
         config = {

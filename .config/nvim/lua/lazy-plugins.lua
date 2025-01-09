@@ -13,5 +13,5 @@ require('lazy').setup('plugins', {
   defaults = { version = nil },
   change_detection = { notify = false },
 })
-vim.cmd.colorscheme('tokyonight-night')
+vim.cmd.colorscheme('catppuccin-mocha')
 vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = '[L]azy' })
