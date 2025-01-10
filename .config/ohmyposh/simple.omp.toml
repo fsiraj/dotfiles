@@ -14,6 +14,7 @@ mauve = '#CBA6F7'
 pink = '#F5C2E7'
 os = '#ACB0BE'
 
+
 # Prompt - 'Zero-th' Line
 [[blocks]]
 type = 'prompt'
@@ -31,6 +32,7 @@ threshold = 500
 style = "austin"
 always_enabled = true
 
+
 # Prompt - First Line
 [[blocks]]
 type = 'prompt'
@@ -38,16 +40,10 @@ alignment = 'left'
 newline = true
 
 [[blocks.segments]]
-type = 'text'
-style = 'plain'
-template = '󰒸 '
-foreground = 'p:teal'
-
-[[blocks.segments]]
 type = 'session'
 style = 'plain'
 template = '{{ .UserName }}{{ if .SSHSession }}@{{ index (splitList "." .HostName) 0 }}{{ end }} '
-foreground = 'p:blue'
+foreground = 'p:teal'
 
 [[blocks.segments]]
 type = 'path'

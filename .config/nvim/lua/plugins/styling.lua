@@ -28,6 +28,7 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
+      vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@keyword' })
       require('dashboard').setup({
         theme = 'hyper',
         config = {
@@ -84,22 +85,24 @@ return {
         options = {
           icons = vim.g.have_nerd_font,
           theme = 'auto',
-          section_separators = { left = '', right = '' },
-          component_separators = { left = '|', right = '|' },
+          section_separators = { left = '', right = '' },
+          component_separators = { left = '󰇝', right = '󰇝' },
         },
         extensions = { 'nvim-dap-ui' },
         sections = {
-          lualine_a = { 'mode' },
-          lualine_b = { 'branch', 'diff', 'diagnostics' },
-          lualine_c = { 'filename' },
+          lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end },
+          lualine_b = {},
+          lualine_c = { 'branch', 'diff', 'diagnostics', 'filename' },
           lualine_x = {
             { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
             { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
             'copilot',
             'filetype',
+            'progress',
+            'location',
           },
-          lualine_y = { 'progress' },
-          lualine_z = { 'location' },
+          lualine_y = {},
+          lualine_z = {},
         },
       })
     end,
