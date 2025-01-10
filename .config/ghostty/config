@@ -1,9 +1,10 @@
 # Styling
+theme = catppuccin-mocha
 font-family = JetBrainsMono Nerd Font
 font-size = 12
 window-inherit-font-size = false
-theme = catppuccin-mocha
 adjust-cell-width = -10%
+window-theme = ghostty
 
 # Keymap
 keybind = ctrl+shift+plus=increase_font_size:1
