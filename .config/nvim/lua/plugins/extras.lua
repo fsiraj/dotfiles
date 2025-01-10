@@ -151,7 +151,6 @@ return {
   },
 
   -- Render markdown nicely
-
   {
     'MeanderingProgrammer/render-markdown.nvim',
     ft = { 'markdown', 'codecompanion' },
