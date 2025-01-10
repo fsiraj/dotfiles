@@ -73,6 +73,7 @@ else
     alias ls="ls -Al"
     alias ll="ls -Al"
 fi
+
 alias cc="clear"
 alias cd..="cd .."
 alias py="python3"
@@ -84,6 +85,7 @@ alias ga="git add -v"
 alias gc="git commit -vm"
 alias gs="git status -sb"
 alias gl="git log --oneline -n 10"
+alias gb="git branch"
 alias gch="git checkout"
 alias gchb="git checkout -b"
 alias gp="git pull"
