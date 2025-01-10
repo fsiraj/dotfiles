@@ -31,34 +31,26 @@ return {
             doc_lines = 0,
           })
 
-          -- Helper to define keymaps
+          local telelescope = require('telescope.builtin')
           local map = function(keys, func, desc, mode)
             mode = mode or 'n'
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          map('gd', require('telescope.builtin').lsp_definitions, '[C]ode [D]efinition')
+          map('gd', telelescope.lsp_definitions, '[C]ode [D]efinition')
           map('gD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
-          map('gr', require('telescope.builtin').lsp_references, '[C]ode [R]eferences')
-          map('gI', require('telescope.builtin').lsp_implementations, '[C]ode [I]mplementation')
-          map('<Leader>gy', require('telescope.builtin').lsp_type_definitions, 'T[y]pe Definition')
-          map('<Leader>bs', require('telescope.builtin').lsp_document_symbols, '[B]uffer [S]ymbols')
-          map(
-            '<Leader>ws',
-            require('telescope.builtin').lsp_workspace_symbols,
-            '[W]orkspace [S]ymbols'
-          )
+          map('gr', telelescope.lsp_references, '[C]ode [R]eferences')
+          map('gI', telelescope.lsp_implementations, '[C]ode [I]mplementation')
+          map('gy', telelescope.lsp_type_definitions, 'T[y]pe Definition')
+          map('<Leader>bs', telelescope.lsp_document_symbols, '[B]uffer [S]ymbols')
+          map('<Leader>ws', telelescope.lsp_workspace_symbols, '[W]orkspace [S]ymbols')
           map('<Leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
           map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- Highliht references on hover
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if
-            client
-            and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight)
-          then
-            local highlight_augroup =
-              vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
+          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+            local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
               group = highlight_augroup,
@@ -106,15 +98,19 @@ return {
 
       -- Add cmp_nvim_lsp capabilities to the default capabilities of Neovim
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities =
-        vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
       local servers = {
         basedpyright = {
           settings = {
             basedpyright = {
-              typeCheckingMode = 'standard',
+              analysis = {
+                diagnosticMode = 'openFilesOnly',
+                typeCheckingMode = 'standard',
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+              },
             },
           },
         },
@@ -153,8 +149,7 @@ return {
           function(server_name)
             local server = servers[server_name] or {}
             -- Override capabilities with server-specific capabilities
-            server.capabilities =
-              vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
         },
@@ -201,8 +196,7 @@ return {
       local compare = cmp.config.compare
       local opts = {
         enabled = function()
-          return vim.api.nvim_get_option_value('buftype', { buf = 0 }) ~= 'prompt'
-            or require('cmp_dap').is_dap_buffer()
+          return vim.api.nvim_get_option_value('buftype', { buf = 0 }) ~= 'prompt' or require('cmp_dap').is_dap_buffer()
         end,
         snippet = {
           expand = function(args) luasnip.lsp_expand(args.body) end,
@@ -250,29 +244,32 @@ return {
           ['<C-u>'] = cmp.mapping.scroll_docs(-4),
           ['<C-d>'] = cmp.mapping.scroll_docs(4),
           ['<C-Space>'] = cmp.mapping.complete({}),
-
           ['<CR>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               if luasnip.expandable() then
                 luasnip.expand()
               else
-                cmp.confirm({ select = true })
+                cmp.confirm({
+                  select = true,
+                })
               end
             else
               fallback()
             end
           end),
-
           ['<Tab>'] = cmp.mapping(function(fallback)
-            if luasnip.locally_jumpable(1) then
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.locally_jumpable(1) then
               luasnip.jump(1)
             else
               fallback()
             end
           end, { 'i', 's' }),
-
           ['<S-Tab>'] = cmp.mapping(function(fallback)
-            if luasnip.locally_jumpable(-1) then
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
             else
               fallback()
@@ -289,17 +286,16 @@ return {
 
   { -- Autoformat
     'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
+    event = 'BufEnter',
     keys = {
       {
         '<Leader>cf',
         function() require('conform').format({ async = true, lsp_format = 'fallback' }) end,
-        mode = '',
-        desc = '[C]ode [F]ormat buffer',
+        mode = { 'n', 'v' },
+        desc = '[C]ode [F]ormat Buffer/Selection',
       },
     },
-    init = function() vim.g.disable_autoformat = false end,
+    init = function() vim.g.disable_autoformat = true end,
     opts = {
       notify_on_error = false,
       format_on_save = function(_)
@@ -327,12 +323,7 @@ return {
       end, {
         desc = 'Toggle autoformat-on-save with conform',
       })
-      vim.keymap.set(
-        'n',
-        '<Leader>tf',
-        ':ToggleFormatOnSave<CR>',
-        { desc = '[T]oggle [F]ormat on save' }
-      )
+      vim.keymap.set('n', '<Leader>tf', ':ToggleFormatOnSave<CR>', { desc = '[T]oggle [F]ormat on save' })
     end,
   },
 

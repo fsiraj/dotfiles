@@ -1,0 +1,15 @@
+# Styling
+theme = catppuccin-mocha
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+window-inherit-font-size = false
+adjust-cell-width = -10%
+window-theme = ghostty
+gtk-tabs-location = hidden
+
+# Keymap
+keybind = alt+equal=increase_font_size:1
+keybind = alt+minus=decrease_font_size:1
+keybind = ctrl+equal=unbind
+keybind = ctrl+minus=unbind
+
