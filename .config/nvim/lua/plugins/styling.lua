@@ -28,6 +28,7 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
+      vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@keyword' })
       require('dashboard').setup({
         theme = 'hyper',
         config = {
