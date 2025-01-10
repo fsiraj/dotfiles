@@ -85,7 +85,7 @@ return {
           icons = vim.g.have_nerd_font,
           theme = 'auto',
           section_separators = { left = '', right = '' },
-          component_separators = { left = '|', right = '|' },
+          component_separators = { left = '󰇝', right = '󰇝' },
         },
         extensions = { 'nvim-dap-ui' },
         sections = {
