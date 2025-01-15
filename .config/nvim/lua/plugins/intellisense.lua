@@ -114,7 +114,12 @@ return {
         basedpyright = {
           settings = {
             basedpyright = {
-              typeCheckingMode = 'standard',
+              analysis = {
+                diagnosticMode = 'openFilesOnly',
+                typeCheckingMode = 'off',
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+              },
             },
           },
         },
