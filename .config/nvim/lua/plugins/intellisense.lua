@@ -297,7 +297,7 @@ return {
 
   { -- Autoformat
     'stevearc/conform.nvim',
-    cmd = { 'ConformInfo' },
+    event = 'BufEnter',
     keys = {
       {
         '<Leader>cf',
@@ -306,7 +306,7 @@ return {
         desc = '[C]ode [F]ormat buffer',
       },
     },
-    init = function() vim.g.disable_autoformat = false end,
+    init = function() vim.g.disable_autoformat = true end,
     opts = {
       notify_on_error = false,
       format_on_save = function(_)
