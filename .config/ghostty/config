@@ -1,7 +1,7 @@
 # Styling
 theme = catppuccin-mocha
 font-family = JetBrainsMono Nerd Font
-font-size = 12
+font-size = 14
 window-inherit-font-size = false
 adjust-cell-width = -10%
 window-theme = ghostty
