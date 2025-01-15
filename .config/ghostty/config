@@ -5,6 +5,7 @@ font-size = 14
 window-inherit-font-size = false
 adjust-cell-width = -10%
 window-theme = ghostty
+gtk-tabs-location = hidden
 
 # Keymap
 keybind = ctrl+shift+plus=increase_font_size:1
