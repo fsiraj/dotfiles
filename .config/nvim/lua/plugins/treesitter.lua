@@ -18,6 +18,7 @@ return {
         'vim',
         'vimdoc',
         'tmux',
+        'yaml',
       },
       auto_install = true,
       highlight = {
