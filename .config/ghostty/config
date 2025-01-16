@@ -8,8 +8,8 @@ window-theme = ghostty
 gtk-tabs-location = hidden
 
 # Keymap
-keybind = ctrl+shift+plus=increase_font_size:1
-keybind = ctrl+shift+minus=decrease_font_size:1
+keybind = alt+equal=increase_font_size:1
+keybind = alt+minus=decrease_font_size:1
 keybind = ctrl+equal=unbind
 keybind = ctrl+minus=unbind
 

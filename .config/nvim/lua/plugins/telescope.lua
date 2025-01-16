@@ -27,7 +27,7 @@ return {
             ['<C-_>'] = 'select_horizontal',
             ['<C-h>'] = 'which_key',
             ['<C-x>'] = 'delete_buffer',
-            ['<C-V>'] = false,
+            ['<C-v>'] = false,
           },
         },
         vimgrep_arguments = {
