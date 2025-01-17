@@ -91,6 +91,7 @@ alias gchb="git checkout -b"
 alias gp="git pull"
 alias gd="git diff"
 alias grhh="git reset --hard HEAD"
+alias grs="git restore --staged"
 alias suggest="gh copilot suggest"
 alias explain="gh copilot explain"
 
