@@ -66,29 +66,12 @@ return {
     main = 'ibl',
     config = function()
       require('ibl').setup({ exclude = { filetypes = { 'help', 'dashboard' } } })
-      vim.keymap.set(
-        'n',
-        '<Leader>ti',
-        ':IBLToggle<CR>',
-        { desc = '[T]oggle [I]ndent blank lines' }
-      )
+      vim.keymap.set('n', '<Leader>ti', ':IBLToggle<CR>', { desc = '[T]oggle [I]ndent blank lines' })
     end,
   },
 
   -- Autopairs automatically adds matching parentheses, quotes, etc.
-  {
-    'windwp/nvim-autopairs',
-    event = 'InsertEnter',
-    -- Optional dependency
-    dependencies = { 'hrsh7th/nvim-cmp' },
-    config = function()
-      require('nvim-autopairs').setup({})
-      -- Automatically add `(` after selecting a function or method
-      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-      local cmp = require('cmp')
-      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
-    end,
-  },
+  { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
 
   -- Detect tabstop and shiftwidth automatically
   { 'tpope/vim-sleuth' },
@@ -123,12 +106,7 @@ return {
           goto_last = '<Leader>gG',
         },
       })
-      vim.keymap.set(
-        'n',
-        '<Leader>tg',
-        MiniDiff.toggle_overlay,
-        { desc = '[T]oggle [G]it overlay' }
-      )
+      vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it overlay' })
     end,
   },
 
@@ -176,12 +154,7 @@ return {
     end,
     init = function()
       if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-      vim.keymap.set(
-        'n',
-        '<Leader>tp',
-        ':MarkdownPreviewToggle<CR>',
-        { desc = '[T]oggle Markdown [P]review' }
-      )
+      vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = '[T]oggle Markdown [P]review' })
     end,
   },
 }
