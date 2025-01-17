@@ -1,5 +1,11 @@
 # Vim Tricks and Tips
 
+- Searching current word/selection
+  - `*` or `#`
+  - Search forward/backward for word under cursor/selection.
+- Searching within range
+  - `:s` after visual selection
+  - Restricts the substitute command to the selection.
 - Deleting Buffers
   - `:bd` or `:%bd`
   - Delete Buffer or Delete All Buffers

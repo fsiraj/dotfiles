@@ -1,4 +1,4 @@
--- NOTE: Set these before plugins are loaded
+-- Set these before plugins are loaded
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ','
 vim.g.have_nerd_font = true
@@ -15,7 +15,8 @@ vim.opt.relativenumber = true
 -- Enable mouse mode
 vim.opt.mouse = 'a'
 
--- Mode already shown in the status line
+-- Lualine using winbar as status line
+vim.opt.laststatus = 0
 vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.

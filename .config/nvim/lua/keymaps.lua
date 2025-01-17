@@ -6,14 +6,6 @@ vim.keymap.set('n', '<C-_>', '<cmd>sp<CR>', { desc = 'Horizontal split' })
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
-vim.keymap.set(
-  'n',
-  '<Leader>cq',
-  vim.diagnostic.setloclist,
-  { desc = 'Open [C]ode diagnostic [Q]uickfix list' }
-)
-
 -- Keybinds to make split navigation easier.
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -29,3 +21,5 @@ vim.keymap.set('n', '<M-Right>', '<cmd>vertical resize +2<CR>', { desc = 'Increa
 -- Easier pasting in insert mode
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
+-- Escape insert mode in terminal easier
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
