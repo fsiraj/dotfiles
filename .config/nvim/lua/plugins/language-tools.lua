@@ -168,6 +168,9 @@ return {
       },
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' },
+        per_filetype = {
+          codecompanion = { 'codecompanion' },
+        },
         providers = {
           copilot = {
             name = 'copilot',
@@ -175,6 +178,10 @@ return {
             score_offset = 100,
             async = true,
             min_keyword_length = 5,
+          },
+          codecompanion = {
+            name = 'CodeCompanion',
+            module = 'codecompanion.providers.completion.blink',
           },
         },
       },

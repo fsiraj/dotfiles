@@ -119,44 +119,17 @@ return {
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
-    dependencies = { 'MunifTanjim/nui.nvim', 'rcarriga/nvim-notify' },
+    dependencies = { 'MunifTanjim/nui.nvim' },
     opts = {
+      cmdline = { enabled = true, view = 'cmdline_popup'},
       messages = { enabled = true },
       lsp = {
         override = {
           ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
           ['vim.lsp.util.stylize_markdown'] = true,
-          ['cmp.entry.get_documentation'] = true,
         },
       },
       presets = { long_message_to_split = true },
     },
-    config = function(_, opts)
-      -- Reroute common messages to mini
-      local grep_strings = {
-        'written',
-        'change;',
-        'changes;',
-        'newest change',
-        'last change',
-        'fewer line',
-        'line less',
-        'more line',
-        'lines yanked',
-      }
-      opts.routes = {}
-      for _, keyword in ipairs(grep_strings) do
-        table.insert(opts.routes, {
-          filter = {
-            event = { 'msg_show' },
-            kind = { '', 'emsg' },
-            find = keyword,
-          },
-          view = 'mini',
-        })
-      end
-      require('noice').setup(opts)
-      vim.keymap.set('ca', 'messages', 'NoiceAll') -- Use :mes for nvim version
-    end,
   },
 }
