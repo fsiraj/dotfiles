@@ -1,10 +1,7 @@
--- Intellisense includes the following plugins
---  - nvim-lspconfig
---  - blink.cmp
---  - nvim-lint
---  - lazydev
---  - conform
+-- LSPs, Linters, Formatters, Completions
+
 return {
+  -- Install and configure LSPs and other external tools
   {
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -144,7 +141,8 @@ return {
     end,
   },
 
-  { -- Autocompletion
+  -- Autocompletion engine and sources
+  {
     'saghen/blink.cmp',
     dependencies = {
       { 'saghen/blink.compat', version = '*', opts = {} },
@@ -161,7 +159,7 @@ return {
         ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
         cmdline = {
           preset = 'enter',
-          ['<Tab>'] = { 'show', 'select_next',  },
+          ['<Tab>'] = { 'show', 'select_next' },
         },
       },
       appearance = {
@@ -187,7 +185,8 @@ return {
     },
   },
 
-  { -- Autoformat
+  -- Code formatter
+  {
     'stevearc/conform.nvim',
     event = 'BufEnter',
     keys = {
@@ -230,7 +229,8 @@ return {
     end,
   },
 
-  { -- Linting
+  -- Linters
+  {
     'mfussenegger/nvim-lint',
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
@@ -250,7 +250,8 @@ return {
     end,
   },
 
-  { -- Intellisense for neovim api and plugins
+  -- Intellisense for neovim api and plugins
+  {
     'folke/lazydev.nvim',
     ft = 'lua',
     opts = {

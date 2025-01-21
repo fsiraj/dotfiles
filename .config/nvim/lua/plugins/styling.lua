@@ -58,7 +58,7 @@ return {
             '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
             '                                    ▒▒ ▒   ▒▒                                      ',
             '                                     ▒                                             ',
-            '                                                                                  ',
+            '                                                                                   ',
           },
           shortcut = {},
           project = { enable = true, limit = 3 },
@@ -67,7 +67,7 @@ return {
         },
       })
     end,
-    dependencies = { { 'nvim-tree/nvim-web-devicons' } },
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
   },
 
   -- Status Line
@@ -77,7 +77,6 @@ return {
     dependencies = {
       'nvim-tree/nvim-web-devicons',
       'folke/noice.nvim',
-      'AndreM222/copilot-lualine',
     },
     config = function()
       local noice = require('noice')
@@ -89,18 +88,26 @@ return {
           component_separators = { left = '󰇝', right = '󰇝' },
         },
         extensions = { 'nvim-dap-ui' },
-        sections = {
+        sections = {},
+        inactive_sections = {},
+        winbar = {
           lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end },
           lualine_b = {},
           lualine_c = { 'branch', 'diff', 'diagnostics', 'filename' },
           lualine_x = {
             { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
             { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
-            'copilot',
             'filetype',
-            'progress',
             'location',
           },
+          lualine_y = {},
+          lualine_z = {},
+        },
+        inactive_winbar = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = { 'filename' },
+          lualine_x = { 'location' },
           lualine_y = {},
           lualine_z = {},
         },
@@ -126,14 +133,23 @@ return {
     },
     config = function(_, opts)
       -- Reroute common messages to mini
-      local keywords =
-        { 'B written', 'change', 'fewer line', 'line less', 'more line', 'lines yanked' }
+      local grep_strings = {
+        'written',
+        'change;',
+        'changes;',
+        'newest change',
+        'last change',
+        'fewer line',
+        'line less',
+        'more line',
+        'lines yanked',
+      }
       opts.routes = {}
-      for _, keyword in ipairs(keywords) do
+      for _, keyword in ipairs(grep_strings) do
         table.insert(opts.routes, {
           filter = {
-            event = 'msg_show',
-            kind = '',
+            event = { 'msg_show' },
+            kind = { '', 'emsg' },
             find = keyword,
           },
           view = 'mini',

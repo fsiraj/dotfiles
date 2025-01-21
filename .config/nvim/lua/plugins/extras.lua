@@ -1,53 +1,10 @@
 -- Colletion of small convenience plugins with minimal configuration.
 
 return {
-  -- Plugin to show pending keybinds.
-  {
-    'folke/which-key.nvim',
-    event = 'VimEnter',
-    keys = {
-      {
-        '<Leader>?',
-        function() require('which-key').show({ global = false }) end,
-        desc = 'Which Key: Buffer Local Keymaps',
-      },
-    },
-    opts = {
-      preset = 'modern',
-      win = { wo = { winblend = 5 } },
-      triggers = {
-        { '<auto>', mode = 'nixsotc' },
-        { 's', mode = { 'n', 'v' } },
-      },
-      icons = {
-        mappings = vim.g.have_nerd_font,
-        keys = {},
-      },
-      spec = {
-        { '<Leader>i', group = '[I]nfo', icon = { icon = ' ', color = 'cyan' } },
-        {
-          '<Leader>c',
-          group = '[C]ode',
-          mode = { 'n', 'x' },
-          icon = { icon = ' ', color = 'orange' },
-        },
-        { '<Leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
-        { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
-        { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
-        { '<Leader>w', group = '[W]orkspace', icon = { icon = '󰈢 ', color = 'azure' } },
-        { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
-        {
-          '<Leader>g',
-          group = '[G]it',
-          mode = { 'n', 'v' },
-          icon = { cat = 'filetype', name = 'git' },
-        },
-      },
-    },
-  },
 
   -- Find and replace
   {
+    'MagicDuck/grug-far.nvim',
     keys = {
       {
         '<Leader>wf',
@@ -56,7 +13,6 @@ return {
         desc = '[W]orkspace [F]ind replace',
       },
     },
-    'MagicDuck/grug-far.nvim',
     config = function() require('grug-far').setup({}) end,
   },
 
