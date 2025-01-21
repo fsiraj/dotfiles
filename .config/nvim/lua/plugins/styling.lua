@@ -79,15 +79,31 @@ return {
       'folke/noice.nvim',
     },
     config = function()
+      -- Has several useful components
       local noice = require('noice')
+
+      -- Custom behaviour for dapui windows
+      local dapui = {
+        winbar = require('lualine.extensions.nvim-dap-ui').sections,
+        filetypes = require('lualine.extensions.nvim-dap-ui').filetypes,
+      }
+      vim.api.nvim_create_autocmd('FileType', {
+        desc = 'Clear statusline for nvim-dap-ui buffers',
+        group = vim.api.nvim_create_augroup('nvim-dap-ui', { clear = true }),
+        pattern = 'dap*',
+        callback = function() vim.opt.statusline=' ' end,
+      })
+
+      -- Lualine config
       require('lualine').setup({
         options = {
           icons = vim.g.have_nerd_font,
           theme = 'auto',
           section_separators = { left = '', right = '' },
           component_separators = { left = '󰇝', right = '󰇝' },
+          disabled_filetypes = { winbar = { 'dap-repl' } },
         },
-        extensions = { 'nvim-dap-ui' },
+        extensions = { dapui },
         sections = {},
         inactive_sections = {},
         winbar = {
@@ -121,7 +137,7 @@ return {
     event = 'VeryLazy',
     dependencies = { 'MunifTanjim/nui.nvim' },
     opts = {
-      cmdline = { enabled = true, view = 'cmdline_popup'},
+      cmdline = { enabled = true, view = 'cmdline_popup' },
       messages = { enabled = true },
       lsp = {
         override = {

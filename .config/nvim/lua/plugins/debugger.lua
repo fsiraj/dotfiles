@@ -76,7 +76,6 @@ return {
     })
 
     -- Dap setup
-    --  see |:help dap.repl.open()| for defaults
     local repl = require('dap.repl')
     repl.commands = vim.tbl_extend('force', repl.commands, {
       -- Add a new alias for the existing .exit command
@@ -92,7 +91,6 @@ return {
     })
 
     -- Dap UI setup
-    --  see |:help nvim-dap-ui|
     dapui.setup({
       layouts = {
         {

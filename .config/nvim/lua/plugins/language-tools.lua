@@ -1,6 +1,7 @@
 -- LSPs, Linters, Formatters, Completions
 
 return {
+
   -- Install and configure LSPs and other external tools
   {
     'neovim/nvim-lspconfig',
@@ -148,18 +149,20 @@ return {
       { 'saghen/blink.compat', version = '*', opts = {} },
       'rafamadriz/friendly-snippets',
       'giuxtaposition/blink-cmp-copilot',
+      'rcarriga/cmp-dap',
     },
     version = '*',
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
+      enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
       keymap = {
         preset = 'enter',
         ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
         ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
         cmdline = {
           preset = 'enter',
-          ['<Tab>'] = { 'show', 'select_next' },
+          ['<C-n>'] = { 'show', 'select_next', 'fallback' },
         },
       },
       appearance = {
@@ -167,7 +170,11 @@ return {
         nerd_font_variant = 'mono',
       },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' },
+        default = function()
+          local sources = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' }
+          if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
+          return sources
+        end,
         per_filetype = {
           codecompanion = { 'codecompanion' },
         },
@@ -182,6 +189,10 @@ return {
           codecompanion = {
             name = 'CodeCompanion',
             module = 'codecompanion.providers.completion.blink',
+          },
+          dap = {
+            name = 'dap',
+            module = 'blink.compat.source',
           },
         },
       },

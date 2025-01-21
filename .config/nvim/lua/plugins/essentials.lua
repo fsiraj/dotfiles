@@ -3,6 +3,7 @@
 -- Treesitter
 
 return {
+
   -- WhichKey: Plugin to show pending keybinds.
   {
     'folke/which-key.nvim',
