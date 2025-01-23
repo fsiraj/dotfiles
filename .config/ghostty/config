@@ -1,11 +1,14 @@
-# Styling
+# Styling - Editor
 theme = catppuccin-mocha
+background = 181825
 font-family = JetBrainsMono Nerd Font
 font-size = 14
-window-inherit-font-size = false
 adjust-cell-width = -10%
+
+# Styling - Window
 window-theme = ghostty
 gtk-tabs-location = hidden
+adw-toolbar-style = flat
 
 # Keymap
 keybind = alt+equal=increase_font_size:1
