@@ -66,9 +66,12 @@ return {
     },
     config = function()
       require('telescope').setup({
-        --  To see bindings in picker: i = <C-h>, n = ?
         defaults = {
-          winblend = 5,
+          layout_strategy = 'horizontal',
+          sorting_strategy = 'ascending',
+          layout_config = {
+            horizontal = { prompt_position = 'top', preview_width = 0.6 },
+          },
           wrap_results = false,
           file_ignore_patterns = { '%.git/' },
           mappings = {
@@ -76,7 +79,6 @@ return {
               ['<C-y>'] = 'select_default',
               ['<C-Bslash>'] = 'select_vertical',
               ['<C-_>'] = 'select_horizontal',
-              ['<C-h>'] = 'which_key',
               ['<C-x>'] = 'delete_buffer',
               ['<C-v>'] = false,
             },
@@ -106,6 +108,29 @@ return {
           },
         },
       })
+
+      -- Customize appearance
+      if vim.g.colors_name == 'catppuccin-mocha' then
+        local colors = require('catppuccin.palettes').get_palette()
+        local mantle = colors.mantle
+        local theme = {
+          TelescopeMatching = { fg = colors.flamingo },
+          TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
+          TelescopePromptPrefix = { bg = mantle, fg = colors.mauve },
+          TelescopePromptNormal = { bg = mantle },
+          TelescopeResultsNormal = { bg = mantle },
+          TelescopePreviewNormal = { bg = mantle },
+          TelescopePromptBorder = { bg = mantle, fg = mantle },
+          TelescopeResultsBorder = { bg = mantle, fg = mantle },
+          TelescopePreviewBorder = { bg = mantle, fg = mantle },
+          TelescopePromptTitle = { bg = colors.mauve, fg = mantle },
+          TelescopeResultsTitle = { fg = mantle },
+          TelescopePreviewTitle = { bg = colors.green, fg = mantle },
+        }
+        for hl, col in pairs(theme) do
+          vim.api.nvim_set_hl(0, hl, col)
+        end
+      end
 
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
@@ -165,6 +190,7 @@ return {
         'vimdoc',
         'tmux',
         'yaml',
+        'regex',
       },
       auto_install = true,
       highlight = {

@@ -156,13 +156,18 @@ return {
     ---@type blink.cmp.Config
     opts = {
       enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
+      completion = {
+        menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end },
+        documentation = { auto_show = true, auto_show_delay_ms = 50 },
+      },
       keymap = {
         preset = 'enter',
         ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
         ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
         cmdline = {
           preset = 'enter',
-          ['<C-n>'] = { 'show', 'select_next', 'fallback' },
+          ['<Tab>'] = { 'show', 'select_next', 'fallback' },
+          ['<S-Tab>'] = { 'select_prev', 'fallback' },
         },
       },
       appearance = {
@@ -184,7 +189,7 @@ return {
             module = 'blink-cmp-copilot',
             score_offset = 100,
             async = true,
-            min_keyword_length = 5,
+            min_keyword_length = 10
           },
           codecompanion = {
             name = 'CodeCompanion',
@@ -195,10 +200,6 @@ return {
             module = 'blink.compat.source',
           },
         },
-      },
-      completion = {
-        menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end },
-        documentation = { auto_show = true, auto_show_delay_ms = 50 },
       },
     },
   },
