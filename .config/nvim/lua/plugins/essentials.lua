@@ -80,7 +80,6 @@ return {
               ['<C-Bslash>'] = 'select_vertical',
               ['<C-_>'] = 'select_horizontal',
               ['<C-x>'] = 'delete_buffer',
-              ['<C-v>'] = false,
             },
           },
           vimgrep_arguments = {

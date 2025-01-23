@@ -147,6 +147,14 @@ return {
           ['vim.lsp.util.stylize_markdown'] = true,
         },
       },
+      views = {
+        cmdline_popup = {
+          size = { max_width = 100 },
+          border = { style = 'none', padding = { 1, 2 } },
+          filter_options = {},
+          win_options = { winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder', wrap = true },
+        },
+      },
     },
 
     config = function(_, opts)

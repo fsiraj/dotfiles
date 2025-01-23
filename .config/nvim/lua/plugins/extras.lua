@@ -37,15 +37,44 @@ return {
     end,
   },
 
+  -- Filesystem manager
+  {
+    'stevearc/oil.nvim',
+    keys = {
+      {
+        '<Leader>ft',
+        function() require('oil').open_float() end,
+        mode = { 'n' },
+        desc = '[F]ile [T]ree',
+      },
+    },
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {
+      view_options = { show_hidden = true },
+      float = {
+        border = 'solid',
+        max_width = 100,
+      },
+      keymaps = {
+        ['<C-h>'] = { 'actions.show_help' },
+        ['<C-_>'] = { 'actions.select', opts = { horizontal = true } },
+        ['<C-Bslash>'] = { 'actions.select', opts = { vertical = true } },
+      },
+      -- Optional dependencies
+      dependencies = { 'nvim-tree/nvim-web-devicons' },
+    },
+  },
+
   -- Find and replace
   {
     'MagicDuck/grug-far.nvim',
     keys = {
       {
-        '<Leader>wf',
+        '<Leader>fr',
         ':GrugFar<CR>',
         mode = { 'n', 'v' },
-        desc = '[W]orkspace [F]ind replace',
+        desc = '[F]ind [R]eplace',
       },
     },
     config = function() require('grug-far').setup({}) end,
