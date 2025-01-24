@@ -165,7 +165,7 @@ return {
                 max_width = 50,
             })
             if vim.g.colors_name == 'catppuccin-mocha' then
-                local colors = require('catppuccin.palettes').get_palette()
+                local colors = require('catppuccin.palettes').get_palette('mocha')
                 for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
                     vim.api.nvim_set_hl(0, 'Notify' .. level .. 'Body', { bg = colors.mantle })
                     vim.api.nvim_set_hl(0, 'Notify' .. level .. 'Border', { bg = colors.mantle, fg = colors.mantle })

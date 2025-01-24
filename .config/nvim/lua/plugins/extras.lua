@@ -23,7 +23,21 @@ return {
             'echasnovski/mini.diff',
         },
         opts = {
-            display = { diff = { provider = 'mini_diff' }, chat = { show_header_separator = false } },
+            display = {
+                diff = { provider = 'mini_diff' },
+                chat = {
+                    show_header_separator = false,
+                    window = { layout = 'float' },
+                },
+            },
+            strategies = {
+                chat = {
+                    keymaps = {
+                        close = { modes = { n = 'q' } },
+                        stop = { modes = { n = '<C-c>' } },
+                    },
+                },
+            },
         },
         config = function(_, opts)
             require('codecompanion').setup(opts)
@@ -52,10 +66,7 @@ return {
         ---@type oil.SetupOpts
         opts = {
             view_options = { show_hidden = true },
-            float = {
-                border = 'solid',
-                max_width = 100,
-            },
+            float = { max_width = 100 },
             keymaps = {
                 ['<C-h>'] = { 'actions.show_help' },
                 ['<C-_>'] = { 'actions.select', opts = { horizontal = true } },
@@ -64,6 +75,25 @@ return {
             -- Optional dependencies
             dependencies = { 'nvim-tree/nvim-web-devicons' },
         },
+        config = function(_, opts)
+            require('oil').setup(opts)
+            -- Automatically open preview
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'OilEnter',
+                callback = vim.schedule_wrap(function(args)
+                    local oil = require('oil')
+                    if vim.api.nvim_get_current_buf() == args.data.buf and oil.get_cursor_entry() then
+                        oil.open_preview()
+                    end
+                end),
+            })
+            -- Close with q
+            vim.api.nvim_create_autocmd('FileType', {
+                desc = 'Close all floats with q',
+                pattern = 'oil',
+                callback = function() vim.keymap.set('n', 'q', '<Cmd>q<CR>', { buffer = true }) end,
+            })
+        end,
     },
 
     -- Find and replace
