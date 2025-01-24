@@ -68,6 +68,7 @@ return {
             view_options = { show_hidden = true },
             float = { max_width = 100 },
             keymaps = {
+                ['q'] = { 'actions.close' },
                 ['<C-h>'] = { 'actions.show_help' },
                 ['<C-_>'] = { 'actions.select', opts = { horizontal = true } },
                 ['<C-Bslash>'] = { 'actions.select', opts = { vertical = true } },
@@ -86,12 +87,6 @@ return {
                         oil.open_preview()
                     end
                 end),
-            })
-            -- Close with q
-            vim.api.nvim_create_autocmd('FileType', {
-                desc = 'Close all floats with q',
-                pattern = 'oil',
-                callback = function() vim.keymap.set('n', 'q', '<Cmd>q<CR>', { buffer = true }) end,
             })
         end,
     },
