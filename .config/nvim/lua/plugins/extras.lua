@@ -66,7 +66,7 @@ return {
         ---@type oil.SetupOpts
         opts = {
             view_options = { show_hidden = true },
-            float = { max_width = 100 },
+            float = { max_width = 0.45, max_height = 0.8 },
             keymaps = {
                 ['q'] = { 'actions.close' },
                 ['<C-h>'] = { 'actions.show_help' },
