@@ -12,7 +12,7 @@
 - Window operations (swap, resize):
   - `<C-w>{action}`
   - Useful actions are `[s]plit`, `[v]split`, `[x]change`, `=`.
-  - Splits also mapped to `<C-\>` and `<C-_>`.
+  - Splits also mapped to `<C-\>` and `<C-->`.
 - Recording macros:
   - `qq{...}q` then `[count]Q`
   - Record ... into register q, then repeat last recorded register.

@@ -92,21 +92,6 @@ revert_icon = ' '
 tag_icon = ' '
 
 
-# Right Prompt
-[[blocks]]
-type = 'prompt'
-alignment = 'right'
-
-[[blocks.segments]]
-type = 'os'
-style = 'plain'
-template = '{{ .Icon }} '
-foreground = 'p:os'
-foreground_templates = [
-    '{{ if eq .OS "ubuntu" }}p:peach{{ end }}'
-]
-
-
 # Prompt - Second Line
 [[blocks]]
 type = 'prompt'

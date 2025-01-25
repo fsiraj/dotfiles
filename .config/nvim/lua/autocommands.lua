@@ -4,14 +4,32 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     callback = function() vim.highlight.on_yank({ timeout = 300 }) end,
 })
 
-vim.api.nvim_create_autocmd('ColorScheme', {
-    desc = 'Set custom overrides for catppuccin',
-    group = vim.api.nvim_create_augroup('catppuccin-override', { clear = true }),
-    pattern = 'catppuccin-mocha',
+vim.api.nvim_create_autocmd('FileType', {
+    desc = 'Execute Python Code',
+    pattern = 'python',
+    group = vim.api.nvim_create_augroup('python', { clear = true }),
     callback = function()
-        local colors = require('catppuccin.palettes').get_palette('mocha')
-        vim.api.nvim_set_hl(0, 'FloatBorder', { fg = colors.mantle, bg = colors.mantle })
-        vim.api.nvim_set_hl(0, 'FloatTitle', { fg = colors.mantle, bg = colors.mauve, bold = true })
+        vim.keymap.set({ 'n', 'v' }, '<Leader>x', ':w !python3<CR>', { desc = ' [X] Execute: Python File/Selection' })
     end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+    desc = 'Execute Lua Code',
+    pattern = 'lua',
+    group = vim.api.nvim_create_augroup('lua', { clear = true }),
+    callback = function()
+        vim.keymap.set('n', '<Leader>x', '<Cmd>luafile %<CR>', { desc = ' [X] Execute: Lua File' })
+        vim.keymap.set('v', '<Leader>x', ':lua<CR>', { desc = '[X] Execute: Lua Selection' })
+    end,
+})
+
+vim.api.nvim_create_autocmd('TermOpen', {
+    desc = 'Set buffer local options for terminals',
+    group = vim.api.nvim_create_augroup('terminal-options', { clear = true }),
+    callback = function()
+        vim.opt.number = false
+        vim.opt.relativenumber = false
+        local winid = vim.api.nvim_get_current_win()
+        vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
+    end,
+})
