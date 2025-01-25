@@ -164,12 +164,6 @@ return {
                 },
             })
 
-            -- Customize appearance
-            if vim.g.colors_name == 'catppuccin-mocha' then
-                local colors = require('catppuccin.palettes').get_palette()
-                local mantle = colors.mantle
-            end
-
             -- Enable Telescope extensions if they are installed
             pcall(require('telescope').load_extension, 'fzf')
             pcall(require('telescope').load_extension, 'ui-select')

@@ -97,7 +97,7 @@ return {
                                 typeCheckingMode = 'standard',
                                 autoSearchPaths = true,
                                 useLibraryCodeForTypes = true,
-                                diagnosticSeverityOverrides = {}
+                                diagnosticSeverityOverrides = {},
                             },
                         },
                     },
@@ -165,7 +165,10 @@ return {
         opts = {
             enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
             completion = {
-                menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end },
+                menu = {
+                    auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
+                    winhighlight = 'Normal:NormalFloat',
+                },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
             keymap = {
@@ -197,7 +200,7 @@ return {
                         module = 'blink-cmp-copilot',
                         score_offset = 100,
                         async = true,
-                        min_keyword_length = 10,
+                        min_keyword_length = 5,
                     },
                     codecompanion = {
                         name = 'CodeCompanion',

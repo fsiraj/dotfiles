@@ -34,7 +34,6 @@ return {
                     local theme = {
                         -- Telescope
                         TelescopeMatching = { fg = colors.flamingo },
-                        TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
                         TelescopePromptPrefix = { bg = mantle, fg = mauve },
                         TelescopePromptTitle = { bg = mauve, fg = mantle },
                         TelescopeResultsTitle = { fg = mantle },
@@ -46,13 +45,12 @@ return {
                     }
                     -- Telescope Extended
                     for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
-                        theme['Telescope' .. section .. 'Normal'] = { bg = mantle }
-                        theme['Telescope' .. section .. 'Border'] = { bg = mantle, fg = mantle }
+                        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
                     end
                     -- Notify
                     for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-                        theme['Notify' .. level .. 'Body'] = { bg = mantle }
-                        theme['Notify' .. level .. 'Border'] = { bg = mantle, fg = mantle }
+                        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
+                        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder'}
                     end
                     -- Apply themes
                     for hl, col in pairs(theme) do
