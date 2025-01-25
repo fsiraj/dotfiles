@@ -70,7 +70,7 @@ return {
             keymaps = {
                 ['q'] = { 'actions.close' },
                 ['<C-h>'] = { 'actions.show_help' },
-                ['<C-_>'] = { 'actions.select', opts = { horizontal = true } },
+                ['<C-->'] = { 'actions.select', opts = { horizontal = true } },
                 ['<C-Bslash>'] = { 'actions.select', opts = { vertical = true } },
             },
             -- Optional dependencies
@@ -91,28 +91,30 @@ return {
         end,
     },
 
-    -- Find and replace
+    -- Symbol Outline
     {
-        'MagicDuck/grug-far.nvim',
+        'hedyhli/outline.nvim',
+        cmd = { 'Outline', 'OutlineOpen' },
         keys = {
-            {
-                '<Leader>fr',
-                ':GrugFar<CR>',
-                mode = { 'n', 'v' },
-                desc = '[F]ind [R]eplace',
-            },
+            { '<leader>fo', '<cmd>Outline<CR>', desc = '[F]ile [O]utline' },
         },
-        config = function() require('grug-far').setup({}) end,
+        opts = {
+            outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat' },
+            outline_items = { show_symbol_details = false },
+            preview_window = { winhl = 'NormalFloat:NormalFloat' },
+        },
     },
 
     -- Add indentation guides even on blank lines
     {
         'lukas-reineke/indent-blankline.nvim',
+        event = 'VeryLazy',
         main = 'ibl',
-        config = function()
-            require('ibl').setup({ exclude = { filetypes = { 'help', 'dashboard' } } })
-            vim.keymap.set('n', '<Leader>ti', ':IBLToggle<CR>', { desc = '[T]oggle [I]ndent blank lines' })
-        end,
+        opts = {
+            scope = { char = '┊', highlight = 'Keyword', show_start = false, show_end = false },
+            indent = { char = '┊' },
+            exclude = { filetypes = { 'help', 'dashboard' } },
+        },
     },
 
     -- Autopairs automatically adds matching parentheses, quotes, etc.
@@ -124,7 +126,7 @@ return {
     -- Highlight todo, notes, etc in comments
     {
         'folke/todo-comments.nvim',
-        event = 'VimEnter',
+        event = 'VeryLazy',
         dependencies = { 'nvim-lua/plenary.nvim' },
         opts = { signs = false },
     },
@@ -132,16 +134,31 @@ return {
     -- Collection of various small independent plugins/modules
     {
         'echasnovski/mini.nvim',
+        event = 'VeryLazy',
         config = function()
             -- Better Around/Inside textobjects
-            require('mini.ai').setup({ n_lines = 500 })
+            local ai = require('mini.ai')
+            ai.setup({
+                n_lines = 500,
+                custom_textobjects = {
+                    -- NOTE: The textobjects below are manually added to WhichKey
+                    o = ai.gen_spec.treesitter({ -- code block
+                        a = { '@block.outer', '@conditional.outer', '@loop.outer' },
+                        i = { '@block.inner', '@conditional.inner', '@loop.inner' },
+                    }),
+                    f = ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }), -- function
+                    c = ai.gen_spec.treesitter({ a = '@class.outer', i = '@class.inner' }), -- class
+                    u = ai.gen_spec.function_call(), -- u for "Usage"
+                    U = ai.gen_spec.function_call({ name_pattern = '[%w_]' }), -- without dot in function name
+                },
+            })
 
             -- Add/delete/replace surroundings (brackets, quotes, etc.)
             require('mini.surround').setup()
 
             -- Git tools, also used with codecompanion.nvim for single buffer diffs
             require('mini.diff').setup({
-                view = { style = 'sign', signs = { add = '+', change = '~', delete = '-' }, priority = 5 },
+                view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
                 mappings = {
                     apply = '<Leader>ga',
                     reset = '<Leader>gr',

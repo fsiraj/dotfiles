@@ -17,7 +17,7 @@ return {
         },
         opts = {
             preset = 'modern',
-            win = { wo = { winblend = 5 } },
+            win = { width = { max = 150 } },
             triggers = {
                 { '<auto>', mode = 'nixsotc' },
                 { 's', mode = { 'n', 'v' } },
@@ -37,7 +37,7 @@ return {
                 { '<Leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
                 { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
                 { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
-                { '<Leader>f', group = '[F]ind/[F]ile', icon = { icon = '󰈢 ', color = 'azure' } },
+                { '<Leader>f', group = '[F]', icon = { icon = '󰈢 ', color = 'azure' } },
                 { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
                 {
                     '<Leader>g',
@@ -47,12 +47,68 @@ return {
                 },
             },
         },
+        config = function(_, opts)
+            require('which-key').setup(opts)
+
+            -- Add Text Objects from mini.ai
+            local objects = {
+                { ' ', desc = 'whitespace' },
+                { '"', desc = '" string' },
+                { "'", desc = "' string" },
+                { '(', desc = '() block' },
+                { ')', desc = '() block with ws' },
+                { '<', desc = '<> block' },
+                { '>', desc = '<> block with ws' },
+                { '?', desc = 'user prompt' },
+                { 'U', desc = 'use/call without dot' },
+                { '[', desc = '[] block' },
+                { ']', desc = '[] block with ws' },
+                { '_', desc = 'underscore' },
+                { '`', desc = '` string' },
+                { 'a', desc = 'argument' },
+                { 'b', desc = ')]} block' },
+                { 'c', desc = 'class' },
+                { 'f', desc = 'function' },
+                { 'i', desc = 'indent' },
+                { 'o', desc = 'block, conditional, loop' },
+                { 'q', desc = 'quote `"\'' },
+                { 't', desc = 'tag' },
+                { 'u', desc = 'use/call' },
+                { '{', desc = '{} block' },
+                { '}', desc = '{} with ws' },
+            }
+
+            ---@type wk.Spec[]
+            local ret = { mode = { 'o', 'x' } }
+            ---@type table<string, string>
+            local mappings = vim.tbl_extend('force', {}, {
+                around = 'a',
+                inside = 'i',
+                around_next = 'an',
+                inside_next = 'in',
+                around_last = 'al',
+                inside_last = 'il',
+            }, opts.mappings or {})
+            mappings.goto_left = nil
+            mappings.goto_right = nil
+
+            for name, prefix in pairs(mappings) do
+                name = name:gsub('^around_', ''):gsub('^inside_', '')
+                ret[#ret + 1] = { prefix, group = name }
+                for _, obj in ipairs(objects) do
+                    local desc = obj.desc
+                    if prefix:sub(1, 1) == 'i' then desc = desc:gsub(' with ws', '') end
+                    ret[#ret + 1] = { prefix .. obj[1], desc = obj.desc }
+                end
+            end
+            require('which-key').add(ret, { notify = false })
+        end,
     },
 
     -- Telescope: Fuzzy Finder (files, lsp, etc)
     {
         'nvim-telescope/telescope.nvim',
-        event = 'VimEnter',
+        event = 'VeryLazy',
         branch = '0.1.x',
         dependencies = {
             'nvim-lua/plenary.nvim',
@@ -78,7 +134,7 @@ return {
                         i = {
                             ['<C-y>'] = 'select_default',
                             ['<C-Bslash>'] = 'select_vertical',
-                            ['<C-_>'] = 'select_horizontal',
+                            ['<C-->'] = 'select_horizontal',
                             ['<C-x>'] = 'delete_buffer',
                         },
                     },
@@ -112,29 +168,13 @@ return {
             if vim.g.colors_name == 'catppuccin-mocha' then
                 local colors = require('catppuccin.palettes').get_palette()
                 local mantle = colors.mantle
-                local theme = {
-                    TelescopeMatching = { fg = colors.flamingo },
-                    TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
-                    TelescopePromptPrefix = { bg = mantle, fg = colors.mauve },
-                    TelescopePromptNormal = { bg = mantle },
-                    TelescopeResultsNormal = { bg = mantle },
-                    TelescopePreviewNormal = { bg = mantle },
-                    TelescopePromptBorder = { bg = mantle, fg = mantle },
-                    TelescopeResultsBorder = { bg = mantle, fg = mantle },
-                    TelescopePreviewBorder = { bg = mantle, fg = mantle },
-                    TelescopePromptTitle = { bg = colors.mauve, fg = mantle },
-                    TelescopeResultsTitle = { fg = mantle },
-                    TelescopePreviewTitle = { bg = colors.green, fg = mantle },
-                }
-                for hl, col in pairs(theme) do
-                    vim.api.nvim_set_hl(0, hl, col)
-                end
             end
 
             -- Enable Telescope extensions if they are installed
             pcall(require('telescope').load_extension, 'fzf')
             pcall(require('telescope').load_extension, 'ui-select')
 
+            -- Keymaps
             local builtin = require('telescope.builtin')
             vim.keymap.set('n', '<Leader>sh', builtin.help_tags, { desc = 'Telescope: [S]earch [H]elp' })
             vim.keymap.set('n', '<Leader>sH', builtin.highlights, { desc = 'Telescope: [S]earch [H]ighlights' })
@@ -171,6 +211,7 @@ return {
     -- Treesitter: Highlight, edit, and navigate code
     {
         'nvim-treesitter/nvim-treesitter',
+        event = 'VeryLazy',
         build = ':TSUpdate',
         main = 'nvim-treesitter.configs',
         opts = {
@@ -215,7 +256,6 @@ return {
             configs.setup(opts)
         end,
     },
-    {
-        'nvim-treesitter/nvim-treesitter-context',
-    },
+    { 'nvim-treesitter/nvim-treesitter-textobjects' },
+    { 'nvim-treesitter/nvim-treesitter-context' },
 }

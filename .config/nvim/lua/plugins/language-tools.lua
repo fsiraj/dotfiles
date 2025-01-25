@@ -5,6 +5,7 @@ return {
     -- Install and configure LSPs and other external tools
     {
         'neovim/nvim-lspconfig',
+        event = 'VeryLazy',
         dependencies = {
             -- Automatically install LSPs and related tools to stdpath for Neovim
             { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -96,6 +97,7 @@ return {
                                 typeCheckingMode = 'standard',
                                 autoSearchPaths = true,
                                 useLibraryCodeForTypes = true,
+                                diagnosticSeverityOverrides = {}
                             },
                         },
                     },
@@ -150,6 +152,7 @@ return {
     -- Autocompletion engine and sources
     {
         'saghen/blink.cmp',
+        event = 'VeryLazy',
         dependencies = {
             { 'saghen/blink.compat', version = '*', opts = {} },
             'rafamadriz/friendly-snippets',
@@ -212,7 +215,7 @@ return {
     -- Code formatter
     {
         'stevearc/conform.nvim',
-        event = 'BufEnter',
+        event = 'VeryLazy',
         keys = {
             {
                 '<Leader>cf',

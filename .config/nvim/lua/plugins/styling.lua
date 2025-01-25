@@ -1,25 +1,74 @@
 return {
     -- Themes
-    { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
     {
         'catppuccin/nvim',
         name = 'catppuccin',
         priority = 1000,
         opts = {
+            flavor = 'mocha',
+            custom_highlights = function(colors)
+                return {
+                    FloatTitle = { fg = colors.mantle, bg = colors.mauve, bold = true },
+                    FloatBorder = { fg = colors.mantle, bg = colors.mantle },
+                }
+            end,
             integrations = {
                 -- Most common plugins enabled by default
                 noice = true,
                 which_key = true,
                 mason = true,
+                blink_cmp = true,
             },
         },
+        config = function(_, opts)
+            require('catppuccin').setup(opts)
+
+            -- Customize other plugins with catppuccin
+            local colors = require('catppuccin.palettes').get_palette('mocha')
+            local mantle = colors.mantle
+            local mauve = colors.mauve
+
+            vim.api.nvim_create_autocmd('UIEnter', {
+                desc = 'Override plugin themes with catppuccin',
+                callback = function()
+                    local theme = {
+                        -- Telescope
+                        TelescopeMatching = { fg = colors.flamingo },
+                        TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
+                        TelescopePromptPrefix = { bg = mantle, fg = mauve },
+                        TelescopePromptTitle = { bg = mauve, fg = mantle },
+                        TelescopeResultsTitle = { fg = mantle },
+                        TelescopePreviewTitle = { bg = colors.green, fg = mantle },
+                        -- Dashboard
+                        DashboardHeader = { fg = mauve },
+                        -- WhichKey
+                        WhichKeyDesc = { fg = mauve },
+                    }
+                    -- Telescope Extended
+                    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
+                        theme['Telescope' .. section .. 'Normal'] = { bg = mantle }
+                        theme['Telescope' .. section .. 'Border'] = { bg = mantle, fg = mantle }
+                    end
+                    -- Notify
+                    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
+                        theme['Notify' .. level .. 'Body'] = { bg = mantle }
+                        theme['Notify' .. level .. 'Border'] = { bg = mantle, fg = mantle }
+                    end
+                    -- Apply themes
+                    for hl, col in pairs(theme) do
+                        vim.api.nvim_set_hl(0, hl, col)
+                    end
+                end,
+            })
+        end,
     },
+    { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
 
     -- Apply theme colors to dev icons
     {
         'rachartier/tiny-devicons-auto-colors.nvim',
-        dependencies = { 'nvim-tree/nvim-web-devicons' },
         event = 'VeryLazy',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
         config = function() require('tiny-devicons-auto-colors').setup() end,
     },
 
@@ -28,7 +77,6 @@ return {
         'nvimdev/dashboard-nvim',
         event = 'VimEnter',
         config = function()
-            vim.api.nvim_set_hl(0, 'DashboardHeader', { link = '@keyword' })
             require('dashboard').setup({
                 theme = 'hyper',
                 config = {
@@ -94,6 +142,12 @@ return {
                 callback = function() vim.opt.statusline = ' ' end,
             })
 
+            -- Outline
+            local outline = {
+                winbar = { lualine_c = { 'filetype' } },
+                filetypes = { 'Outline' },
+            }
+
             -- Lualine config
             require('lualine').setup({
                 options = {
@@ -103,7 +157,7 @@ return {
                     component_separators = { left = '󰇝', right = '󰇝' },
                     disabled_filetypes = { winbar = { 'dap-repl' } },
                 },
-                extensions = { dapui },
+                extensions = { dapui, outline },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
@@ -164,13 +218,6 @@ return {
                 minimum_width = 50,
                 max_width = 50,
             })
-            if vim.g.colors_name == 'catppuccin-mocha' then
-                local colors = require('catppuccin.palettes').get_palette('mocha')
-                for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-                    vim.api.nvim_set_hl(0, 'Notify' .. level .. 'Body', { bg = colors.mantle })
-                    vim.api.nvim_set_hl(0, 'Notify' .. level .. 'Border', { bg = colors.mantle, fg = colors.mantle })
-                end
-            end
             require('noice').setup(opts)
         end,
     },
