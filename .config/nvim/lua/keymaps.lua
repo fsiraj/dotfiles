@@ -1,7 +1,12 @@
 -- Buffer keymaps
 vim.keymap.set('n', '<Leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
+vim.keymap.set('n', '<Leader>bd', '<cmd>bp | sp | bn | bd<CR>', { desc = '[B]uffer [D]elete (preserves Window)' })
 vim.keymap.set('n', '<C-\\>', '<cmd>vsp<CR>', { desc = 'Vertical split' })
-vim.keymap.set('n', '<C-_>', '<cmd>sp<CR>', { desc = 'Horizontal split' })
+vim.keymap.set('n', '<C-->', '<cmd>sp<CR>', { desc = 'Horizontal split' })
+
+-- Find Replace
+vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = '[F]ind [R]eplace Word'})
+vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = '[F]ind [R]eplace Selection'})
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -22,4 +27,4 @@ vim.keymap.set('n', '<M-Right>', '<cmd>vertical resize +2<CR>', { desc = 'Increa
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
 -- Escape insert mode in terminal easier
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })

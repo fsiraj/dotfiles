@@ -6,11 +6,13 @@ font-size = 14
 adjust-cell-width = -10%
 
 # Styling - Window
+title = " "
 window-theme = ghostty
 gtk-tabs-location = hidden
 adw-toolbar-style = flat
 
 # Keymap
+keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
 keybind = alt+minus=decrease_font_size:1
 keybind = ctrl+equal=unbind

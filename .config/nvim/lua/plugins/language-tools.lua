@@ -5,6 +5,7 @@ return {
     -- Install and configure LSPs and other external tools
     {
         'neovim/nvim-lspconfig',
+        event = 'VeryLazy',
         dependencies = {
             -- Automatically install LSPs and related tools to stdpath for Neovim
             { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
@@ -29,8 +30,8 @@ return {
                     map('<Leader>cr', telescope.lsp_references, '[C]ode [R]eferences')
                     map('<Leader>ci', telescope.lsp_implementations, '[C]ode [I]mplementation')
                     map('<Leader>ct', telescope.lsp_type_definitions, '[C]ode [T]ype Definition')
-                    map('<Leader>cb', telescope.lsp_document_symbols, '[C]ode Symbols [B]uffer')
-                    map('<Leader>cw', telescope.lsp_workspace_symbols, '[C]ode Symbols [W]orkspace')
+                    map('<Leader>cs', telescope.lsp_document_symbols, '[C]ode [S]ymbols Buffer')
+                    map('<Leader>cS', telescope.lsp_workspace_symbols, '[C]ode [S]ymbols Workspace')
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
                     map('<Leader>cq', vim.diagnostic.setloclist, '[C]ode [Q]uickfix List')
@@ -85,6 +86,14 @@ return {
                 vim.diagnostic.config({ signs = { text = diagnostic_signs } })
             end
 
+            -- Toggle diagnostic information
+            vim.keymap.set(
+                'n',
+                '<Leader>td',
+                function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end,
+                { desc = 'LSP: [T]oggle [D]iagnostics' }
+            )
+
             -- Enable the following language servers
             local servers = {
                 -- Python
@@ -96,12 +105,11 @@ return {
                                 typeCheckingMode = 'standard',
                                 autoSearchPaths = true,
                                 useLibraryCodeForTypes = true,
+                                diagnosticSeverityOverrides = {},
                             },
                         },
                     },
                 },
-                -- Markdown
-                marksman = {},
                 -- Lua
                 lua_ls = {
                     settings = {
@@ -115,6 +123,10 @@ return {
                 bashls = {
                     filetypes = { 'bash', 'sh' },
                 },
+                -- Markdown
+                marksman = {},
+                -- TOML
+                taplo = {},
             }
 
             -- Mason installs external tools
@@ -125,8 +137,8 @@ return {
             local ensure_installed = vim.tbl_keys(servers or {})
             vim.list_extend(ensure_installed, {
                 'stylua',
-                'black',
-                'isort',
+                'ruff',
+                'debugpy',
                 'markdownlint',
                 'jsonlint',
                 'shellcheck',
@@ -150,10 +162,11 @@ return {
     -- Autocompletion engine and sources
     {
         'saghen/blink.cmp',
+        event = 'VeryLazy',
         dependencies = {
             { 'saghen/blink.compat', version = '*', opts = {} },
             'rafamadriz/friendly-snippets',
-            'giuxtaposition/blink-cmp-copilot',
+            'fang2hou/blink-copilot',
             'rcarriga/cmp-dap',
         },
         version = '*',
@@ -162,22 +175,22 @@ return {
         opts = {
             enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
             completion = {
-                menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end },
+                menu = {
+                    auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
+                },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
             keymap = {
                 preset = 'enter',
                 ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
                 ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
-                cmdline = {
-                    preset = 'enter',
-                    ['<Tab>'] = { 'show', 'select_next', 'fallback' },
-                    ['<S-Tab>'] = { 'select_prev', 'fallback' },
-                },
             },
             appearance = {
                 use_nvim_cmp_as_default = true,
                 nerd_font_variant = 'mono',
+                kind_icons = {
+                    Copilot = '',
+                },
             },
             sources = {
                 default = function()
@@ -185,16 +198,19 @@ return {
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
+                cmdline = {},
                 per_filetype = {
                     codecompanion = { 'codecompanion' },
                 },
                 providers = {
                     copilot = {
                         name = 'copilot',
-                        module = 'blink-cmp-copilot',
-                        score_offset = 100,
+                        module = 'blink-copilot',
                         async = true,
-                        min_keyword_length = 10,
+                        opts = {
+                            max_completions = 1,
+                            max_attempts = 2,
+                        },
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
@@ -212,7 +228,7 @@ return {
     -- Code formatter
     {
         'stevearc/conform.nvim',
-        event = 'BufEnter',
+        event = 'VeryLazy',
         keys = {
             {
                 '<Leader>cf',
@@ -233,7 +249,7 @@ return {
             end,
             formatters_by_ft = {
                 lua = { 'stylua' },
-                python = { 'isort', 'black' },
+                python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
                 markdown = { 'markdownlint' },
                 zsh = { 'shfmt', 'shellcheck' },
                 sh = { 'shfmt', 'shellcheck' },
@@ -260,7 +276,10 @@ return {
         config = function()
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed
-            lint.linters_by_ft = {}
+            lint.linters_by_ft = {
+                json = { 'jsonlint' },
+                markdown = { 'markdownlint' },
+            }
 
             -- Autocommand to start linting
             local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
@@ -285,4 +304,33 @@ return {
         },
     },
     { 'Bilal2453/luvit-meta', lazy = true },
+
+    -- Render markdown nicely
+    {
+        'MeanderingProgrammer/render-markdown.nvim',
+        ft = { 'markdown', 'codecompanion' },
+        dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+        ---@module 'render-markdown'
+        ---@type render.md.UserConfig
+        opts = {},
+    },
+
+    -- Preview markdown in browser
+    {
+        'iamcco/markdown-preview.nvim',
+        cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+        ft = { 'markdown' },
+        build = function(plugin)
+            -- Install markdown preview, use npx if available.
+            if vim.fn.executable('npx') then
+                vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
+            else
+                vim.cmd([[Lazy load markdown-preview.nvim]])
+                vim.fn['mkdp#util#install']()
+            end
+        end,
+        init = function()
+            if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
+        end,
+    },
 }
