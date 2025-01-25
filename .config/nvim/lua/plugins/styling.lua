@@ -31,26 +31,26 @@ return {
             vim.api.nvim_create_autocmd('UIEnter', {
                 desc = 'Override plugin themes with catppuccin',
                 callback = function()
-                    local theme = {
-                        -- Telescope
-                        TelescopeMatching = { fg = colors.flamingo },
-                        TelescopePromptPrefix = { bg = mantle, fg = mauve },
+                    local theme = {}
+                    -- Dashboard
+                    theme.DashboardHeader = { fg = mauve }
+                    -- WhichKey
+                    theme.WhichKeyDesc = { fg = mauve }
+                    -- Telescope
+                    theme = vim.tbl_extend('error', theme, {
                         TelescopePromptTitle = { bg = mauve, fg = mantle },
                         TelescopeResultsTitle = { fg = mantle },
                         TelescopePreviewTitle = { bg = colors.green, fg = mantle },
-                        -- Dashboard
-                        DashboardHeader = { fg = mauve },
-                        -- WhichKey
-                        WhichKeyDesc = { fg = mauve },
-                    }
-                    -- Telescope Extended
+                        TelescopePromptPrefix = { bg = mantle, fg = mauve },
+                        TelescopeMatching = { fg = colors.flamingo },
+                    })
                     for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
                         theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
                     end
                     -- Notify
                     for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
                         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
-                        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder'}
+                        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
                     end
                     -- Apply themes
                     for hl, col in pairs(theme) do
@@ -153,7 +153,7 @@ return {
                     theme = 'auto',
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
-                    disabled_filetypes = { winbar = { 'dap-repl' } },
+                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard' } },
                 },
                 extensions = { dapui, outline },
                 sections = {},

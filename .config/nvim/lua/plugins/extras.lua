@@ -51,6 +51,40 @@ return {
         end,
     },
 
+    -- Floating terminal
+    {
+        'akinsho/toggleterm.nvim',
+        version = '*',
+        keys = {
+            { '<Leader>tt', '<Cmd>ToggleTerm name=Terminal<CR>', mode = 'n', desc = '[T]oggle [T]erm' },
+        },
+        ---@module 'toggleterm'
+        ---@type ToggleTermConfig
+        opts = {
+            direction = 'float',
+            highlights = {
+                NormalFloat = { link = 'NormalFloat' },
+                FloatBorder = { link = 'FloatBorder' },
+            },
+            float_opts = {
+                width = math.floor(vim.o.columns * 0.6),
+                height = math.floor(vim.o.lines * 0.8),
+                border = 'single',
+                title_pos = 'center',
+            },
+        },
+        config = function(_, opts)
+            require('toggleterm').setup(opts)
+            vim.api.nvim_create_autocmd('TermOpen', {
+                pattern = 'term://*toggleterm#*',
+                callback = function()
+                    vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                    vim.keymap.set('t', '<Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                end,
+            })
+        end,
+    },
+
     -- Filesystem manager
     {
         'stevearc/oil.nvim',
@@ -216,7 +250,6 @@ return {
         end,
         init = function()
             if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-            vim.keymap.set('n', '<Leader>tp', ':MarkdownPreviewToggle<CR>', { desc = '[T]oggle Markdown [P]review' })
         end,
     },
 }
