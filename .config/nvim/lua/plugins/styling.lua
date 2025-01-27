@@ -189,11 +189,16 @@ return {
         event = 'VeryLazy',
         dependencies = { 'MunifTanjim/nui.nvim', 'rcarriga/nvim-notify' },
         opts = {
-            cmdline = { enabled = true, format = { conceal = false } },
+            cmdline = {
+                enabled = true,
+                format = {},
+            },
             messages = { enabled = true },
-            popupmenu = { enabeld = false },
+            popupmenu = { enabled = false },
             presets = { long_message_to_split = true },
             lsp = {
+                hover = { enabled = true },
+                signature = { enabled = true },
                 override = {
                     ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
                     ['vim.lsp.util.stylize_markdown'] = true,
@@ -204,11 +209,13 @@ return {
                     size = { max_width = 100 },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
-                    win_options = { winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder', wrap = true },
+                    win_options = {
+                        winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+                        wrap = true,
+                    },
                 },
             },
         },
-
         config = function(_, opts)
             require('notify').setup({
                 render = 'wrapped-compact',
@@ -216,6 +223,9 @@ return {
                 minimum_width = 50,
                 max_width = 50,
             })
+            for format, _ in pairs(require('noice.config').defaults().cmdline.format) do
+                opts.cmdline.format[format] = { conceal = false }
+            end
             require('noice').setup(opts)
         end,
     },
