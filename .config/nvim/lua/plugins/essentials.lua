@@ -12,7 +12,7 @@ return {
             {
                 '<Leader>?',
                 function() require('which-key').show({ global = false }) end,
-                desc = 'Which Key: Buffer Local Keymaps',
+                desc = ' [?] Which Key: Buffer Local Keymaps',
             },
         },
         opts = {
@@ -180,7 +180,7 @@ return {
             vim.keymap.set('n', '<Leader>sd', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
             vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
             vim.keymap.set('n', '<Leader>so', builtin.oldfiles, { desc = 'Telescope: [S]earch [O]ld Files' })
-            vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = 'Telescope: [ ] Find Existing Buffers' })
+            vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
             vim.keymap.set(
                 'v',
                 '<Leader>ss',
@@ -191,7 +191,7 @@ return {
                 'n',
                 '<Leader>/',
                 builtin.current_buffer_fuzzy_find,
-                { desc = 'Telescope: [/] Fuzzy Search Current Buffer' }
+                { desc = ' [/] Telescope: Fuzzy Search Current Buffer' }
             )
             vim.keymap.set(
                 'n',
