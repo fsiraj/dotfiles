@@ -159,9 +159,9 @@ return {
                 sections = {},
                 inactive_sections = {},
                 winbar = {
-                    lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end },
+                    lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end, 'filename' },
                     lualine_b = {},
-                    lualine_c = { 'branch', 'diff', 'diagnostics', 'filename' },
+                    lualine_c = { 'branch', 'diff', 'diagnostics' },
                     lualine_x = {
                         { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
                         { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
