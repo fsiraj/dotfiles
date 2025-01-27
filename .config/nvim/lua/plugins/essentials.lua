@@ -34,9 +34,10 @@ return {
                     mode = { 'n', 'x' },
                     icon = { icon = ' ', color = 'orange' },
                 },
-                { '<Leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'cyan' } },
+                { '<Leader>b', group = '[B]uffer', icon = { icon = '󰈔 ', color = 'gray' } },
                 { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
                 { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
+                { '<Leader>S', group = '[S]essions', icon = { icon = '󰙰 ', color = 'purple' } },
                 { '<Leader>f', group = '[F]', icon = { icon = '󰈢 ', color = 'azure' } },
                 { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
                 {

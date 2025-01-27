@@ -203,6 +203,26 @@ return {
                 },
             })
             vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it overlay' })
+
+            -- Session management
+            local sessions = require('mini.sessions')
+            sessions.setup()
+            vim.keymap.set('n', '<Leader>Sw', function()
+                sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) ---@diagnostic disable-line
+            end, { desc = '[S]ession [W]rite' })
+            vim.keymap.set(
+                'n',
+                '<Leader>Sr',
+                function() sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, ---@diagnostic disable-line
+                { desc = '[S]ession [R]estore' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>Sd',
+                function() sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, ---@diagnostic disable-line
+                { desc = '[S]ession [D]elete' }
+            )
+            vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = '[S]ession [S]elect' })
         end,
     },
 
