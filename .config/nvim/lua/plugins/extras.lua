@@ -56,7 +56,7 @@ return {
         'akinsho/toggleterm.nvim',
         version = '*',
         keys = {
-            { '<Leader>tt', '<Cmd>ToggleTerm name=Terminal<CR>', mode = 'n', desc = '[T]oggle [T]erm' },
+            { '<Bslash>', '<Cmd>ToggleTerm name=Terminal<CR>', mode = 'n', desc = 'Open Terminal' },
         },
         ---@module 'toggleterm'
         ---@type ToggleTermConfig
@@ -79,7 +79,7 @@ return {
                 pattern = 'term://*toggleterm#*',
                 callback = function()
                     vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
-                    vim.keymap.set('t', '<Esc><Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                    vim.keymap.set('t', '<Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
                 end,
             })
         end,
