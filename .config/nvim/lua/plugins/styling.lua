@@ -33,7 +33,13 @@ return {
                 callback = function()
                     local theme = {}
                     -- Dashboard
-                    theme.DashboardHeader = { fg = mauve }
+                    theme = vim.tbl_extend('error', {
+                        DashboardHeader = { fg = mauve },
+                        DashboardMruTitle = { link = 'DashboardShortcut'},
+                        DashboardProjectTitle = { link = 'DashboardShortcut'},
+                        DashboardFiles = { link = 'NormalFloat'}
+
+                    }, theme)
                     -- WhichKey
                     theme.WhichKeyDesc = { fg = mauve }
                     -- Telescope
@@ -111,6 +117,14 @@ return {
                     mru = { enable = true, limit = 5 },
                     footer = {},
                 },
+            })
+
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = 'dashboard',
+                callback = function()
+                    local winid = vim.api.nvim_get_current_win()
+                    vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
+                end,
             })
         end,
         dependencies = { 'nvim-tree/nvim-web-devicons' },
