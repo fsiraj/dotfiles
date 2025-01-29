@@ -110,8 +110,6 @@ return {
                         },
                     },
                 },
-                -- Markdown
-                marksman = {},
                 -- Lua
                 lua_ls = {
                     settings = {
@@ -125,6 +123,10 @@ return {
                 bashls = {
                     filetypes = { 'bash', 'sh' },
                 },
+                -- Markdown
+                marksman = {},
+                -- TOML
+                taplo = {}
             }
 
             -- Mason installs external tools
@@ -135,8 +137,7 @@ return {
             local ensure_installed = vim.tbl_keys(servers or {})
             vim.list_extend(ensure_installed, {
                 'stylua',
-                'black',
-                'isort',
+                'ruff',
                 'markdownlint',
                 'jsonlint',
                 'shellcheck',
@@ -247,7 +248,7 @@ return {
             end,
             formatters_by_ft = {
                 lua = { 'stylua' },
-                python = { 'isort', 'black' },
+                python = { 'ruff' },
                 markdown = { 'markdownlint' },
                 zsh = { 'shfmt', 'shellcheck' },
                 sh = { 'shfmt', 'shellcheck' },
@@ -274,7 +275,10 @@ return {
         config = function()
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed
-            lint.linters_by_ft = {}
+            lint.linters_by_ft = {
+                  json = {'jsonlint',},
+                  markdown = {'markdownlint',},
+            }
 
             -- Autocommand to start linting
             local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
