@@ -86,6 +86,14 @@ return {
                 vim.diagnostic.config({ signs = { text = diagnostic_signs } })
             end
 
+            -- Toggle diagnostic information
+            vim.keymap.set(
+                'n',
+                '<Leader>td',
+                function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end,
+                { desc = 'LSP: [T]oggle [D]iagnostics' }
+            )
+
             -- Enable the following language servers
             local servers = {
                 -- Python
