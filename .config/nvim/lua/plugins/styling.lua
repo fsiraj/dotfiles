@@ -58,7 +58,7 @@ return {
                     -- WhichKey
                     theme.WhichKeyDesc = { fg = mauve }
                     -- Treesitter
-                    theme.TreesitterContextBottom = { fg = mauve, underline = true }
+                    theme.TreesitterContextBottom = { sp = mauve, underline = true }
                     -- Apply themes
                     for hl, col in pairs(theme) do
                         vim.api.nvim_set_hl(0, hl, col)
