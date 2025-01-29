@@ -126,7 +126,7 @@ return {
                 -- Markdown
                 marksman = {},
                 -- TOML
-                taplo = {}
+                taplo = {},
             }
 
             -- Mason installs external tools
@@ -249,7 +249,7 @@ return {
             end,
             formatters_by_ft = {
                 lua = { 'stylua' },
-                python = { 'ruff' },
+                python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
                 markdown = { 'markdownlint' },
                 zsh = { 'shfmt', 'shellcheck' },
                 sh = { 'shfmt', 'shellcheck' },
@@ -277,8 +277,8 @@ return {
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed
             lint.linters_by_ft = {
-                  json = {'jsonlint',},
-                  markdown = {'markdownlint',},
+                json = { 'jsonlint' },
+                markdown = { 'markdownlint' },
             }
 
             -- Autocommand to start linting
