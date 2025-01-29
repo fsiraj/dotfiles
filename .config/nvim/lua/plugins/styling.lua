@@ -39,8 +39,6 @@ return {
                         DashboardProjectTitle = { link = 'DashboardDesc' },
                         DashboardFiles = { link = 'NormalFloat' },
                     }, theme)
-                    -- WhichKey
-                    theme.WhichKeyDesc = { fg = mauve }
                     -- Telescope
                     theme = vim.tbl_extend('error', theme, {
                         TelescopePromptTitle = { bg = mauve, fg = mantle },
@@ -57,6 +55,10 @@ return {
                         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
                         theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
                     end
+                    -- WhichKey
+                    theme.WhichKeyDesc = { fg = mauve }
+                    -- Treesitter
+                    theme.TreesitterContextBottom = { fg = mauve, underline = true }
                     -- Apply themes
                     for hl, col in pairs(theme) do
                         vim.api.nvim_set_hl(0, hl, col)
