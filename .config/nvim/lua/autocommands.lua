@@ -14,11 +14,22 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 vim.api.nvim_create_autocmd('FileType', {
-    desc = 'Execute Python Code',
+    desc = 'Execute Lua Code',
     pattern = 'lua',
     group = vim.api.nvim_create_augroup('lua', { clear = true }),
     callback = function()
         vim.keymap.set('n', '<Leader>x', '<Cmd>luafile %<CR>', { desc = ' [X] Execute: Lua File' })
         vim.keymap.set('v', '<Leader>x', ':lua<CR>', { desc = '[X] Execute: Lua Selection' })
+    end,
+})
+
+vim.api.nvim_create_autocmd('TermOpen', {
+    desc = 'Set buffer local options for terminals',
+    group = vim.api.nvim_create_augroup('terminal-options', { clear = true }),
+    callback = function()
+        vim.opt.number = false
+        vim.opt.relativenumber = false
+        local winid = vim.api.nvim_get_current_win()
+        vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
     end,
 })

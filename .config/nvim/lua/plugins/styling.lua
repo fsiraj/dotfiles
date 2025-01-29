@@ -35,10 +35,9 @@ return {
                     -- Dashboard
                     theme = vim.tbl_extend('error', {
                         DashboardHeader = { fg = mauve },
-                        DashboardMruTitle = { link = 'DashboardShortcut'},
-                        DashboardProjectTitle = { link = 'DashboardShortcut'},
-                        DashboardFiles = { link = 'NormalFloat'}
-
+                        DashboardMruTitle = { link = 'DashboardDesc' },
+                        DashboardProjectTitle = { link = 'DashboardDesc' },
+                        DashboardFiles = { link = 'NormalFloat' },
                     }, theme)
                     -- WhichKey
                     theme.WhichKeyDesc = { fg = mauve }
@@ -167,7 +166,7 @@ return {
                     theme = 'auto',
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
-                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard' } },
+                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm' } },
                 },
                 extensions = { dapui, outline },
                 sections = {},

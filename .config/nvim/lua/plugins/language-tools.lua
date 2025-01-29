@@ -200,7 +200,7 @@ return {
                         module = 'blink-cmp-copilot',
                         score_offset = 100,
                         async = true,
-                        min_keyword_length = 5,
+                        min_keyword_length = 8,
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
