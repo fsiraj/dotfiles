@@ -177,7 +177,6 @@ return {
             completion = {
                 menu = {
                     auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
-                    winhighlight = 'Normal:NormalFloat',
                 },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
@@ -185,11 +184,6 @@ return {
                 preset = 'enter',
                 ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
                 ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
-                cmdline = {
-                    preset = 'enter',
-                    ['<Tab>'] = { 'show', 'select_next', 'fallback' },
-                    ['<S-Tab>'] = { 'select_prev', 'fallback' },
-                },
             },
             appearance = {
                 use_nvim_cmp_as_default = true,
@@ -201,6 +195,7 @@ return {
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
+                cmdline = {},
                 per_filetype = {
                     codecompanion = { 'codecompanion' },
                 },

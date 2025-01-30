@@ -10,6 +10,7 @@ return {
                 return {
                     FloatTitle = { fg = colors.mantle, bg = colors.mauve, bold = true },
                     FloatBorder = { fg = colors.mantle, bg = colors.mantle },
+                    Pmenu = { link = 'NormalFloat' }
                 }
             end,
             integrations = {
@@ -209,7 +210,7 @@ return {
                 format = {},
             },
             messages = { enabled = true },
-            popupmenu = { enabled = false },
+            popupmenu = { enabled = true },
             presets = { long_message_to_split = true },
             lsp = {
                 hover = { enabled = true },
