@@ -6,13 +6,12 @@ return {
     {
         'zbirenbaum/copilot.lua',
         cmd = 'Copilot',
+        build = ':Copilot auth',
         event = 'InsertEnter',
-        config = function()
-            require('copilot').setup({
-                suggestion = { enabled = false },
-                panel = { enabled = false },
-            })
-        end,
+        opts = {
+            suggestion = { enabled = false },
+            panel = { enabled = false },
+        },
     },
     {
         'olimorris/codecompanion.nvim',
@@ -79,7 +78,12 @@ return {
                 pattern = 'term://*toggleterm#*',
                 callback = function()
                     vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
-                    vim.keymap.set({ 't', 'n' }, '<Esc><Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                    vim.keymap.set(
+                        { 't', 'n' },
+                        '<Esc><Esc>',
+                        '<Cmd>ToggleTerm<CR>',
+                        { buffer = true, desc = '[T]oggle [T]erm' }
+                    )
                 end,
             })
         end,

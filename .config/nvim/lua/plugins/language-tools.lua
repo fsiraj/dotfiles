@@ -166,7 +166,7 @@ return {
         dependencies = {
             { 'saghen/blink.compat', version = '*', opts = {} },
             'rafamadriz/friendly-snippets',
-            'giuxtaposition/blink-cmp-copilot',
+            'fang2hou/blink-copilot',
             'rcarriga/cmp-dap',
         },
         version = '*',
@@ -188,6 +188,9 @@ return {
             appearance = {
                 use_nvim_cmp_as_default = true,
                 nerd_font_variant = 'mono',
+                kind_icons = {
+                    Copilot = '',
+                },
             },
             sources = {
                 default = function()
@@ -202,10 +205,13 @@ return {
                 providers = {
                     copilot = {
                         name = 'copilot',
-                        module = 'blink-cmp-copilot',
+                        module = 'blink-copilot',
                         score_offset = 100,
                         async = true,
-                        min_keyword_length = 8,
+                        opts = {
+                            max_completions = 1,
+                            max_attempts = 2,
+                        },
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
