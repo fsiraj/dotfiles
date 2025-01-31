@@ -79,7 +79,7 @@ return {
                 pattern = 'term://*toggleterm#*',
                 callback = function()
                     vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
-                    vim.keymap.set('t', '<Esc><Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                    vim.keymap.set({ 't', 'n' }, '<Esc><Esc>', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
                 end,
             })
         end,

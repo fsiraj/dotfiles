@@ -10,7 +10,7 @@ return {
                 return {
                     FloatTitle = { fg = colors.mantle, bg = colors.mauve, bold = true },
                     FloatBorder = { fg = colors.mantle, bg = colors.mantle },
-                    Pmenu = { link = 'NormalFloat' }
+                    Pmenu = { link = 'NormalFloat' },
                 }
             end,
             integrations = {
@@ -56,6 +56,8 @@ return {
                         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
                         theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
                     end
+                    -- Noice
+                    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
                     -- WhichKey
                     theme.WhichKeyDesc = { fg = mauve }
                     -- Treesitter
@@ -229,6 +231,9 @@ return {
                         winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
                         wrap = true,
                     },
+                },
+                cmdline_input = {
+                    border = { style = 'solid', padding = { 0, 2 } },
                 },
             },
         },
