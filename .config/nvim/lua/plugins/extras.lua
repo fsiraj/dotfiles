@@ -143,91 +143,12 @@ return {
         },
     },
 
-    -- Add indentation guides even on blank lines
-    {
-        'lukas-reineke/indent-blankline.nvim',
-        event = 'VeryLazy',
-        main = 'ibl',
-        opts = {
-            scope = { char = '┊', highlight = 'Keyword', show_start = false, show_end = false },
-            indent = { char = '┊' },
-            exclude = { filetypes = { 'help', 'dashboard' } },
-        },
-    },
-
-    -- Autopairs automatically adds matching parentheses, quotes, etc.
-    { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
-
-    -- Detect tabstop and shiftwidth automatically
-    { 'tpope/vim-sleuth' },
-
     -- Highlight todo, notes, etc in comments
     {
         'folke/todo-comments.nvim',
         event = 'VeryLazy',
         dependencies = { 'nvim-lua/plenary.nvim' },
         opts = { signs = false },
-    },
-
-    -- Collection of various small independent plugins/modules
-    {
-        'echasnovski/mini.nvim',
-        event = 'VeryLazy',
-        config = function()
-            -- Better Around/Inside textobjects
-            local ai = require('mini.ai')
-            ai.setup({
-                n_lines = 500,
-                custom_textobjects = {
-                    -- NOTE: The textobjects below are manually added to WhichKey
-                    o = ai.gen_spec.treesitter({ -- code block
-                        a = { '@block.outer', '@conditional.outer', '@loop.outer' },
-                        i = { '@block.inner', '@conditional.inner', '@loop.inner' },
-                    }),
-                    f = ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }), -- function
-                    c = ai.gen_spec.treesitter({ a = '@class.outer', i = '@class.inner' }), -- class
-                    u = ai.gen_spec.function_call(), -- u for "Usage"
-                    U = ai.gen_spec.function_call({ name_pattern = '[%w_]' }), -- without dot in function name
-                },
-            })
-
-            -- Add/delete/replace surroundings (brackets, quotes, etc.)
-            require('mini.surround').setup()
-
-            -- Git tools, also used with codecompanion.nvim for single buffer diffs
-            require('mini.diff').setup({
-                view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
-                mappings = {
-                    apply = '<Leader>ga',
-                    reset = '<Leader>gr',
-                    goto_prev = '<Leader>gp',
-                    goto_next = '<Leader>gn',
-                    goto_first = '<Leader>gg',
-                    goto_last = '<Leader>gG',
-                },
-            })
-            vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it Overlay' })
-
-            -- Session management
-            local sessions = require('mini.sessions')
-            sessions.setup()
-            vim.keymap.set('n', '<Leader>Sw', function()
-                sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) ---@diagnostic disable-line
-            end, { desc = '[S]ession [W]rite' })
-            vim.keymap.set(
-                'n',
-                '<Leader>Sr',
-                function() sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, ---@diagnostic disable-line
-                { desc = '[S]ession [R]estore' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>Sd',
-                function() sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, ---@diagnostic disable-line
-                { desc = '[S]ession [D]elete' }
-            )
-            vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = '[S]ession [S]elect' })
-        end,
     },
 
     -- Navigate between tmux and neovim seamlessly
@@ -246,34 +167,5 @@ return {
             { '<c-k>', '<cmd>TmuxNavigateUp<CR>' },
             { '<c-l>', '<cmd>TmuxNavigateRight<CR>' },
         },
-    },
-
-    -- Render markdown nicely
-    {
-        'MeanderingProgrammer/render-markdown.nvim',
-        ft = { 'markdown', 'codecompanion' },
-        dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
-        ---@module 'render-markdown'
-        ---@type render.md.UserConfig
-        opts = {},
-    },
-
-    -- Preview markdown in browser
-    {
-        'iamcco/markdown-preview.nvim',
-        cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-        ft = { 'markdown' },
-        build = function(plugin)
-            -- Install markdown preview, use npx if available.
-            if vim.fn.executable('npx') then
-                vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
-            else
-                vim.cmd([[Lazy load markdown-preview.nvim]])
-                vim.fn['mkdp#util#install']()
-            end
-        end,
-        init = function()
-            if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-        end,
     },
 }
