@@ -1,6 +1,36 @@
 -- Colletion of small convenience plugins with minimal configuration.
 
 return {
+    -- Git
+    {
+        'NeogitOrg/neogit',
+        keys = {
+            { '<Leader>gN', '<Cmd>Neogit<CR>', desc = 'Open Neogit' },
+        },
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'sindrets/diffview.nvim',
+            'nvim-telescope/telescope.nvim',
+        },
+        config = true,
+    },
+    {
+        'sindrets/diffview.nvim',
+        keys = {
+            { '<Leader>gD', '<Cmd>DiffviewOpen<CR>', desc = 'Open Diffview' },
+        },
+        opts = {
+            enhanced_diff_hl = true,
+            keymaps = {
+                view = {
+                    ['q'] = '<Cmd>DiffviewClose<CR>',
+                },
+                file_panel = {
+                    ['q'] = '<Cmd>DiffviewClose<CR>',
+                },
+            },
+        },
+    },
 
     -- Copilot
     {
@@ -24,18 +54,7 @@ return {
         opts = {
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = {
-                    show_header_separator = false,
-                    window = { layout = 'float' },
-                },
-            },
-            strategies = {
-                chat = {
-                    keymaps = {
-                        close = { modes = { n = 'q' } },
-                        stop = { modes = { n = '<C-c>' } },
-                    },
-                },
+                chat = { show_header_separator = false, },
             },
         },
         config = function(_, opts)
@@ -44,7 +63,7 @@ return {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR>',
+                '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
                 { desc = 'Toggle [C]ode [C]ompanion chat' }
             )
         end,
@@ -94,17 +113,17 @@ return {
         'stevearc/oil.nvim',
         keys = {
             {
-                '<Leader>ft',
+                '<Leader>fs',
                 function() require('oil').open_float() end,
                 mode = { 'n' },
-                desc = '[F]ile [T]ree',
+                desc = '[F]ile [S]ystem',
             },
         },
         ---@module 'oil'
         ---@type oil.SetupOpts
         opts = {
             view_options = { show_hidden = true },
-            float = { max_width = 0.45, max_height = 0.8 },
+            float = { max_width = 0.4, max_height = 0.8 },
             keymaps = {
                 ['q'] = { 'actions.close' },
                 ['<C-h>'] = { 'actions.show_help' },
@@ -137,8 +156,8 @@ return {
             { '<leader>fo', '<cmd>Outline<CR>', desc = '[F]ile [O]utline' },
         },
         opts = {
-            outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat' },
-            outline_items = { show_symbol_details = false },
+            outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat', auto_close = true },
+            outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
         },
     },

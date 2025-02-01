@@ -1,4 +1,38 @@
-return {
+-- Colorschemes
+-- Dashboard
+-- Lualine
+-- Noice
+
+local dashboard_header = {
+    '                                                                                   ',
+    '                                        ▒▓▓▓▓▒▒                                    ',
+    '                                    ▒   ▓▓▓▓▓▓▒▒▓▒                                 ',
+    '                               ▒  ▒▓   ▒▓▓▓▓▓▓▓▓▒▓▓                                ',
+    '                              ▓▒  ▓▓   ▒▒▒▒▓▓▓▓▓▒▓▓▓                               ',
+    '                              ▓▒  ▒  ▒▒▓▓▓▓▒▓▓▓▓▓▓▓▓▒                              ',
+    '     .:                      ▒▓▒  ▒▒▒   ▒▒▒▒▒▓▓▓▓▓▓▓▓                       :.     ',
+    '   -%#*:                     ▓▓ ▒▒ ▒▒▓▓▓▓▓▓▓▓▓▒▒▓▓▓▓▓▒                     :*#%=   ',
+    '   @+                       ▒▒   ▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▓                        +@.  ',
+    '   @*                         ▒▒▒▓▓▓▓▓▓▓▓         ▒▒▒▒▓                       +@.  ',
+    '   #%                        ▓▓▒ ▒▒▒▒▓▓▓▓       ▒  ▓▓▒▓▒                      %%   ',
+    '   *@                      ▒▓▓▓▒  ▓▓▓▒▒ ▓  ▒▒▓▓▓▓  ▓▓▓▒▓                      @*   ',
+    '   %%                      ▓▓▓▓ ▒▓▒▓▓▓▒▒▓    ▒▒    ▓▓▓▓▒▒                     #%   ',
+    ':#@#                       ▓▓▓▓▒▒▓▓▓▓▓▓▓▓       ▒▒▒▓▓▓▓▒▒                      #@#:',
+    ' .=@=                       ▓▓▓▓▒▒▒▒▓▓▓▓▓      ▒▒▓▓▓▓ ▒▓                      =@=: ',
+    '   *@                        ▓▓▓▓▓▒ ▒▓▓▓▓▓     ▒▓▓▓▓  ▒                       @*   ',
+    '   *@                          ▓▓▓▒  ▓▓▓▒      ▒▓▓▓  ▓▒                       @#   ',
+    '   @#                  ▒▒▓▓▓▒   ▒▓▓▓▒ ▒▓▓▒   ▒▓▓▓▒ ▒▒▓▓▓▓▒▒                   *@   ',
+    '  .@+                ▓▓▓▓▓▓▓▓▓ ▒ ▒▓▓▓▓ ▒▓   ▓▒▓▓▒▒▓▒▓▓▓▓▓▓▓▓▓                 =@.  ',
+    '   %#.                 ▒▒▓▓▓▓▓▓▒▒▒ ▓▓▒▒▓▓▓▓▓▓▒▓▒▓▒▒▓▓▓▓▓▓▓▒                  .#%   ',
+    '    =*#:                   ▒▓▓▓▓▒▒▒ ▓▒▒▓▓▓ ▓▒▒▒▓▒▓▓▓▓▓▓▒                   :#*=    ',
+    '                              ▒▒▓▒ ▒▒▒ ▓▒▒ ▓▒▒▓▒▓▓▓▒                               ',
+    '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
+    '                                    ▒▒ ▒   ▒▒                                      ',
+    '                                     ▒                                             ',
+    '                                                                                   ',
+}
+
+local M = {
     -- Themes
     {
         'catppuccin/nvim',
@@ -7,12 +41,19 @@ return {
         opts = {
             flavor = 'mocha',
             custom_highlights = function(colors)
+                local mauve = colors.mauve
+                local mantle = colors.mantle
+                local base = colors.base
                 return {
-                    FloatTitle = { fg = colors.mantle, bg = colors.mauve, bold = true },
-                    FloatBorder = { fg = colors.mantle, bg = colors.mantle },
+                    FloatTitle = { fg = mantle, bg = mauve, bold = true },
+                    FloatBorder = { fg = mantle, bg = mantle },
                     Pmenu = { link = 'NormalFloat' },
+                    CursorLineNr = { fg = mauve },
+                    StatusLine = { fg = base, bg = base },
+                    StatusLineNC = { fg = base, bg = base },
                 }
             end,
+            default_integrations = true,
             integrations = {
                 -- Most common plugins enabled by default
                 noice = true,
@@ -21,62 +62,14 @@ return {
                 blink_cmp = true,
             },
         },
-        config = function(_, opts)
-            require('catppuccin').setup(opts)
-
-            -- Customize other plugins with catppuccin
-            local colors = require('catppuccin.palettes').get_palette('mocha')
-            local mantle = colors.mantle
-            local mauve = colors.mauve
-
-            vim.api.nvim_create_autocmd('UIEnter', {
-                desc = 'Override plugin themes with catppuccin',
-                callback = function()
-                    local theme = {}
-                    -- Dashboard
-                    theme = vim.tbl_extend('error', {
-                        DashboardHeader = { fg = mauve },
-                        DashboardMruTitle = { link = 'DashboardDesc' },
-                        DashboardProjectTitle = { link = 'DashboardDesc' },
-                        DashboardFiles = { link = 'NormalFloat' },
-                    }, theme)
-                    -- Telescope
-                    theme = vim.tbl_extend('error', theme, {
-                        TelescopePromptTitle = { bg = mauve, fg = mantle },
-                        TelescopeResultsTitle = { fg = mantle },
-                        TelescopePreviewTitle = { bg = colors.green, fg = mantle },
-                        TelescopePromptPrefix = { bg = mantle, fg = mauve },
-                        TelescopeMatching = { fg = colors.flamingo },
-                    })
-                    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
-                        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
-                    end
-                    -- Notify
-                    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-                        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
-                        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
-                    end
-                    -- Noice
-                    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
-                    -- WhichKey
-                    theme.WhichKeyDesc = { fg = mauve }
-                    -- Treesitter
-                    theme.TreesitterContextBottom = { sp = mauve, underline = true }
-                    -- Apply themes
-                    for hl, col in pairs(theme) do
-                        vim.api.nvim_set_hl(0, hl, col)
-                    end
-                end,
-            })
-        end,
     },
     { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
 
     -- Apply theme colors to dev icons
     {
         'rachartier/tiny-devicons-auto-colors.nvim',
-        event = 'VeryLazy',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
+        event = 'VeryLazy',
         config = function() require('tiny-devicons-auto-colors').setup() end,
     },
 
@@ -88,34 +81,7 @@ return {
             require('dashboard').setup({
                 theme = 'hyper',
                 config = {
-                    header = {
-                        '                                                                                   ',
-                        '                                        ▒▓▓▓▓▒▒                                    ',
-                        '                                    ▒   ▓▓▓▓▓▓▒▒▓▒                                 ',
-                        '                               ▒  ▒▓   ▒▓▓▓▓▓▓▓▓▒▓▓                                ',
-                        '                              ▓▒  ▓▓   ▒▒▒▒▓▓▓▓▓▒▓▓▓                               ',
-                        '                              ▓▒  ▒  ▒▒▓▓▓▓▒▓▓▓▓▓▓▓▓▒                              ',
-                        '     .:                      ▒▓▒  ▒▒▒   ▒▒▒▒▒▓▓▓▓▓▓▓▓                       :.     ',
-                        '   -%#*:                     ▓▓ ▒▒ ▒▒▓▓▓▓▓▓▓▓▓▒▒▓▓▓▓▓▒                     :*#%=   ',
-                        '   @+                       ▒▒   ▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▓                        +@.  ',
-                        '   @*                         ▒▒▒▓▓▓▓▓▓▓▓         ▒▒▒▒▓                       +@.  ',
-                        '   #%                        ▓▓▒ ▒▒▒▒▓▓▓▓       ▒  ▓▓▒▓▒                      %%   ',
-                        '   *@                      ▒▓▓▓▒  ▓▓▓▒▒ ▓  ▒▒▓▓▓▓  ▓▓▓▒▓                      @*   ',
-                        '   %%                      ▓▓▓▓ ▒▓▒▓▓▓▒▒▓    ▒▒    ▓▓▓▓▒▒                     #%   ',
-                        ':#@#                       ▓▓▓▓▒▒▓▓▓▓▓▓▓▓       ▒▒▒▓▓▓▓▒▒                      #@#:',
-                        ' .=@=                       ▓▓▓▓▒▒▒▒▓▓▓▓▓      ▒▒▓▓▓▓ ▒▓                      =@=: ',
-                        '   *@                        ▓▓▓▓▓▒ ▒▓▓▓▓▓     ▒▓▓▓▓  ▒                       @*   ',
-                        '   *@                          ▓▓▓▒  ▓▓▓▒      ▒▓▓▓  ▓▒                       @#   ',
-                        '   @#                  ▒▒▓▓▓▒   ▒▓▓▓▒ ▒▓▓▒   ▒▓▓▓▒ ▒▒▓▓▓▓▒▒                   *@   ',
-                        '  .@+                ▓▓▓▓▓▓▓▓▓ ▒ ▒▓▓▓▓ ▒▓   ▓▒▓▓▒▒▓▒▓▓▓▓▓▓▓▓▓                 =@.  ',
-                        '   %#.                 ▒▒▓▓▓▓▓▓▒▒▒ ▓▓▒▒▓▓▓▓▓▓▒▓▒▓▒▒▓▓▓▓▓▓▓▒                  .#%   ',
-                        '    =*#:                   ▒▓▓▓▓▒▒▒ ▓▒▒▓▓▓ ▓▒▒▒▓▒▓▓▓▓▓▓▒                   :#*=    ',
-                        '                              ▒▒▓▒ ▒▒▒ ▓▒▒ ▓▒▒▓▒▓▓▓▒                               ',
-                        '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
-                        '                                    ▒▒ ▒   ▒▒                                      ',
-                        '                                     ▒                                             ',
-                        '                                                                                   ',
-                    },
+                    header = dashboard_header,
                     shortcut = {},
                     project = { enable = true, limit = 3 },
                     mru = { enable = true, limit = 5 },
@@ -146,6 +112,16 @@ return {
             -- Has several useful components
             local noice = require('noice')
 
+            -- Custom components
+            local mode = { function() return string.upper(vim.api.nvim_get_mode().mode) end }
+            local tabs = {
+                'tabs',
+                cond = function() return #vim.fn.gettabinfo() > 1 end,
+                show_modified_status = true,
+            }
+            local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
+            local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
+
             -- Custom behaviour for dapui windows
             local dapui = {
                 winbar = require('lualine.extensions.nvim-dap-ui').sections,
@@ -158,10 +134,18 @@ return {
                 callback = function() vim.opt.statusline = ' ' end,
             })
 
-            -- Outline
-            local outline = {
-                winbar = { lualine_c = { 'filetype' } },
-                filetypes = { 'Outline' },
+            -- Outline and Diffview
+            local side_panel = {
+                winbar = { lualine_a = { 'filetype' }, lualine_b = { tabs }, lualine_x = { showcmd } },
+                inactive_winbar = { lualine_c = { 'filetype' } },
+                filetypes = { 'Outline', 'DiffviewFiles' },
+            }
+
+            -- Terminal (No filetype)
+            local terminal = {
+                winbar = { lualine_a = { mode }, lualine_x = { showcmd } },
+                inactive_winbar = { lualine_a = { mode } },
+                filetypes = { '' },
             }
 
             -- Lualine config
@@ -173,29 +157,19 @@ return {
                     component_separators = { left = '󰇝', right = '󰇝' },
                     disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm' } },
                 },
-                extensions = { dapui, outline },
+                extensions = { dapui, side_panel, terminal },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
-                    lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end, 'filename' },
-                    lualine_b = {},
+                    lualine_a = { mode, 'filename' },
+                    lualine_b = { tabs },
                     lualine_c = { 'branch', 'diff', 'diagnostics' },
-                    lualine_x = {
-                        { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
-                        { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
-                        'filetype',
-                        'location',
-                    },
+                    lualine_x = { showmode, showcmd, 'filetype', 'location' },
                     lualine_y = {},
                     lualine_z = {},
                 },
                 inactive_winbar = {
-                    lualine_a = {},
-                    lualine_b = {},
-                    lualine_c = { 'filename' },
-                    lualine_x = { 'location' },
-                    lualine_y = {},
-                    lualine_z = {},
+                    lualine_a = { 'filename' },
                 },
             })
         end,
@@ -224,7 +198,7 @@ return {
             },
             views = {
                 cmdline_popup = {
-                    size = { max_width = 100 },
+                    size = { width = 60, max_width = 60 },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
                     win_options = {
@@ -251,3 +225,58 @@ return {
         end,
     },
 }
+
+-- Override plugin colors using colorscheme
+local color_overrides = function(accent, mantle, palette)
+    local theme = {}
+    theme = vim.tbl_extend('error', {
+        DashboardHeader = { fg = accent },
+        DashboardMruTitle = { link = 'DashboardDesc' },
+        DashboardProjectTitle = { link = 'DashboardDesc' },
+        DashboardFiles = { link = 'NormalFloat' },
+    }, theme)
+    theme = vim.tbl_extend('error', theme, {
+        TelescopePromptTitle = { bg = accent, fg = mantle },
+        TelescopeResultsTitle = { fg = mantle },
+        TelescopePreviewTitle = { bg = palette.green, fg = mantle },
+        TelescopePromptPrefix = { bg = mantle, fg = accent },
+    })
+    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
+        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
+    end
+    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
+        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
+        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
+    end
+    theme = vim.tbl_extend('error', theme, {
+        MiniJump = { bg = accent, fg = mantle, bold = true },
+        MiniJump2dSpot = { link = 'MiniJump' },
+        MiniJump2dSpotAhead = { link = 'MiniJump' },
+        MiniJump2dSpotUnique = { link = 'MiniJump' },
+    })
+    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
+    theme.WhichKeyDesc = { fg = accent }
+    theme.TreesitterContextBottom = { sp = accent, underline = true }
+    theme.SniprunVirtualTextOk = { bg = palette.green, fg = mantle }
+    theme.SniprunVirtualTextErr = { bg = palette.red, fg = mantle }
+    -- Apply themes
+    for hl, col in pairs(theme) do
+        vim.api.nvim_set_hl(0, hl, col)
+    end
+end
+
+-- Run overrides when colorscheme enabled
+vim.api.nvim_create_autocmd('Colorscheme', {
+    pattern = 'catppuccin-mocha',
+    callback = function()
+        vim.api.nvim_create_autocmd('UIEnter', {
+            desc = 'Override plugin themes with catppuccin',
+            callback = function()
+                local colors = require('catppuccin.palettes').get_palette('mocha')
+                color_overrides(colors.mauve, colors.mantle, colors)
+            end,
+        })
+    end,
+})
+
+return M
