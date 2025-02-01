@@ -8,6 +8,16 @@ return {
         'echasnovski/mini.nvim',
         event = 'VeryLazy',
         config = function()
+            -- Enhanced jump motions
+            require('mini.jump').setup()
+            require('mini.jump2d').setup({ view = { n_steps_ahead = 1 } })
+            vim.keymap.set(
+                'n',
+                '<CR>',
+                '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
+                { desc = 'Jump 2D' }
+            )
+
             -- Better Around/Inside textobjects
             local ai = require('mini.ai')
             ai.setup({
@@ -28,19 +38,17 @@ return {
             -- Add/delete/replace surroundings (brackets, quotes, etc.)
             require('mini.surround').setup()
 
-            -- Git tools, also used with codecompanion.nvim for single buffer diffs
+            -- Delete buffers and preserve window layout
+            require('mini.bufremove').setup()
+            vim.keymap.set('ca', 'bd', 'lua MiniBufremove.delete()')
+            vim.keymap.set('ca', 'bw', 'lua MiniBufremove.wipeout()')
+
+            -- Git tools, used for inline diffs (and codecompanion)
             require('mini.diff').setup({
+                mappings = { apply = '<Leader>ga', reset = '<Leader>gr' },
                 view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
-                mappings = {
-                    apply = '<Leader>ga',
-                    reset = '<Leader>gr',
-                    goto_prev = '<Leader>gp',
-                    goto_next = '<Leader>gn',
-                    goto_first = '<Leader>gg',
-                    goto_last = '<Leader>gG',
-                },
             })
-            vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it Overlay' })
+            vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })
 
             -- Session management
             local sessions = require('mini.sessions')
@@ -67,7 +75,7 @@ return {
     -- WhichKey: Plugin to show pending keybinds.
     {
         'folke/which-key.nvim',
-        event = 'VimEnter',
+        event = 'VeryLazy',
         keys = {
             {
                 '<Leader>?',
@@ -179,7 +187,7 @@ return {
                 cond = function() return vim.fn.executable('make') == 1 end,
             },
             { 'nvim-telescope/telescope-ui-select.nvim' },
-            { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+            { 'nvim-tree/nvim-web-devicons' },
         },
         config = function()
             require('telescope').setup({
@@ -238,9 +246,8 @@ return {
             vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
             vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
             vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
-            vim.keymap.set('n', '<Leader>sd', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
+            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
             vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
-            vim.keymap.set('n', '<Leader>so', builtin.oldfiles, { desc = 'Telescope: [S]earch [O]ld Files' })
             vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
             vim.keymap.set(
                 'v',
@@ -295,7 +302,7 @@ return {
             incremental_selection = {
                 enable = true,
                 keymaps = {
-                    init_selection = 'gnn',
+                    init_selection = false,
                     node_incremental = 'grn',
                     scope_incremental = 'grc',
                     node_decremental = 'grm',
