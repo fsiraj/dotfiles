@@ -272,7 +272,7 @@ return {
     -- Linters
     {
         'mfussenegger/nvim-lint',
-        event = { 'BufReadPre', 'BufNewFile' },
+        event = 'VeryLazy',
         config = function()
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed

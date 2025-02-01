@@ -158,10 +158,10 @@ return {
                 callback = function() vim.opt.statusline = ' ' end,
             })
 
-            -- Outline
-            local outline = {
+            -- Outline and Diffview
+            local side_panel = {
                 winbar = { lualine_c = { 'filetype' } },
-                filetypes = { 'Outline' },
+                filetypes = { 'Outline', 'DiffviewFiles' },
             }
 
             -- Lualine config
@@ -171,14 +171,20 @@ return {
                     theme = 'auto',
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
-                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm' } },
+                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm', 'NeogitStatus' } },
                 },
-                extensions = { dapui, outline },
+                extensions = { dapui, side_panel },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
                     lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end, 'filename' },
-                    lualine_b = {},
+                    lualine_b = {
+                        {
+                            'tabs',
+                            cond = function() return #vim.fn.gettabinfo() > 1 end,
+                            show_modified_status = true
+                        },
+                    },
                     lualine_c = { 'branch', 'diff', 'diagnostics' },
                     lualine_x = {
                         { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line

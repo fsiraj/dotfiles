@@ -1,6 +1,28 @@
 -- Colletion of small convenience plugins with minimal configuration.
 
 return {
+    -- Git
+    {
+        'NeogitOrg/neogit',
+        keys = {
+            { '<Leader>gN', '<Cmd>Neogit<CR>', desc = 'Open Neogit' },
+        },
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'sindrets/diffview.nvim',
+            'nvim-telescope/telescope.nvim',
+        },
+        config = true,
+    },
+    {
+        'sindrets/diffview.nvim',
+        keys = {
+            { '<Leader>gD', '<Cmd>DiffviewOpen<CR>', desc = 'Open Diffview' },
+        },
+        opts = {
+            enhanced_diff_hl = true,
+        },
+    },
 
     -- Copilot
     {

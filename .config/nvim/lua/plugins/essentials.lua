@@ -40,7 +40,7 @@ return {
                     goto_last = '<Leader>gG',
                 },
             })
-            vim.keymap.set('n', '<Leader>tg', MiniDiff.toggle_overlay, { desc = '[T]oggle [G]it Overlay' })
+            vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })
 
             -- Session management
             local sessions = require('mini.sessions')
