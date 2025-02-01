@@ -67,11 +67,11 @@ return {
 
                     -- If LSP supports inlay hints, enable them
                     if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-                        map('<Leader>th', function()
+                        map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
                             vim.lsp.inlay_hint.enable(not is_enabled)
                             vim.print('Inlay Hints: ' .. tostring(not is_enabled))
-                        end, '[T]oggle Inlay [H]ints')
+                        end, '[T]oggle [I]nlay Hints')
                     end
                 end,
             })
@@ -173,7 +173,15 @@ return {
         ---@module 'blink.cmp'
         ---@type blink.cmp.Config
         opts = {
-            enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
+            cmdline = {
+                enabled = true,
+                completion = { ghost_text = { enabled = false } },
+            },
+            enabled = function()
+                local disabled_filetypes = { 'oil', 'gitcommit' }
+                return not vim.tbl_contains(disabled_filetypes, vim.bo.filetype)
+                    and (vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer())
+            end,
             completion = {
                 menu = {
                     auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
@@ -198,7 +206,6 @@ return {
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
-                cmdline = {},
                 per_filetype = {
                     codecompanion = { 'codecompanion' },
                 },
@@ -211,6 +218,7 @@ return {
                             max_completions = 1,
                             max_attempts = 2,
                         },
+                        score_offset = -5,
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
@@ -237,11 +245,11 @@ return {
                 desc = '[C]ode [F]ormat Buffer/Selection',
             },
         },
-        init = function() vim.g.disable_autoformat = true end,
+        init = function() vim.g.format_on_save = false end,
         opts = {
             notify_on_error = false,
             format_on_save = function(_)
-                if vim.g.disable_autoformat then return end
+                if not vim.g.format_on_save then return end
                 return {
                     timeout_ms = 500,
                     lsp_format = 'fallback',
@@ -259,20 +267,17 @@ return {
             require('conform').setup(opts)
 
             -- Toggle format on save
-            vim.api.nvim_create_user_command('ToggleFormatOnSave', function()
-                vim.g.disable_autoformat = not vim.g.disable_autoformat
-                vim.print('Format On Save: ' .. tostring(not vim.g.disable_autoformat))
-            end, {
-                desc = 'Toggle autoformat-on-save with conform',
-            })
-            vim.keymap.set('n', '<Leader>tf', ':ToggleFormatOnSave<CR>', { desc = '[T]oggle [F]ormat on save' })
+            vim.keymap.set('n', '<Leader>tf', function()
+                vim.g.format_on_save = not vim.g.format_on_save
+                vim.print('Format On Save: ' .. tostring(vim.g.format_on_save))
+            end, { desc = '[T]oggle [F]ormat On Save' })
         end,
     },
 
     -- Linters
     {
         'mfussenegger/nvim-lint',
-        event = { 'BufReadPre', 'BufNewFile' },
+        event = 'VeryLazy',
         config = function()
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed
@@ -289,6 +294,23 @@ return {
                     -- Only run in modifiable buffers
                     if vim.opt_local.modifiable:get() then lint.try_lint() end
                 end,
+            })
+        end,
+    },
+
+    -- Run code snippets
+    {
+        'michaelb/sniprun',
+        branch = 'master',
+        build = 'sh install.sh',
+        keys = {
+            { '<Leader>r', '<Plug>SnipRun', mode = { 'n', 'v' }, desc = ' [R]un Code' },
+        },
+        config = function()
+            require('sniprun').setup({
+                display = { 'Terminal', 'VirtualText' },
+                selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
+                repl_enable = { 'Python3_fifo' },
             })
         end,
     },
