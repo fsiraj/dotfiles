@@ -38,6 +38,11 @@ return {
             -- Add/delete/replace surroundings (brackets, quotes, etc.)
             require('mini.surround').setup()
 
+            -- Delete buffers and preserve window layout
+            require('mini.bufremove').setup()
+            vim.keymap.set('ca', 'bd', 'lua MiniBufremove.delete()')
+            vim.keymap.set('ca', 'bw', 'lua MiniBufremove.wipeout()')
+
             -- Git tools, used for inline diffs (and codecompanion)
             require('mini.diff').setup({
                 view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
@@ -248,9 +253,8 @@ return {
             vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
             vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
             vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
-            vim.keymap.set('n', '<Leader>sd', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
+            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
             vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
-            vim.keymap.set('n', '<Leader>so', builtin.oldfiles, { desc = 'Telescope: [S]earch [O]ld Files' })
             vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
             vim.keymap.set(
                 'v',
@@ -305,7 +309,7 @@ return {
             incremental_selection = {
                 enable = true,
                 keymaps = {
-                    init_selection = 'gnn',
+                    init_selection = false,
                     node_incremental = 'grn',
                     scope_incremental = 'grc',
                     node_decremental = 'grm',

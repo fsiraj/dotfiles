@@ -1,6 +1,5 @@
 -- Buffer keymaps
 vim.keymap.set('n', '<Leader>bt', '<cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
-vim.keymap.set('n', '<Leader>bd', '<cmd>bp | sp | bn | bd<CR>', { desc = '[B]uffer [D]elete (preserves Window)' })
 vim.keymap.set('n', '<C-\\>', '<cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<cmd>sp<CR>', { desc = 'Horizontal split' })
 
