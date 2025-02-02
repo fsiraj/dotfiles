@@ -1,4 +1,38 @@
-return {
+-- Colorschemes
+-- Dashboard
+-- Lualine
+-- Noice
+
+local dashboard_header = {
+    '                                                                                   ',
+    '                                        ▒▓▓▓▓▒▒                                    ',
+    '                                    ▒   ▓▓▓▓▓▓▒▒▓▒                                 ',
+    '                               ▒  ▒▓   ▒▓▓▓▓▓▓▓▓▒▓▓                                ',
+    '                              ▓▒  ▓▓   ▒▒▒▒▓▓▓▓▓▒▓▓▓                               ',
+    '                              ▓▒  ▒  ▒▒▓▓▓▓▒▓▓▓▓▓▓▓▓▒                              ',
+    '     .:                      ▒▓▒  ▒▒▒   ▒▒▒▒▒▓▓▓▓▓▓▓▓                       :.     ',
+    '   -%#*:                     ▓▓ ▒▒ ▒▒▓▓▓▓▓▓▓▓▓▒▒▓▓▓▓▓▒                     :*#%=   ',
+    '   @+                       ▒▒   ▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▓                        +@.  ',
+    '   @*                         ▒▒▒▓▓▓▓▓▓▓▓         ▒▒▒▒▓                       +@.  ',
+    '   #%                        ▓▓▒ ▒▒▒▒▓▓▓▓       ▒  ▓▓▒▓▒                      %%   ',
+    '   *@                      ▒▓▓▓▒  ▓▓▓▒▒ ▓  ▒▒▓▓▓▓  ▓▓▓▒▓                      @*   ',
+    '   %%                      ▓▓▓▓ ▒▓▒▓▓▓▒▒▓    ▒▒    ▓▓▓▓▒▒                     #%   ',
+    ':#@#                       ▓▓▓▓▒▒▓▓▓▓▓▓▓▓       ▒▒▒▓▓▓▓▒▒                      #@#:',
+    ' .=@=                       ▓▓▓▓▒▒▒▒▓▓▓▓▓      ▒▒▓▓▓▓ ▒▓                      =@=: ',
+    '   *@                        ▓▓▓▓▓▒ ▒▓▓▓▓▓     ▒▓▓▓▓  ▒                       @*   ',
+    '   *@                          ▓▓▓▒  ▓▓▓▒      ▒▓▓▓  ▓▒                       @#   ',
+    '   @#                  ▒▒▓▓▓▒   ▒▓▓▓▒ ▒▓▓▒   ▒▓▓▓▒ ▒▒▓▓▓▓▒▒                   *@   ',
+    '  .@+                ▓▓▓▓▓▓▓▓▓ ▒ ▒▓▓▓▓ ▒▓   ▓▒▓▓▒▒▓▒▓▓▓▓▓▓▓▓▓                 =@.  ',
+    '   %#.                 ▒▒▓▓▓▓▓▓▒▒▒ ▓▓▒▒▓▓▓▓▓▓▒▓▒▓▒▒▓▓▓▓▓▓▓▒                  .#%   ',
+    '    =*#:                   ▒▓▓▓▓▒▒▒ ▓▒▒▓▓▓ ▓▒▒▒▓▒▓▓▓▓▓▓▒                   :#*=    ',
+    '                              ▒▒▓▒ ▒▒▒ ▓▒▒ ▓▒▒▓▒▓▓▓▒                               ',
+    '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
+    '                                    ▒▒ ▒   ▒▒                                      ',
+    '                                     ▒                                             ',
+    '                                                                                   ',
+}
+
+local M = {
     -- Themes
     {
         'catppuccin/nvim',
@@ -13,6 +47,7 @@ return {
                     Pmenu = { link = 'NormalFloat' },
                 }
             end,
+            default_integrations = true,
             integrations = {
                 -- Most common plugins enabled by default
                 noice = true,
@@ -21,61 +56,6 @@ return {
                 blink_cmp = true,
             },
         },
-        config = function(_, opts)
-            require('catppuccin').setup(opts)
-
-            -- Customize other plugins with catppuccin
-            local colors = require('catppuccin.palettes').get_palette('mocha')
-            local mantle = colors.mantle
-            local mauve = colors.mauve
-
-            vim.api.nvim_create_autocmd('UIEnter', {
-                desc = 'Override plugin themes with catppuccin',
-                callback = function()
-                    local theme = {}
-                    -- Dashboard
-                    theme = vim.tbl_extend('error', {
-                        DashboardHeader = { fg = mauve },
-                        DashboardMruTitle = { link = 'DashboardDesc' },
-                        DashboardProjectTitle = { link = 'DashboardDesc' },
-                        DashboardFiles = { link = 'NormalFloat' },
-                    }, theme)
-                    -- Telescope
-                    theme = vim.tbl_extend('error', theme, {
-                        TelescopePromptTitle = { bg = mauve, fg = mantle },
-                        TelescopeResultsTitle = { fg = mantle },
-                        TelescopePreviewTitle = { bg = colors.green, fg = mantle },
-                        TelescopePromptPrefix = { bg = mantle, fg = mauve },
-                        TelescopeMatching = { fg = colors.flamingo },
-                    })
-                    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
-                        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
-                    end
-                    -- Notify
-                    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-                        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
-                        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
-                    end
-                    -- Mini
-                    theme = vim.tbl_extend('error', theme, {
-                        MiniJump = { bg = mauve, fg = mantle, bold = true },
-                        MiniJump2dSpot = { link = 'MiniJump' },
-                        MiniJump2dSpotAhead = { link = 'MiniJump' },
-                        MiniJump2dSpotUnique = { link = 'MiniJump' },
-                    })
-                    -- Noice
-                    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
-                    -- WhichKey
-                    theme.WhichKeyDesc = { fg = mauve }
-                    -- Treesitter
-                    theme.TreesitterContextBottom = { sp = mauve, underline = true }
-                    -- Apply themes
-                    for hl, col in pairs(theme) do
-                        vim.api.nvim_set_hl(0, hl, col)
-                    end
-                end,
-            })
-        end,
     },
     { 'folke/tokyonight.nvim', priority = 1000, opts = { plugins = { auto = true } } },
 
@@ -95,34 +75,7 @@ return {
             require('dashboard').setup({
                 theme = 'hyper',
                 config = {
-                    header = {
-                        '                                                                                   ',
-                        '                                        ▒▓▓▓▓▒▒                                    ',
-                        '                                    ▒   ▓▓▓▓▓▓▒▒▓▒                                 ',
-                        '                               ▒  ▒▓   ▒▓▓▓▓▓▓▓▓▒▓▓                                ',
-                        '                              ▓▒  ▓▓   ▒▒▒▒▓▓▓▓▓▒▓▓▓                               ',
-                        '                              ▓▒  ▒  ▒▒▓▓▓▓▒▓▓▓▓▓▓▓▓▒                              ',
-                        '     .:                      ▒▓▒  ▒▒▒   ▒▒▒▒▒▓▓▓▓▓▓▓▓                       :.     ',
-                        '   -%#*:                     ▓▓ ▒▒ ▒▒▓▓▓▓▓▓▓▓▓▒▒▓▓▓▓▓▒                     :*#%=   ',
-                        '   @+                       ▒▒   ▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▓                        +@.  ',
-                        '   @*                         ▒▒▒▓▓▓▓▓▓▓▓         ▒▒▒▒▓                       +@.  ',
-                        '   #%                        ▓▓▒ ▒▒▒▒▓▓▓▓       ▒  ▓▓▒▓▒                      %%   ',
-                        '   *@                      ▒▓▓▓▒  ▓▓▓▒▒ ▓  ▒▒▓▓▓▓  ▓▓▓▒▓                      @*   ',
-                        '   %%                      ▓▓▓▓ ▒▓▒▓▓▓▒▒▓    ▒▒    ▓▓▓▓▒▒                     #%   ',
-                        ':#@#                       ▓▓▓▓▒▒▓▓▓▓▓▓▓▓       ▒▒▒▓▓▓▓▒▒                      #@#:',
-                        ' .=@=                       ▓▓▓▓▒▒▒▒▓▓▓▓▓      ▒▒▓▓▓▓ ▒▓                      =@=: ',
-                        '   *@                        ▓▓▓▓▓▒ ▒▓▓▓▓▓     ▒▓▓▓▓  ▒                       @*   ',
-                        '   *@                          ▓▓▓▒  ▓▓▓▒      ▒▓▓▓  ▓▒                       @#   ',
-                        '   @#                  ▒▒▓▓▓▒   ▒▓▓▓▒ ▒▓▓▒   ▒▓▓▓▒ ▒▒▓▓▓▓▒▒                   *@   ',
-                        '  .@+                ▓▓▓▓▓▓▓▓▓ ▒ ▒▓▓▓▓ ▒▓   ▓▒▓▓▒▒▓▒▓▓▓▓▓▓▓▓▓                 =@.  ',
-                        '   %#.                 ▒▒▓▓▓▓▓▓▒▒▒ ▓▓▒▒▓▓▓▓▓▓▒▓▒▓▒▒▓▓▓▓▓▓▓▒                  .#%   ',
-                        '    =*#:                   ▒▓▓▓▓▒▒▒ ▓▒▒▓▓▓ ▓▒▒▒▓▒▓▓▓▓▓▓▒                   :#*=    ',
-                        '                              ▒▒▓▒ ▒▒▒ ▓▒▒ ▓▒▒▓▒▓▓▓▒                               ',
-                        '                                 ▒  ▒▒ ▒▒  ▓▒▒ ▓▒                                  ',
-                        '                                    ▒▒ ▒   ▒▒                                      ',
-                        '                                     ▒                                             ',
-                        '                                                                                   ',
-                    },
+                    header = dashboard_header,
                     shortcut = {},
                     project = { enable = true, limit = 3 },
                     mru = { enable = true, limit = 5 },
@@ -259,3 +212,63 @@ return {
         end,
     },
 }
+
+-- Override plugin colors using colorscheme
+local color_overrides = function(accent, mantle, palette)
+    local theme = {}
+    -- Dashboard
+    theme = vim.tbl_extend('error', {
+        DashboardHeader = { fg = accent },
+        DashboardMruTitle = { link = 'DashboardDesc' },
+        DashboardProjectTitle = { link = 'DashboardDesc' },
+        DashboardFiles = { link = 'NormalFloat' },
+    }, theme)
+    -- Telescope
+    theme = vim.tbl_extend('error', theme, {
+        TelescopePromptTitle = { bg = accent, fg = mantle },
+        TelescopeResultsTitle = { fg = mantle },
+        TelescopePreviewTitle = { bg = palette.green, fg = mantle },
+        TelescopePromptPrefix = { bg = mantle, fg = accent },
+    })
+    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
+        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
+    end
+    -- Notify
+    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
+        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
+        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
+    end
+    -- Mini
+    theme = vim.tbl_extend('error', theme, {
+        MiniJump = { bg = accent, fg = mantle, bold = true },
+        MiniJump2dSpot = { link = 'MiniJump' },
+        MiniJump2dSpotAhead = { link = 'MiniJump' },
+        MiniJump2dSpotUnique = { link = 'MiniJump' },
+    })
+    -- Noice
+    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
+    -- WhichKey
+    theme.WhichKeyDesc = { fg = accent }
+    -- Treesitter
+    theme.TreesitterContextBottom = { sp = accent, underline = true }
+    -- Apply themes
+    for hl, col in pairs(theme) do
+        vim.api.nvim_set_hl(0, hl, col)
+    end
+end
+
+-- Run overrides when colorscheme enabled
+vim.api.nvim_create_autocmd('Colorscheme', {
+    pattern = 'catppuccin-mocha',
+    callback = function()
+        vim.api.nvim_create_autocmd('UIEnter', {
+            desc = 'Override plugin themes with catppuccin',
+            callback = function()
+                local colors = require('catppuccin.palettes').get_palette('mocha')
+                color_overrides(colors.mauve, colors.mantle, colors)
+            end,
+        })
+    end,
+})
+
+return M

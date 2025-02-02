@@ -168,7 +168,7 @@ return {
         },
         opts = {
             outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat' },
-            outline_items = { show_symbol_details = false },
+            outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
         },
     },
