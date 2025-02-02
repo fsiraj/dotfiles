@@ -56,6 +56,13 @@ return {
                         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
                         theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
                     end
+                    -- Mini
+                    theme = vim.tbl_extend('error', theme, {
+                        MiniJump = { bg = mauve, fg = mantle, bold = true },
+                        MiniJump2dSpot = { link = 'MiniJump' },
+                        MiniJump2dSpotAhead = { link = 'MiniJump' },
+                        MiniJump2dSpotUnique = { link = 'MiniJump' },
+                    })
                     -- Noice
                     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
                     -- WhichKey
@@ -146,6 +153,16 @@ return {
             -- Has several useful components
             local noice = require('noice')
 
+            -- Custom components
+            local mode = { function() return string.upper(vim.api.nvim_get_mode().mode) end }
+            local tabs = {
+                'tabs',
+                cond = function() return #vim.fn.gettabinfo() > 1 end,
+                show_modified_status = true,
+            }
+            local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
+            local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
+
             -- Custom behaviour for dapui windows
             local dapui = {
                 winbar = require('lualine.extensions.nvim-dap-ui').sections,
@@ -160,7 +177,8 @@ return {
 
             -- Outline and Diffview
             local side_panel = {
-                winbar = { lualine_c = { 'filetype' } },
+                winbar = { lualine_a = { 'filetype' }, lualine_b = { tabs }, lualine_x = { showcmd } },
+                inactive_winbar = { lualine_c = { 'filetype' } },
                 filetypes = { 'Outline', 'DiffviewFiles' },
             }
 
@@ -171,37 +189,21 @@ return {
                     theme = 'auto',
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
-                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm', 'NeogitStatus' } },
+                    disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm' } },
                 },
                 extensions = { dapui, side_panel },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
-                    lualine_a = { function() return string.upper(vim.api.nvim_get_mode().mode) end, 'filename' },
-                    lualine_b = {
-                        {
-                            'tabs',
-                            cond = function() return #vim.fn.gettabinfo() > 1 end,
-                            show_modified_status = true
-                        },
-                    },
+                    lualine_a = { mode, 'filename' },
+                    lualine_b = { tabs },
                     lualine_c = { 'branch', 'diff', 'diagnostics' },
-                    lualine_x = {
-                        { noice.api.status.mode.get, cond = noice.api.status.mode.has }, ---@diagnostic disable-line
-                        { noice.api.status.command.get, cond = noice.api.status.command.has }, ---@diagnostic disable-line
-                        'filetype',
-                        'location',
-                    },
+                    lualine_x = { showmode, showcmd, 'filetype', 'location' },
                     lualine_y = {},
                     lualine_z = {},
                 },
                 inactive_winbar = {
-                    lualine_a = {},
-                    lualine_b = {},
-                    lualine_c = { 'filename' },
-                    lualine_x = { 'location' },
-                    lualine_y = {},
-                    lualine_z = {},
+                    lualine_a = { 'filename' },
                 },
             })
         end,

@@ -21,6 +21,14 @@ return {
         },
         opts = {
             enhanced_diff_hl = true,
+            keymaps = {
+                view = {
+                    ['q'] = '<Cmd>DiffviewClose<CR>',
+                },
+                file_panel = {
+                    ['q'] = '<Cmd>DiffviewClose<CR>',
+                },
+            },
         },
     },
 

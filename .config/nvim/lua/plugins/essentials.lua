@@ -8,6 +8,16 @@ return {
         'echasnovski/mini.nvim',
         event = 'VeryLazy',
         config = function()
+            -- Enhanced jump motions
+            require('mini.jump').setup()
+            require('mini.jump2d').setup({ view = { n_steps_ahead = 1 } })
+            vim.keymap.set(
+                'n',
+                '<CR>',
+                '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
+                { desc = 'Jump 2D' }
+            )
+
             -- Better Around/Inside textobjects
             local ai = require('mini.ai')
             ai.setup({
@@ -28,7 +38,7 @@ return {
             -- Add/delete/replace surroundings (brackets, quotes, etc.)
             require('mini.surround').setup()
 
-            -- Git tools, also used with codecompanion.nvim for single buffer diffs
+            -- Git tools, used for inline diffs (and codecompanion)
             require('mini.diff').setup({
                 view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
                 mappings = {
