@@ -185,7 +185,7 @@ local M = {
             },
             views = {
                 cmdline_popup = {
-                    size = { max_width = 100 },
+                    size = { width = 60, max_width = 60 },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
                     win_options = {
