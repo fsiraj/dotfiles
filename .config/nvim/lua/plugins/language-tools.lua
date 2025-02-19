@@ -293,6 +293,23 @@ return {
         end,
     },
 
+    -- Run code snippets
+    {
+        'michaelb/sniprun',
+        branch = 'master',
+        build = 'sh install.sh',
+        keys = {
+            { '<Leader>r', '<Plug>SnipRun', mode = { 'n', 'v' }, desc = ' [R]un Code' },
+        },
+        config = function()
+            require('sniprun').setup({
+                display = { 'Classic', 'VirtualText' },
+                selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
+                repl_enable = { 'Python3_fifo' },
+            })
+        end,
+    },
+
     -- Intellisense for neovim api and plugins
     {
         'folke/lazydev.nvim',

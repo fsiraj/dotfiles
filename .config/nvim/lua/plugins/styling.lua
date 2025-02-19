@@ -251,6 +251,9 @@ local color_overrides = function(accent, mantle, palette)
     theme.WhichKeyDesc = { fg = accent }
     -- Treesitter
     theme.TreesitterContextBottom = { sp = accent, underline = true }
+    -- Sniprun
+    theme.SniprunVirtualTextOk = { bg = palette.green, fg = mantle}
+    theme.SniprunVirtualTextErr = { bg = palette.red, fg = mantle}
     -- Apply themes
     for hl, col in pairs(theme) do
         vim.api.nvim_set_hl(0, hl, col)

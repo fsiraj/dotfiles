@@ -17,12 +17,6 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Resize windows with Meta + arrow keys
-vim.keymap.set('n', '<M-Up>', '<Cmd>resize +2<CR>', { desc = 'Increase window height' })
-vim.keymap.set('n', '<M-Down>', '<Cmd>resize -2<CR>', { desc = 'Decrease window height' })
-vim.keymap.set('n', '<M-Left>', '<Cmd>vertical resize -2<CR>', { desc = 'Decrease window width' })
-vim.keymap.set('n', '<M-Right>', '<Cmd>vertical resize +2<CR>', { desc = 'Increase window width' })
-
 -- Easier pasting in insert mode
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
