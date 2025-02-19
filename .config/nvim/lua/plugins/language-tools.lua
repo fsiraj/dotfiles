@@ -173,6 +173,7 @@ return {
         ---@module 'blink.cmp'
         ---@type blink.cmp.Config
         opts = {
+            cmdline = { enabled = false },
             enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
             completion = {
                 menu = {
@@ -198,7 +199,6 @@ return {
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
-                cmdline = {},
                 per_filetype = {
                     codecompanion = { 'codecompanion' },
                 },

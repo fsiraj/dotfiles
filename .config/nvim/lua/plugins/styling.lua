@@ -62,9 +62,8 @@ local M = {
     -- Apply theme colors to dev icons
     {
         'rachartier/tiny-devicons-auto-colors.nvim',
-        event = 'VeryLazy',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
-        config = function() require('tiny-devicons-auto-colors').setup() end,
+        lazy = true -- Called from color_overrides()
     },
 
     -- Dashboard
@@ -216,14 +215,12 @@ local M = {
 -- Override plugin colors using colorscheme
 local color_overrides = function(accent, mantle, palette)
     local theme = {}
-    -- Dashboard
     theme = vim.tbl_extend('error', {
         DashboardHeader = { fg = accent },
         DashboardMruTitle = { link = 'DashboardDesc' },
         DashboardProjectTitle = { link = 'DashboardDesc' },
         DashboardFiles = { link = 'NormalFloat' },
     }, theme)
-    -- Telescope
     theme = vim.tbl_extend('error', theme, {
         TelescopePromptTitle = { bg = accent, fg = mantle },
         TelescopeResultsTitle = { fg = mantle },
@@ -233,31 +230,26 @@ local color_overrides = function(accent, mantle, palette)
     for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
         theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
     end
-    -- Notify
     for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
         theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
     end
-    -- Mini
     theme = vim.tbl_extend('error', theme, {
         MiniJump = { bg = accent, fg = mantle, bold = true },
         MiniJump2dSpot = { link = 'MiniJump' },
         MiniJump2dSpotAhead = { link = 'MiniJump' },
         MiniJump2dSpotUnique = { link = 'MiniJump' },
     })
-    -- Noice
     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
-    -- WhichKey
     theme.WhichKeyDesc = { fg = accent }
-    -- Treesitter
     theme.TreesitterContextBottom = { sp = accent, underline = true }
-    -- Sniprun
-    theme.SniprunVirtualTextOk = { bg = palette.green, fg = mantle}
-    theme.SniprunVirtualTextErr = { bg = palette.red, fg = mantle}
+    theme.SniprunVirtualTextOk = { bg = palette.green, fg = mantle }
+    theme.SniprunVirtualTextErr = { bg = palette.red, fg = mantle }
     -- Apply themes
     for hl, col in pairs(theme) do
         vim.api.nvim_set_hl(0, hl, col)
     end
+    require('tiny-devicons-auto-colors').setup({ colors = palette })
 end
 
 -- Run overrides when colorscheme enabled
