@@ -67,11 +67,11 @@ return {
 
                     -- If LSP supports inlay hints, enable them
                     if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-                        map('<Leader>th', function()
+                        map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
                             vim.lsp.inlay_hint.enable(not is_enabled)
                             vim.print('Inlay Hints: ' .. tostring(not is_enabled))
-                        end, '[T]oggle Inlay [H]ints')
+                        end, '[T]oggle [I]nlay Hints')
                     end
                 end,
             })
@@ -237,11 +237,11 @@ return {
                 desc = '[C]ode [F]ormat Buffer/Selection',
             },
         },
-        init = function() vim.g.disable_autoformat = true end,
+        init = function() vim.g.format_on_save = false end,
         opts = {
             notify_on_error = false,
             format_on_save = function(_)
-                if vim.g.disable_autoformat then return end
+                if not vim.g.format_on_save then return end
                 return {
                     timeout_ms = 500,
                     lsp_format = 'fallback',
@@ -259,13 +259,10 @@ return {
             require('conform').setup(opts)
 
             -- Toggle format on save
-            vim.api.nvim_create_user_command('ToggleFormatOnSave', function()
-                vim.g.disable_autoformat = not vim.g.disable_autoformat
-                vim.print('Format On Save: ' .. tostring(not vim.g.disable_autoformat))
-            end, {
-                desc = 'Toggle autoformat-on-save with conform',
-            })
-            vim.keymap.set('n', '<Leader>tf', ':ToggleFormatOnSave<CR>', { desc = '[T]oggle [F]ormat on save' })
+            vim.keymap.set('n', '<Leader>tf', function()
+                vim.g.format_on_save = not vim.g.format_on_save
+                vim.print('Format On Save: ' .. tostring(vim.g.format_on_save))
+            end, { desc = '[T]oggle [F]ormat On Save' })
         end,
     },
 
