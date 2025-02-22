@@ -45,6 +45,7 @@ return {
 
             -- Git tools, used for inline diffs (and codecompanion)
             require('mini.diff').setup({
+                mappings = { apply = '<Leader>ga', reset = '<Leader>gr' },
                 view = { style = 'sign', signs = { add = '▎', change = '▎', delete = '' }, priority = 5 },
             })
             vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })

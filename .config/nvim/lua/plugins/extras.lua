@@ -134,7 +134,7 @@ return {
         ---@type oil.SetupOpts
         opts = {
             view_options = { show_hidden = true },
-            float = { max_width = 0.45, max_height = 0.8 },
+            float = { max_width = 0.4, max_height = 0.8 },
             keymaps = {
                 ['q'] = { 'actions.close' },
                 ['<C-h>'] = { 'actions.show_help' },
@@ -167,7 +167,7 @@ return {
             { '<leader>fo', '<cmd>Outline<CR>', desc = '[F]ile [O]utline' },
         },
         opts = {
-            outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat' },
+            outline_window = { split_command = '40vsplit', winhl = 'Normal:NormalFloat', auto_close = true },
             outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
         },

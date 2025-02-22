@@ -41,10 +41,13 @@ local M = {
         opts = {
             flavor = 'mocha',
             custom_highlights = function(colors)
+                local mauve = colors.mauve
+                local mantle = colors.mantle
                 return {
-                    FloatTitle = { fg = colors.mantle, bg = colors.mauve, bold = true },
-                    FloatBorder = { fg = colors.mantle, bg = colors.mantle },
+                    FloatTitle = { fg = mantle, bg = mauve, bold = true },
+                    FloatBorder = { fg = mantle, bg = mantle },
                     Pmenu = { link = 'NormalFloat' },
+                    CursorLineNr = { fg = mauve}
                 }
             end,
             default_integrations = true,
