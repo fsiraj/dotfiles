@@ -75,7 +75,7 @@ return {
     -- WhichKey: Plugin to show pending keybinds.
     {
         'folke/which-key.nvim',
-        event = 'VimEnter',
+        event = 'VeryLazy',
         keys = {
             {
                 '<Leader>?',

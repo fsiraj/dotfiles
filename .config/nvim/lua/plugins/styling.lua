@@ -43,11 +43,14 @@ local M = {
             custom_highlights = function(colors)
                 local mauve = colors.mauve
                 local mantle = colors.mantle
+                local base = colors.base
                 return {
                     FloatTitle = { fg = mantle, bg = mauve, bold = true },
                     FloatBorder = { fg = mantle, bg = mantle },
                     Pmenu = { link = 'NormalFloat' },
-                    CursorLineNr = { fg = mauve}
+                    CursorLineNr = { fg = mauve },
+                    StatusLine = { fg = base, bg = base },
+                    StatusLineNC = { fg = base, bg = base },
                 }
             end,
             default_integrations = true,
@@ -66,7 +69,7 @@ local M = {
     {
         'rachartier/tiny-devicons-auto-colors.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
-        lazy = true -- Called from color_overrides()
+        lazy = true, -- Called from color_overrides()
     },
 
     -- Dashboard
@@ -137,6 +140,13 @@ local M = {
                 filetypes = { 'Outline', 'DiffviewFiles' },
             }
 
+            -- Terminal (No filetype)
+            local terminal = {
+                winbar = { lualine_a = { mode }, lualine_x = { showcmd } },
+                inactive_winbar = { lualine_a = { mode } },
+                filetypes = { '' },
+            }
+
             -- Lualine config
             require('lualine').setup({
                 options = {
@@ -146,7 +156,7 @@ local M = {
                     component_separators = { left = '󰇝', right = '󰇝' },
                     disabled_filetypes = { winbar = { 'dap-repl', 'dashboard', 'toggleterm' } },
                 },
-                extensions = { dapui, side_panel },
+                extensions = { dapui, side_panel, terminal },
                 sections = {},
                 inactive_sections = {},
                 winbar = {

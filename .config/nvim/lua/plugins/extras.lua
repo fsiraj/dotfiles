@@ -54,18 +54,7 @@ return {
         opts = {
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = {
-                    show_header_separator = false,
-                    window = { layout = 'float' },
-                },
-            },
-            strategies = {
-                chat = {
-                    keymaps = {
-                        close = { modes = { n = 'q' } },
-                        stop = { modes = { n = '<C-c>' } },
-                    },
-                },
+                chat = { show_header_separator = false, },
             },
         },
         config = function(_, opts)
@@ -74,7 +63,7 @@ return {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR>',
+                '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
                 { desc = 'Toggle [C]ode [C]ompanion chat' }
             )
         end,
@@ -124,10 +113,10 @@ return {
         'stevearc/oil.nvim',
         keys = {
             {
-                '<Leader>ft',
+                '<Leader>fs',
                 function() require('oil').open_float() end,
                 mode = { 'n' },
-                desc = '[F]ile [T]ree',
+                desc = '[F]ile [S]ystem',
             },
         },
         ---@module 'oil'

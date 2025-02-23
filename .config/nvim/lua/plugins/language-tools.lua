@@ -174,7 +174,11 @@ return {
         ---@type blink.cmp.Config
         opts = {
             cmdline = { enabled = false },
-            enabled = function() return vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer() end,
+            enabled = function()
+                local disabled_filetypes = { 'oil', 'gitcommit' }
+                return not vim.tbl_contains(disabled_filetypes, vim.bo.filetype)
+                    and (vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer())
+            end,
             completion = {
                 menu = {
                     auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
@@ -211,6 +215,7 @@ return {
                             max_completions = 1,
                             max_attempts = 2,
                         },
+                        score_offset = -5
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
@@ -300,7 +305,7 @@ return {
         },
         config = function()
             require('sniprun').setup({
-                display = { 'Classic', 'VirtualText' },
+                display = { 'Terminal', 'VirtualText' },
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
             })
