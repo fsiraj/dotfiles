@@ -69,7 +69,8 @@ local M = {
     {
         'rachartier/tiny-devicons-auto-colors.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
-        lazy = true, -- Called from color_overrides()
+        event = 'VeryLazy',
+        config = function() require('tiny-devicons-auto-colors').setup() end,
     },
 
     -- Dashboard
@@ -262,7 +263,6 @@ local color_overrides = function(accent, mantle, palette)
     for hl, col in pairs(theme) do
         vim.api.nvim_set_hl(0, hl, col)
     end
-    require('tiny-devicons-auto-colors').setup({ colors = palette })
 end
 
 -- Run overrides when colorscheme enabled
