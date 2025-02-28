@@ -12,5 +12,7 @@ vim.api.nvim_create_autocmd('TermOpen', {
         vim.opt.relativenumber = false
         local winid = vim.api.nvim_get_current_win()
         vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
+        vim.keymap.set('n', 'cc', 'icc', { buffer = true, remap = true })
+        vim.keymap.set('n', '<CR>', 'i', { buffer = true })
     end,
 })
