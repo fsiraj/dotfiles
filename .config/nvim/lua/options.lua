@@ -1,3 +1,6 @@
+-- Colorscheme
+vim.g.colorscheme = 'catppuccin-mocha'
+
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ','
