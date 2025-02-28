@@ -173,7 +173,10 @@ return {
         ---@module 'blink.cmp'
         ---@type blink.cmp.Config
         opts = {
-            cmdline = { enabled = false },
+            cmdline = {
+                enabled = true,
+                completion = { ghost_text = { enabled = false } },
+            },
             enabled = function()
                 local disabled_filetypes = { 'oil', 'gitcommit' }
                 return not vim.tbl_contains(disabled_filetypes, vim.bo.filetype)
@@ -215,7 +218,7 @@ return {
                             max_completions = 1,
                             max_attempts = 2,
                         },
-                        score_offset = -5
+                        score_offset = -5,
                     },
                     codecompanion = {
                         name = 'CodeCompanion',
