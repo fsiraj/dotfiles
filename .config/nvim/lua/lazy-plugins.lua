@@ -11,5 +11,5 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup('plugins', {
     defaults = { version = nil },
 })
-vim.cmd.colorscheme('catppuccin-mocha')
+vim.cmd.colorscheme(vim.g.colorscheme)
 vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = '[L]azy' })
