@@ -1,5 +1,5 @@
 -- Colorscheme
-vim.g.colorscheme = 'tokyonight-night'
+vim.g.colorscheme = 'catppuccin-mocha'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
