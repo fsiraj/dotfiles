@@ -1199,7 +1199,13 @@ local M = {
         },
         ---@module 'render-markdown'
         ---@type render.md.UserConfig
-        opts = {},
+        opts = {
+            heading = {
+                width = 'block',
+                icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' },
+                right_pad = 1,
+            },
+        },
     },
 
     --MarkdwonPreview
