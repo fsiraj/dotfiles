@@ -1,3 +1,6 @@
+-- Colorscheme
+vim.g.colorscheme = 'tokyonight-night'
+
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ','

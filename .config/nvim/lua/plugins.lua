@@ -1024,6 +1024,7 @@ local M = {
         opts = {
             cmdline = {
                 enabled = true,
+                keymap = { preset = 'cmdline', ['<CR>'] = { 'accept', 'fallback' } },
                 completion = { ghost_text = { enabled = false } },
             },
             enabled = function()
