@@ -636,15 +636,11 @@ local M = {
             require('noice').setup(opts)
 
             -- Keymaps to scroll lsp hover and signature
-            vim.keymap.set({ "n", "i", "s" }, "<C-d>", function()
-                  if not require("noice.lsp").scroll(4) then
-                    return "<c-f>"
-                  end
+            vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
+                if not require('noice.lsp').scroll(4) then return '<c-f>' end
             end, { silent = true, expr = true })
-            vim.keymap.set({ "n", "i", "s" }, "<C-u>", function()
-                  if not require("noice.lsp").scroll(-4) then
-                    return "<c-b>"
-                  end
+            vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
+                if not require('noice.lsp').scroll(-4) then return '<c-b>' end
             end, { silent = true, expr = true })
         end,
     },
@@ -1212,6 +1208,7 @@ local M = {
         ---@module 'render-markdown'
         ---@type render.md.UserConfig
         opts = {
+            sign = { enabled = false },
             heading = {
                 width = 'block',
                 icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' },
@@ -1292,7 +1289,6 @@ local M = {
             -- Dap setup
             local repl = require('dap.repl')
             repl.commands = vim.tbl_extend('force', repl.commands, {
-                -- Add a new alias for the existing .exit command
                 help = { '.h', '.help' },
                 into = { '.i', '.into' },
                 next_ = { '.o', '.over' },
