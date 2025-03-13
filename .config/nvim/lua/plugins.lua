@@ -528,18 +528,6 @@ local M = {
                 cond = noice.api.status.command.has,
             } ---@diagnostic disable-line
 
-            -- Custom behaviour for dapui windows
-            local dapui = {
-                winbar = require('lualine.extensions.nvim-dap-ui').sections,
-                filetypes = require('lualine.extensions.nvim-dap-ui').filetypes,
-            }
-            vim.api.nvim_create_autocmd('FileType', {
-                desc = 'Clear statusline for nvim-dap-ui buffers',
-                group = vim.api.nvim_create_augroup('nvim-dap-ui', { clear = true }),
-                pattern = 'dap*',
-                callback = function() vim.opt.statusline = ' ' end,
-            })
-
             -- Outline and Diffview
             local side_panel = {
                 winbar = {
@@ -548,7 +536,7 @@ local M = {
                     lualine_x = { showcmd },
                 },
                 inactive_winbar = { lualine_c = { 'filetype' } },
-                filetypes = { 'Outline', 'DiffviewFiles' },
+                filetypes = { 'Outline', 'DiffviewFiles', 'dap-view-term' },
             }
 
             -- Terminal (No filetype)
@@ -566,10 +554,10 @@ local M = {
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
                     disabled_filetypes = {
-                        winbar = { 'dap-repl', 'dashboard', 'toggleterm' },
+                        winbar = { 'dap-repl', 'dap-view', 'dashboard', 'toggleterm' },
                     },
                 },
-                extensions = { dapui, side_panel, terminal },
+                extensions = { side_panel, terminal },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
@@ -1243,39 +1231,51 @@ local M = {
     --Dap
     {
         'mfussenegger/nvim-dap',
+        event = 'VeryLazy',
         dependencies = {
             -- UI
-            {
-                'rcarriga/nvim-dap-ui',
-                dependencies = { 'nvim-neotest/nvim-nio' },
-            },
+            'igorlfs/nvim-dap-view',
             -- Installs dependencies
             'williamboman/mason.nvim',
             'jay-babu/mason-nvim-dap.nvim',
             -- Language specific debuggers
             'mfussenegger/nvim-dap-python',
         },
-        keys = {
-            {
-                '<Leader>ds',
-                function() require('dap').continue() end,
-                desc = '[D]ebug [S]tart/Continue',
-            },
-        },
         config = function()
             local dap = require('dap')
-            local dapui = require('dapui')
+            local dv = require('dap-view')
+            local widgets = require('dap.ui.widgets')
 
             -- Keybindings
-            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = '[D]ebug [T]erminate session.' })
-            vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = '[D]ebug [R]estart session.' })
-            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = '[D]ebug Toggle [B]reakpoint' })
-            vim.keymap.set('n', '<Leader>dl', dapui.toggle, { desc = '[D]ebug See [L]ast session result.' })
             vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
             vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
             vim.keymap.set('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
             vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
             vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
+
+            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = '[D]ebug [B]reakpoint Toggle ' })
+            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = '[D]ebug [C]ontinue Session.' })
+            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = '[D]ebug [T]erminate Session.' })
+            vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = '[D]ebug [R]estart Session.' })
+            vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = '[D]ebug [V]iew Toggle ' })
+
+            vim.keymap.set(
+                'n',
+                '<Leader>ds',
+                function() widgets.centered_float(widgets.scopes) end,
+                { desc = '[D]ebug [S]cope' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dk',
+                function() widgets.hover(nil, { border = 'none' }) end,
+                { desc = '[D]ebug Symbol ([K]eywordprog)' }
+            )
+
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = { 'dap-float' },
+                callback = function(event) vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf }) end,
+            })
 
             -- Installs all dependencies with mason
             require('mason-nvim-dap').setup({
@@ -1287,6 +1287,7 @@ local M = {
             })
 
             -- Dap setup
+            dap.defaults.fallback.switchbuf = 'useopen'
             local repl = require('dap.repl')
             repl.commands = vim.tbl_extend('force', repl.commands, {
                 help = { '.h', '.help' },
@@ -1300,33 +1301,13 @@ local M = {
                 },
             })
 
-            -- Dap UI setup
-            dapui.setup({
-                layouts = {
-                    {
-                        elements = {
-                            { id = 'stacks', size = 0.2 },
-                            { id = 'breakpoints', size = 0.2 },
-                            { id = 'scopes', size = 0.3 },
-                            { id = 'watches', size = 0.3 },
-                        },
-                        position = 'left',
-                        size = 40,
-                    },
-                    {
-                        elements = {
-                            { id = 'repl', size = 0.5 },
-                            { id = 'console', size = 0.5 },
-                        },
-                        position = 'bottom',
-                        size = 16,
-                    },
-                },
+            -- Dap View setup
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = { 'dap-view', 'dap-repl' },
+                callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
             })
 
             -- Change breakpoint icons
-            vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
-            vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
             local breakpoint_icons = vim.g.have_nerd_font
                     and {
                         Breakpoint = '',
@@ -1342,10 +1323,11 @@ local M = {
                 vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
             end
 
-            -- Launch dapui automatically when dap starts
-            dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-            dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-            dap.listeners.before.event_exited['dapui_config'] = dapui.close
+            -- Launch dap view automatically when dap starts
+            dap.listeners.before.attach['dap-view-config'] = dv.open
+            dap.listeners.before.launch['dap-view-config'] = dv.open
+            dap.listeners.before.event_terminated['dap-view-config'] = dv.close
+            dap.listeners.before.event_exited['dap-view-config'] = dv.close
 
             -- Python specific config
             local python_path = vim.fs.joinpath(
@@ -1390,6 +1372,8 @@ local color_overrides = function(accent, mantle, palette)
         MiniJump2dSpotAhead = { link = 'MiniJump' },
         MiniJump2dSpotUnique = { link = 'MiniJump' },
     })
+    theme.DapBreak = { fg = palette.red }
+    theme.DapStop = { fg = palette.yellow }
     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
     theme.WhichKeyDesc = { fg = accent }
     theme.TreesitterContextBottom = { sp = accent, underline = true }
