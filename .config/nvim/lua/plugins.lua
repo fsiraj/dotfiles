@@ -528,15 +528,15 @@ local M = {
                 cond = noice.api.status.command.has,
             } ---@diagnostic disable-line
 
-            -- Outline and Diffview
-            local side_panel = {
+            -- Minimal
+            local minimal = {
                 winbar = {
                     lualine_a = { 'filetype' },
                     lualine_b = { tabs },
                     lualine_x = { showcmd },
                 },
                 inactive_winbar = { lualine_c = { 'filetype' } },
-                filetypes = { 'Outline', 'DiffviewFiles', 'dap-view-term' },
+                filetypes = { 'codecompanion', 'Outline', 'DiffviewFiles', 'dap-view-term' },
             }
 
             -- Terminal (No filetype)
@@ -557,7 +557,7 @@ local M = {
                         winbar = { 'dap-repl', 'dap-view', 'dashboard', 'toggleterm' },
                     },
                 },
-                extensions = { side_panel, terminal },
+                extensions = { minimal, terminal },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
