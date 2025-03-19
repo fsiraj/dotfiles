@@ -742,7 +742,7 @@ local M = {
                     vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
                     vim.keymap.set(
                         { 't', 'n' },
-                        '<Esc><Esc>',
+                        '<Bslash>',
                         '<Cmd>ToggleTerm<CR>',
                         { buffer = true, desc = '[T]oggle [T]erm' }
                     )
