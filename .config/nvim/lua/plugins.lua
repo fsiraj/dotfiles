@@ -184,11 +184,6 @@ local M = {
                     icon = { icon = ' ', color = 'orange' },
                 },
                 {
-                    '<Leader>b',
-                    group = '[B]uffer',
-                    icon = { icon = '󰈔 ', color = 'gray' },
-                },
-                {
                     '<Leader>d',
                     group = '[D]ebug',
                     icon = { icon = ' ', color = 'red' },
@@ -1154,20 +1149,20 @@ local M = {
         'michaelb/sniprun',
         branch = 'master',
         build = 'sh install.sh',
-        keys = {
-            {
-                '<Leader>r',
-                '<Plug>SnipRun',
-                mode = { 'n', 'v' },
-                desc = ' [R]un Code',
-            },
-        },
+        event = 'VeryLazy',
         config = function()
             require('sniprun').setup({
                 display = { 'Classic', 'VirtualText' },
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
             })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>rc', '<Plug>SnipClose', { desc = '[R]un [C]lose' })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>rr', function()
+                local mode = vim.api.nvim_get_mode().mode
+                local range_begin, range_end = require('sniprun').get_range(mode ~= 'n' and mode or nil)
+                require('sniprun.api').run_range(range_begin, range_end, vim.bo.filetype, { display = { 'Terminal' } })
+            end, { desc = '[R]un Code (Terminal)' })
         end,
     },
 

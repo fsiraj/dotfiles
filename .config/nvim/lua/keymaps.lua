@@ -1,6 +1,6 @@
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
-vim.keymap.set('n', '<Leader>bt', '<Cmd>e #<CR>', { desc = '[B]uffer [T]oggle Alternative (#)' })
+vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = '[T]oggle [B]uffer Alternative (#)' })
 vim.keymap.set('n', '<C-\\>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
