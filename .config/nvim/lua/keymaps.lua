@@ -22,3 +22,7 @@ vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
 -- Escape insert mode in terminal easier
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
+
+-- Better scrolling
+vim.keymap.set('n', '<C-u>', '10kzz', { desc = 'Scroll half page up and center line'})
+vim.keymap.set('n', '<C-d>', '10jzz', { desc = 'Scroll half page down and center line'})

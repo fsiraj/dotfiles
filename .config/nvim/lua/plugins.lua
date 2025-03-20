@@ -1164,7 +1164,7 @@ local M = {
         },
         config = function()
             require('sniprun').setup({
-                display = { 'Terminal', 'VirtualText' },
+                display = { 'Classic', 'VirtualText' },
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
             })
