@@ -1132,6 +1132,9 @@ local M = {
                 markdown = { 'markdownlint' },
             }
 
+            -- Configure linters
+            lint.linters.markdownlint.args = { "--disable", "MD013", "--" }
+
             -- Autocommand to start linting
             local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
             vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
@@ -1157,8 +1160,7 @@ local M = {
                 repl_enable = { 'Python3_fifo' },
             })
             vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>rc', '<Plug>SnipClose', { desc = '[R]un [C]lose' })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>rr', function()
+            vim.keymap.set({ 'n', 'v' }, '<Leader>R', function()
                 local mode = vim.api.nvim_get_mode().mode
                 local range_begin, range_end = require('sniprun').get_range(mode ~= 'n' and mode or nil)
                 require('sniprun.api').run_range(range_begin, range_end, vim.bo.filetype, { display = { 'Terminal' } })
