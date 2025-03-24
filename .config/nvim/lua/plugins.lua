@@ -129,7 +129,20 @@ local M = {
 
             -- Session management
             local sessions = require('mini.sessions')
-            sessions.setup()
+            sessions.setup({
+                hooks = {
+                    post = {
+                        read = function()
+                            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                                -- Targetting dead codecompanion buffers
+                                if vim.bo[buf].filetype == '' then
+                                    vim.api.nvim_buf_delete(buf, {})
+                                end
+                            end
+                        end,
+                    },
+                },
+            })
             vim.keymap.set('n', '<Leader>Sw', function()
                 sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) ---@diagnostic disable-line
             end, { desc = '[S]ession [W]rite' })
@@ -295,11 +308,18 @@ local M = {
 
                 pickers = {
                     find_files = { hidden = true },
+                    buffers = {
+                        previewer = false,
+                        layout_config = { width = 50, height = 16 },
+                        path_display = { 'tail' },
+                    },
+                    live_grep = { path_display = { 'tail' } },
                     help_tags = {
                         mappings = { i = { ['<CR>'] = 'select_vertical' } },
                     },
                     colorscheme = { enable_preview = true },
                     lsp_references = { path_display = { 'tail' } },
+                    current_buffer_fuzzy_find = { previewer = false },
                 },
 
                 extensions = {
@@ -322,7 +342,7 @@ local M = {
             vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
             vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
             vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
-            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [D]iagnostics' })
+            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [Q]uickfix' })
             vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
             vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
             vim.keymap.set(
@@ -679,7 +699,7 @@ local M = {
         opts = {
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false },
+                chat = { show_header_separator = false, auto_scroll = false },
             },
         },
         config = function(_, opts)
@@ -1051,11 +1071,7 @@ local M = {
                             max_completions = 1,
                             max_attempts = 2,
                         },
-                        score_offset = -5,
-                    },
-                    codecompanion = {
-                        name = 'CodeCompanion',
-                        module = 'codecompanion.providers.completion.blink',
+                        score_offset = -10,
                     },
                     dap = {
                         name = 'dap',
@@ -1125,7 +1141,7 @@ local M = {
             }
 
             -- Configure linters
-            lint.linters.markdownlint.args = { "--disable", "MD013", "--" }
+            lint.linters.markdownlint.args = { '--disable', 'MD013', '--' }
 
             -- Autocommand to start linting
             local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
