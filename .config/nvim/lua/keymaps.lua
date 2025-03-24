@@ -21,7 +21,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
 
 -- Escape insert mode in terminal easier
-vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
 
 -- Keymaps to scroll lsp hover and signature
 vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()

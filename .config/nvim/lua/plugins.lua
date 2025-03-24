@@ -1,7 +1,83 @@
--- Colorschemes
--- Dashboard
--- Lualine
--- Noice
+-- Language support
+local treesitter_parsers = {
+    'python',
+    'bash',
+    'c',
+    'diff',
+    'html',
+    'lua',
+    'luadoc',
+    'markdown',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+    'tmux',
+    'yaml',
+    'regex',
+}
+
+local language_servers = {
+    -- Python
+    basedpyright = {
+        settings = {
+            basedpyright = {
+                analysis = {
+                    diagnosticMode = 'openFilesOnly',
+                    typeCheckingMode = 'standard',
+                    autoSearchPaths = true,
+                    useLibraryCodeForTypes = true,
+                    diagnosticSeverityOverrides = {},
+                },
+            },
+        },
+    },
+    -- Lua
+    lua_ls = {
+        settings = {
+            Lua = {
+                completion = { callSnippet = 'Replace' },
+                diagnostics = {
+                    globals = { 'vim', 'require' },
+                    disable = { 'missing-fields' },
+                },
+            },
+        },
+    },
+    -- Bash
+    bashls = {
+        filetypes = { 'bash', 'sh' },
+    },
+    -- Markdown
+    marksman = {},
+    -- TOML
+    taplo = {},
+}
+
+local formatters_by_ft = {
+    lua = { 'stylua' },
+    python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
+    markdown = { 'markdownlint' },
+    zsh = { 'shfmt', 'shellcheck' },
+    sh = { 'shfmt', 'shellcheck' },
+}
+
+local linters_by_ft = {
+    json = { 'jsonlint' },
+    markdown = { 'markdownlint' },
+}
+
+-- Add tools here that you want Mason to install
+local ensure_installed = vim.tbl_keys(language_servers or {})
+vim.list_extend(ensure_installed, {
+    'stylua',
+    'ruff',
+    'debugpy',
+    'markdownlint',
+    'jsonlint',
+    'shellcheck',
+    'shfmt',
+})
 
 local dashboard_header = {
     '                                                                                   ',
@@ -58,6 +134,9 @@ local textobjects = {
     { '{', desc = '{} block' },
     { '}', desc = '{} with ws' },
 }
+
+-- To make UIs multiples of 50
+local unit_width = 50
 
 local M = {
     -- NOTE: Essentials
@@ -135,9 +214,7 @@ local M = {
                         read = function()
                             for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                                 -- Targetting dead codecompanion buffers
-                                if vim.bo[buf].filetype == '' then
-                                    vim.api.nvim_buf_delete(buf, {})
-                                end
+                                if vim.bo[buf].filetype == '' then vim.api.nvim_buf_delete(buf, {}) end
                             end
                         end,
                     },
@@ -175,7 +252,7 @@ local M = {
         },
         opts = {
             preset = 'modern',
-            win = { width = { max = 150 } },
+            win = { width = { max = unit_width * 3 } },
             triggers = {
                 { '<auto>', mode = 'nixsotc' },
                 { 's', mode = { 'n', 'v' } },
@@ -282,6 +359,7 @@ local M = {
                         horizontal = {
                             prompt_position = 'top',
                             preview_width = 0.6,
+                            width = math.min(unit_width * 3, math.floor(0.8 * vim.o.columns)),
                         },
                     },
                     wrap_results = false,
@@ -310,7 +388,7 @@ local M = {
                     find_files = { hidden = true },
                     buffers = {
                         previewer = false,
-                        layout_config = { width = 50, height = 16 },
+                        layout_config = { width = unit_width, height = 16 },
                         path_display = { 'tail' },
                     },
                     live_grep = { path_display = { 'tail' } },
@@ -373,23 +451,7 @@ local M = {
         build = ':TSUpdate',
         main = 'nvim-treesitter.configs',
         opts = {
-            ensure_installed = {
-                'python',
-                'bash',
-                'c',
-                'diff',
-                'html',
-                'lua',
-                'luadoc',
-                'markdown',
-                'markdown_inline',
-                'query',
-                'vim',
-                'vimdoc',
-                'tmux',
-                'yaml',
-                'regex',
-            },
+            ensure_installed = treesitter_parsers,
             auto_install = true,
             highlight = {
                 enable = true,
@@ -613,7 +675,7 @@ local M = {
             },
             views = {
                 cmdline_popup = {
-                    size = { width = 60, max_width = 60 },
+                    size = { width = unit_width, max_width = unit_width },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
                     win_options = {
@@ -630,8 +692,8 @@ local M = {
             require('notify').setup({
                 render = 'wrapped-compact',
                 stages = 'static',
-                minimum_width = 50,
-                max_width = 50,
+                minimum_width = unit_width,
+                max_width = unit_width,
             })
             for format, _ in pairs(require('noice.config').defaults().cmdline.format) do
                 opts.cmdline.format[format] = { conceal = false }
@@ -941,66 +1003,17 @@ local M = {
                 { desc = 'LSP: [T]oggle [D]iagnostics' }
             )
 
-            -- Enable the following language servers
-            local servers = {
-                -- Python
-                basedpyright = {
-                    settings = {
-                        basedpyright = {
-                            analysis = {
-                                diagnosticMode = 'openFilesOnly',
-                                typeCheckingMode = 'standard',
-                                autoSearchPaths = true,
-                                useLibraryCodeForTypes = true,
-                                diagnosticSeverityOverrides = {},
-                            },
-                        },
-                    },
-                },
-                -- Lua
-                lua_ls = {
-                    settings = {
-                        Lua = {
-                            completion = { callSnippet = 'Replace' },
-                            diagnostics = {
-                                globals = { 'vim', 'require' },
-                                disable = { 'missing-fields' },
-                            },
-                        },
-                    },
-                },
-                -- Bash
-                bashls = {
-                    filetypes = { 'bash', 'sh' },
-                },
-                -- Markdown
-                marksman = {},
-                -- TOML
-                taplo = {},
-            }
-
             -- Mason installs external tools
             require('mason').setup()
             vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = '[M]ason' })
 
-            -- Add tools here that you want Mason to install
-            local ensure_installed = vim.tbl_keys(servers or {})
-            vim.list_extend(ensure_installed, {
-                'stylua',
-                'ruff',
-                'debugpy',
-                'markdownlint',
-                'jsonlint',
-                'shellcheck',
-                'shfmt',
-            })
             require('mason-tool-installer').setup({
                 ensure_installed = ensure_installed,
             })
             require('mason-lspconfig').setup({
                 handlers = {
                     function(server_name)
-                        local server_config = servers[server_name] or {}
+                        local server_config = language_servers[server_name] or {}
                         -- Adds additional capabilities from blink.cmp
                         server_config.capabilities =
                             require('blink.cmp').get_lsp_capabilities(server_config.capabilities)
@@ -1109,17 +1122,10 @@ local M = {
                     lsp_format = 'fallback',
                 }
             end,
-            formatters_by_ft = {
-                lua = { 'stylua' },
-                python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
-                markdown = { 'markdownlint' },
-                zsh = { 'shfmt', 'shellcheck' },
-                sh = { 'shfmt', 'shellcheck' },
-            },
+            formatters_by_ft = formatters_by_ft,
         },
         config = function(_, opts)
             require('conform').setup(opts)
-
             -- Toggle format on save
             vim.keymap.set('n', '<Leader>tf', function()
                 vim.g.format_on_save = not vim.g.format_on_save
@@ -1135,10 +1141,7 @@ local M = {
         config = function()
             local lint = require('lint')
             -- Disable all default linters, enable manually if needed
-            lint.linters_by_ft = {
-                json = { 'jsonlint' },
-                markdown = { 'markdownlint' },
-            }
+            lint.linters_by_ft = linters_by_ft
 
             -- Configure linters
             lint.linters.markdownlint.args = { '--disable', 'MD013', '--' }
