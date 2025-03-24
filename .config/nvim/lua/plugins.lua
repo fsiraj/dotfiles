@@ -204,7 +204,12 @@ local M = {
                     priority = 5,
                 },
             })
-            vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })
+            vim.keymap.set(
+                'n',
+                '<Leader>gd',
+                MiniDiff.toggle_overlay,
+                { desc = 'Toggle Git Overlay' }
+            )
 
             -- Session management
             local sessions = require('mini.sessions')
@@ -214,7 +219,9 @@ local M = {
                         read = function()
                             for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                                 -- Targetting dead codecompanion buffers
-                                if vim.bo[buf].filetype == '' then vim.api.nvim_buf_delete(buf, {}) end
+                                if vim.bo[buf].filetype == '' then
+                                    vim.api.nvim_buf_delete(buf, {})
+                                end
                             end
                         end,
                     },
@@ -303,6 +310,11 @@ local M = {
                     group = '[G]it',
                     mode = { 'n', 'v' },
                     icon = { cat = 'filetype', name = 'git' },
+                },
+                {
+                    '<Leader>n',
+                    group = '[N]eotest',
+                    icon = { icon = ' ', color = 'azure' },
                 },
             },
         },
@@ -413,16 +425,66 @@ local M = {
 
             -- Keymaps
             local builtin = require('telescope.builtin')
-            vim.keymap.set('n', '<Leader>sh', builtin.help_tags, { desc = 'Telescope: [S]earch [H]elp' })
-            vim.keymap.set('n', '<Leader>sH', builtin.highlights, { desc = 'Telescope: [S]earch [H]ighlights' })
-            vim.keymap.set('n', '<Leader>sk', builtin.keymaps, { desc = 'Telescope: [S]earch [K]eymaps' })
-            vim.keymap.set('n', '<Leader>sf', builtin.find_files, { desc = 'Telescope: [S]earch [F]iles' })
-            vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
-            vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
-            vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
-            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [Q]uickfix' })
-            vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
-            vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
+            vim.keymap.set(
+                'n',
+                '<Leader>sh',
+                builtin.help_tags,
+                { desc = 'Telescope: [S]earch [H]elp' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sH',
+                builtin.highlights,
+                { desc = 'Telescope: [S]earch [H]ighlights' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sk',
+                builtin.keymaps,
+                { desc = 'Telescope: [S]earch [K]eymaps' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sf',
+                builtin.find_files,
+                { desc = 'Telescope: [S]earch [F]iles' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sb',
+                builtin.builtin,
+                { desc = 'Telescope: [S]earch [B]uiltin' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sw',
+                builtin.grep_string,
+                { desc = 'Telescope: [S]earch Current [W]ord' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sg',
+                builtin.live_grep,
+                { desc = 'Telescope: [S]earch by [G]rep' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sq',
+                builtin.diagnostics,
+                { desc = 'Telescope: [S]earch [Q]uickfix' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>sr',
+                builtin.resume,
+                { desc = 'Telescope: [S]earch [R]esume' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader><Leader>',
+                builtin.buffers,
+                { desc = ' [ ] Telescope: Find Existing Buffers' }
+            )
             vim.keymap.set(
                 'v',
                 '<Leader>ss',
@@ -532,6 +594,9 @@ local M = {
                 which_key = true,
                 mason = true,
                 blink_cmp = true,
+                neotest = true,
+                diffview = true,
+                notify = true,
             },
         },
     },
@@ -613,7 +678,13 @@ local M = {
                     lualine_x = { showcmd },
                 },
                 inactive_winbar = { lualine_c = { 'filetype' } },
-                filetypes = { 'codecompanion', 'Outline', 'DiffviewFiles', 'dap-view-term' },
+                filetypes = {
+                    'codecompanion',
+                    'Outline',
+                    'DiffviewFiles',
+                    'dap-view-term',
+                    'neotest-summary',
+                },
             }
 
             -- Terminal (No filetype)
@@ -808,7 +879,12 @@ local M = {
             vim.api.nvim_create_autocmd('TermOpen', {
                 pattern = 'term://*toggleterm#*',
                 callback = function()
-                    vim.keymap.set('n', 'q', '<Cmd>ToggleTerm<CR>', { buffer = true, desc = '[T]oggle [T]erm' })
+                    vim.keymap.set(
+                        'n',
+                        'q',
+                        '<Cmd>ToggleTerm<CR>',
+                        { buffer = true, desc = '[T]oggle [T]erm' }
+                    )
                     vim.keymap.set(
                         { 't', 'n' },
                         '<Bslash>',
@@ -855,7 +931,9 @@ local M = {
                 pattern = 'OilEnter',
                 callback = vim.schedule_wrap(function(args)
                     local oil = require('oil')
-                    if vim.api.nvim_get_current_buf() == args.data.buf and oil.get_cursor_entry() then
+                    if
+                        vim.api.nvim_get_current_buf() == args.data.buf and oil.get_cursor_entry()
+                    then
                         oil.open_preview()
                     end
                 end),
@@ -930,7 +1008,12 @@ local M = {
                     local telescope = require('telescope.builtin')
                     local map = function(keys, func, desc, mode)
                         mode = mode or 'n'
-                        vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+                        vim.keymap.set(
+                            mode,
+                            keys,
+                            func,
+                            { buffer = event.buf, desc = 'LSP: ' .. desc }
+                        )
                     end
                     map('<Leader>cd', telescope.lsp_definitions, '[C]ode [D]efinition')
                     map('<Leader>cD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
@@ -942,14 +1025,24 @@ local M = {
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
                     map('<Leader>cq', vim.diagnostic.setloclist, '[C]ode [Q]uickfix List')
-                    map('<Leader>ck', vim.diagnostic.open_float, '[C]ode Diagnotic Float ([K]eywordprog)')
+                    map(
+                        '<Leader>ck',
+                        vim.diagnostic.open_float,
+                        '[C]ode Diagnotic Float ([K]eywordprog)'
+                    )
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 
                     -- Highliht references on hover
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
-                    if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-                        local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
+                    if
+                        client
+                        and client.supports_method(
+                            vim.lsp.protocol.Methods.textDocument_documentHighlight
+                        )
+                    then
+                        local highlight_augroup =
+                            vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
                         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
                             buffer = event.buf,
                             group = highlight_augroup,
@@ -973,7 +1066,10 @@ local M = {
                     end
 
                     -- If LSP supports inlay hints, enable them
-                    if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+                    if
+                        client
+                        and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint)
+                    then
                         map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({
                                 bufnr = event.buf,
@@ -1158,6 +1254,89 @@ local M = {
         end,
     },
 
+    --Neotest
+    {
+        'nvim-neotest/neotest',
+        dependencies = {
+            'nvim-neotest/nvim-nio',
+            'nvim-lua/plenary.nvim',
+            'antoinemadec/FixCursorHold.nvim',
+            'nvim-treesitter/nvim-treesitter',
+            'nvim-neotest/neotest-python',
+        },
+        config = function()
+            local neotest = require('neotest')
+            neotest.setup({
+                adapters = {
+                    require('neotest-python')({}),
+                },
+                summary = {
+                    open = '40vsplit',
+                },
+            })
+
+            -- Keymaps
+            vim.keymap.set(
+                'n',
+                '<Leader>nr',
+                function() neotest.run.run() end,
+                { desc = '[N]eotest [R]un' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>nl',
+                function() neotest.run.run_last() end,
+                { desc = '[N]eotest Run [L]ast' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>nf',
+                function() neotest.run.run(vim.fn.expand('%')) end,
+                { desc = '[N]eotest Run [F]ile' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>na',
+                function() neotest.run.run({ suite = true }) end,
+                { desc = '[N]eotest Run [A]ll' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>no',
+                function() neotest.output.open({ enter = true }) end,
+                { desc = '[N]eotest [O]utput' }
+            )
+            vim.keymap.set('n', '<Leader>ns', function()
+                neotest.summary.toggle()
+                vim.cmd('wincmd =')
+            end, { desc = '[N]eotest [S]ummary' })
+            vim.keymap.set(
+                'n',
+                ']n',
+                function() neotest.jump.next({ status = "failed" }) end,
+                { desc = '[N]eotest [N]ext' }
+            )
+            vim.keymap.set(
+                'n',
+                '[n',
+                function() neotest.jump.prev({ status = "failed" }) end,
+                { desc = '[N]eotest [P]revious' }
+            )
+
+            -- Window highlight and close window keymap
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = 'neotest-summary',
+                callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
+            })
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = 'neotest-output',
+                callback = function()
+                    vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { desc = 'Close Window' })
+                end,
+            })
+        end,
+    },
+
     --Sniprun
     {
         'michaelb/sniprun',
@@ -1173,8 +1352,14 @@ local M = {
             vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
             vim.keymap.set({ 'n', 'v' }, '<Leader>R', function()
                 local mode = vim.api.nvim_get_mode().mode
-                local range_begin, range_end = require('sniprun').get_range(mode ~= 'n' and mode or nil)
-                require('sniprun.api').run_range(range_begin, range_end, vim.bo.filetype, { display = { 'Terminal' } })
+                local range_begin, range_end =
+                    require('sniprun').get_range(mode ~= 'n' and mode or nil)
+                require('sniprun.api').run_range(
+                    range_begin,
+                    range_end,
+                    vim.bo.filetype,
+                    { display = { 'Terminal' } }
+                )
             end, { desc = '[R]un Code (Terminal)' })
         end,
     },
@@ -1261,9 +1446,24 @@ local M = {
             vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
             vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
 
-            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = '[D]ebug [B]reakpoint Toggle ' })
-            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = '[D]ebug [C]ontinue Session.' })
-            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = '[D]ebug [T]erminate Session.' })
+            vim.keymap.set(
+                'n',
+                '<Leader>db',
+                dap.toggle_breakpoint,
+                { desc = '[D]ebug [B]reakpoint Toggle ' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dc',
+                dap.continue,
+                { desc = '[D]ebug [C]ontinue Session.' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dt',
+                dap.terminate,
+                { desc = '[D]ebug [T]erminate Session.' }
+            )
             vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = '[D]ebug [R]estart Session.' })
             vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = '[D]ebug [V]iew Toggle ' })
 
@@ -1282,7 +1482,9 @@ local M = {
 
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-float' },
-                callback = function(event) vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf }) end,
+                callback = function(event)
+                    vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf })
+                end,
             })
 
             -- Installs all dependencies with mason
