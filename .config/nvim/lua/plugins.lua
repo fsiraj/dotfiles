@@ -1319,13 +1319,13 @@ local M = {
             vim.keymap.set(
                 'n',
                 ']n',
-                function() neotest.jump.next({ status = "failed" }) end,
+                function() neotest.jump.next({ status = 'failed' }) end,
                 { desc = '[N]eotest [N]ext' }
             )
             vim.keymap.set(
                 'n',
                 '[n',
-                function() neotest.jump.prev({ status = "failed" }) end,
+                function() neotest.jump.prev({ status = 'failed' }) end,
                 { desc = '[N]eotest [P]revious' }
             )
 
@@ -1356,17 +1356,6 @@ local M = {
                 repl_enable = { 'Python3_fifo' },
             })
             vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>R', function()
-                local mode = vim.api.nvim_get_mode().mode
-                local range_begin, range_end =
-                    require('sniprun').get_range(mode ~= 'n' and mode or nil)
-                require('sniprun.api').run_range(
-                    range_begin,
-                    range_end,
-                    vim.bo.filetype,
-                    { display = { 'Terminal' } }
-                )
-            end, { desc = '[R]un Code (Terminal)' })
         end,
     },
 
