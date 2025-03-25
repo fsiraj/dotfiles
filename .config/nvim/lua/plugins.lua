@@ -1302,6 +1302,12 @@ local M = {
             )
             vim.keymap.set(
                 'n',
+                '<Leader>nw',
+                function() neotest.watch.toggle() end,
+                { desc = '[N]eotest [W]atch' }
+            )
+            vim.keymap.set(
+                'n',
                 '<Leader>no',
                 function() neotest.output.open({ enter = true }) end,
                 { desc = '[N]eotest [O]utput' }
