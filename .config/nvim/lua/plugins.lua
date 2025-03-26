@@ -832,7 +832,7 @@ local M = {
         opts = {
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false },
+                chat = { show_header_separator = false, auto_scroll = false, show_settings = true },
             },
         },
         config = function(_, opts)
@@ -1257,6 +1257,7 @@ local M = {
     --Neotest
     {
         'nvim-neotest/neotest',
+        event = 'VeryLazy',
         dependencies = {
             'nvim-neotest/nvim-nio',
             'nvim-lua/plenary.nvim',
