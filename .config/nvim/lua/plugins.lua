@@ -782,7 +782,7 @@ local M = {
     {
         'NeogitOrg/neogit',
         keys = {
-            { '<Leader>gN', '<Cmd>Neogit<CR>', desc = 'Open Neogit' },
+            { '<Leader>N', '<Cmd>Neogit<CR>', desc = ' [N]eogit: Git' },
         },
         dependencies = {
             'nvim-lua/plenary.nvim',
@@ -820,6 +820,7 @@ local M = {
         opts = {
             suggestion = { enabled = false },
             panel = { enabled = false },
+            server = { type = 'binary' }
         },
     },
 
@@ -833,9 +834,16 @@ local M = {
             'echasnovski/mini.diff',
         },
         opts = {
+            adapters = {
+                copilot = function()
+                    return require('codecompanion.adapters').extend('copilot', {
+                        schema = { model = { default = 'claude-3.7-sonnet' } },
+                    })
+                end,
+            },
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false },
+                chat = { show_header_separator = false, auto_scroll = false, show_settings = true },
             },
         },
         config = function(_, opts)
@@ -1040,8 +1048,9 @@ local M = {
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if
                         client
-                        and client.supports_method(
-                            vim.lsp.protocol.Methods.textDocument_documentHighlight
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_documentHighlight,
+                            event.buf
                         )
                     then
                         local highlight_augroup =
@@ -1071,7 +1080,10 @@ local M = {
                     -- If LSP supports inlay hints, enable them
                     if
                         client
-                        and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint)
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_inlayHint,
+                            event.buf
+                        )
                     then
                         map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({
@@ -1364,7 +1376,7 @@ local M = {
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
             })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = ' [R]un Code' })
         end,
     },
 
