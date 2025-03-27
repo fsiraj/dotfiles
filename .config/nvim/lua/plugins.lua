@@ -219,7 +219,9 @@ local M = {
                         read = function()
                             for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                                 -- Targetting dead CodeCompanion buffers
-                                if string.match(vim.api.nvim_buf_get_name(buf), 'CodeCompanion') then
+                                if
+                                    string.match(vim.api.nvim_buf_get_name(buf), 'CodeCompanion')
+                                then
                                     vim.api.nvim_buf_delete(buf, {})
                                     vim.cmd('CodeCompanionChat Toggle')
                                     vim.cmd('wincmd =')
@@ -668,8 +670,8 @@ local M = {
             }
             local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
             local showcmd = {
-                noice.api.status.command.get,
-                cond = noice.api.status.command.has,
+                noice.api.status.command.get, ---@diagnostic disable-line
+                cond = noice.api.status.command.has, ---@diagnostic disable-line
             } ---@diagnostic disable-line
 
             -- Minimal
@@ -737,7 +739,6 @@ local M = {
             },
             messages = { enabled = true },
             popupmenu = { enabled = true },
-            presets = { long_message_to_split = true },
             lsp = {
                 hover = { enabled = true },
                 signature = { enabled = true },
@@ -1149,6 +1150,7 @@ local M = {
             completion = {
                 menu = {
                     auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
+                    draw = { components = { label = { width = { max = unit_width / 2 } } } },
                 },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
@@ -1339,7 +1341,12 @@ local M = {
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = 'neotest-output',
                 callback = function()
-                    vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' })
+                    vim.keymap.set(
+                        'n',
+                        'q',
+                        '<Cmd>:q<CR>',
+                        { buffer = true, desc = 'Close Window' }
+                    )
                 end,
             })
         end,
