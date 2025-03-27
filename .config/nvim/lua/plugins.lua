@@ -833,9 +833,16 @@ local M = {
             'echasnovski/mini.diff',
         },
         opts = {
+            adapters = {
+                copilot = function()
+                    return require('codecompanion.adapters').extend('copilot', {
+                        schema = { model = { default = 'gpt-4o-2024-11-20' } },
+                    })
+                end,
+            },
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false },
+                chat = { show_header_separator = false, auto_scroll = false, show_settings = true },
             },
         },
         config = function(_, opts)
