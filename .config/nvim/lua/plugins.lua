@@ -782,7 +782,7 @@ local M = {
     {
         'NeogitOrg/neogit',
         keys = {
-            { '<Leader>gN', '<Cmd>Neogit<CR>', desc = 'Open Neogit' },
+            { '<Leader>N', '<Cmd>Neogit<CR>', desc = ' [N]eogit: Git' },
         },
         dependencies = {
             'nvim-lua/plenary.nvim',
@@ -1371,7 +1371,7 @@ local M = {
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
             })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = '[R]un Code' })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = ' [R]un Code' })
         end,
     },
 
