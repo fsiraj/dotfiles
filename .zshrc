@@ -69,14 +69,14 @@ source <(fzf --zsh)
 if command -v eza &>/dev/null; then
     alias ls="eza --git-ignore --group-directories-first --color=auto --icons=auto"
     alias ll="eza -al --group-directories-first --color=auto --icons=auto"
-    alias lsa="eza -a --group-directories-first --color=auto --icons=auto"
+    alias la="eza -a --group-directories-first --color=auto --icons=auto"
 else
     alias ls="ls"
     alias ll="ls -Al"
-    alias lsa = "ls -A"
+    alias la = "ls -A"
 fi
 
-alias cc="clear -x"
+alias c="clear -x"
 alias cd..="cd .."
 alias py="python3"
 alias pyv="python3 --version"
