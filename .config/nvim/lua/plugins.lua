@@ -836,7 +836,7 @@ local M = {
             adapters = {
                 copilot = function()
                     return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'gpt-4o-2024-11-20' } },
+                        schema = { model = { default = 'claude-3.7-sonnet' } },
                     })
                 end,
             },
@@ -1047,8 +1047,9 @@ local M = {
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if
                         client
-                        and client.supports_method(
-                            vim.lsp.protocol.Methods.textDocument_documentHighlight
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_documentHighlight,
+                            event.buf
                         )
                     then
                         local highlight_augroup =
@@ -1078,7 +1079,10 @@ local M = {
                     -- If LSP supports inlay hints, enable them
                     if
                         client
-                        and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint)
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_inlayHint,
+                            event.buf
+                        )
                     then
                         map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({
