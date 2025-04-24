@@ -820,7 +820,7 @@ local M = {
         opts = {
             suggestion = { enabled = false },
             panel = { enabled = false },
-            server = { type = 'binary' }
+            server = { type = 'binary' },
         },
     },
 
@@ -1044,7 +1044,7 @@ local M = {
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 
-                    -- Highliht references on hover
+                    -- Highlight references on hover
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if
                         client
@@ -1096,15 +1096,23 @@ local M = {
                 end,
             })
 
-            -- Change diagnostic symbols in the sign column (gutter)
-            if vim.g.have_nerd_font then
-                local signs = { ERROR = '', WARN = '', INFO = '', HINT = '' }
-                local diagnostic_signs = {}
-                for type, icon in pairs(signs) do
-                    diagnostic_signs[vim.diagnostic.severity[type]] = icon
-                end
-                vim.diagnostic.config({ signs = { text = diagnostic_signs } })
-            end
+            -- Diagnostic Config
+            vim.diagnostic.config({
+                severity_sort = true,
+                float = { border = 'rounded', source = 'if_many' },
+                underline = { severity = vim.diagnostic.severity.ERROR },
+                signs = vim.g.have_nerd_font
+                        and {
+                            text = {
+                                [vim.diagnostic.severity.ERROR] = '󰅚 ',
+                                [vim.diagnostic.severity.WARN] = '󰀪 ',
+                                [vim.diagnostic.severity.INFO] = '󰋽 ',
+                                [vim.diagnostic.severity.HINT] = '󰌶 ',
+                            },
+                        }
+                    or {},
+                virtual_text = false,
+            })
 
             -- Toggle diagnostic information
             vim.keymap.set(
@@ -1113,6 +1121,16 @@ local M = {
                 function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end,
                 { desc = 'LSP: [T]oggle [D]iagnostics' }
             )
+            vim.api.nvim_create_autocmd({ 'CursorHold' }, {
+                pattern = '*',
+                callback = function()
+                    vim.diagnostic.open_float({
+                        scope = 'line',
+                        focusable = false,
+                        close_events = { 'CursorMoved', 'CursorMovedI', },
+                    })
+                end,
+            })
 
             -- Mason installs external tools
             require('mason').setup()
@@ -1125,9 +1143,12 @@ local M = {
                 handlers = {
                     function(server_name)
                         local server_config = language_servers[server_name] or {}
-                        -- Adds additional capabilities from blink.cmp
-                        server_config.capabilities =
-                            require('blink.cmp').get_lsp_capabilities(server_config.capabilities)
+                        server_config.capabilities = vim.tbl_deep_extend(
+                            'force',
+                            {},
+                            require('blink.cmp').get_lsp_capabilities(server_config.capabilities),
+                            server_config.capabilities or {}
+                        )
                         require('lspconfig')[server_name].setup(server_config)
                     end,
                 },
