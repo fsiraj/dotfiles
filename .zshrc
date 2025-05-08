@@ -76,7 +76,7 @@ else
     alias la = "ls -A"
 fi
 
-alias cc="clear -x"
+alias c="clear -x"
 alias cd..="cd .."
 alias py="python3"
 alias pyv="python3 --version"
