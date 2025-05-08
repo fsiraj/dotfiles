@@ -1117,7 +1117,7 @@ local M = {
                     vim.diagnostic.open_float({
                         scope = 'line',
                         focusable = false,
-                        close_events = { 'CursorMoved', 'CursorMovedI', },
+                        close_events = { 'CursorMoved', 'CursorMovedI' },
                     })
                 end,
             })
@@ -1129,20 +1129,12 @@ local M = {
             require('mason-tool-installer').setup({
                 ensure_installed = ensure_installed,
             })
-            require('mason-lspconfig').setup({
-                handlers = {
-                    function(server_name)
-                        local server_config = language_servers[server_name] or {}
-                        server_config.capabilities = vim.tbl_deep_extend(
-                            'force',
-                            {},
-                            require('blink.cmp').get_lsp_capabilities(server_config.capabilities),
-                            server_config.capabilities or {}
-                        )
-                        require('lspconfig')[server_name].setup(server_config)
-                    end,
-                },
-            })
+            require('mason-lspconfig').setup()
+
+            -- Add custom configs to LSPs
+            for server_name, server_config in pairs(language_servers) do
+                vim.lsp.config(server_name, server_config)
+            end
         end,
     },
 
@@ -1454,7 +1446,10 @@ local M = {
         event = 'VeryLazy',
         dependencies = {
             -- UI
-            'igorlfs/nvim-dap-view',
+            {
+                'igorlfs/nvim-dap-view',
+                opts = { windows = { terminal = { position = 'right' } } },
+            },
             -- Installs dependencies
             'williamboman/mason.nvim',
             'jay-babu/mason-nvim-dap.nvim',
@@ -1543,7 +1538,6 @@ local M = {
                 pattern = { 'dap-view', 'dap-repl' },
                 callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
             })
-
             -- Change breakpoint icons
             local breakpoint_icons = vim.g.have_nerd_font
                     and {

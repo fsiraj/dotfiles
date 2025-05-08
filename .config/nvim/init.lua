@@ -95,9 +95,6 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Easier pasting in insert mode
-vim.keymap.set('i', '<C-p>', '<C-r>+', { desc = 'Paste from register +' })
-
 -- Escape insert mode in terminal easier
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
 
@@ -152,5 +149,5 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup('plugins', {
     defaults = { version = nil },
 })
-vim.cmd.colorscheme(vim.g.colorscheme)
 vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = '[L]azy' })
+vim.cmd.colorscheme(vim.g.colorscheme)
