@@ -953,7 +953,6 @@ local M = {
             outline_window = {
                 split_command = unit_width .. 'vsplit',
                 winhl = 'Normal:NormalFloat',
-                auto_close = true,
             },
             outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
