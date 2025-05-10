@@ -506,6 +506,12 @@ local M = {
                 function() builtin.find_files({ cwd = '~/dotfiles' }) end,
                 { desc = 'Telescope: [S]earch [D]otfiles' }
             )
+            vim.keymap.set(
+                'n',
+                '<Leader>sp',
+                function() builtin.find_files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end,
+                { desc = 'Telescope: [S]earch [P]lugins' }
+            )
         end,
     },
 
@@ -897,47 +903,24 @@ local M = {
         end,
     },
 
-    --Oil
+    --Namu
     {
-        'stevearc/oil.nvim',
-        keys = {
-            {
-                '<Leader>fs',
-                function() require('oil').open_float() end,
-                mode = { 'n' },
-                desc = '[F]ile [S]ystem',
-            },
-        },
-        ---@module 'oil'
-        ---@type oil.SetupOpts
-        opts = {
-            view_options = { show_hidden = true },
-            float = { max_width = 0.4, max_height = 0.8 },
-            keymaps = {
-                ['q'] = { 'actions.close' },
-                ['<C-h>'] = { 'actions.show_help' },
-                ['<C-->'] = { 'actions.select', opts = { horizontal = true } },
-                ['<C-Bslash>'] = {
-                    'actions.select',
-                    opts = { vertical = true },
+        'bassamsdata/namu.nvim',
+        config = function()
+            require('namu').setup({
+                namu_symbols = {
+                    options = {
+                        display = { format = 'tree_guides' },
+                    },
                 },
-            },
-            -- Optional dependencies
-            dependencies = { 'nvim-tree/nvim-web-devicons' },
-        },
-        config = function(_, opts)
-            require('oil').setup(opts)
-            -- Automatically open preview
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'OilEnter',
-                callback = vim.schedule_wrap(function(args)
-                    local oil = require('oil')
-                    if
-                        vim.api.nvim_get_current_buf() == args.data.buf and oil.get_cursor_entry()
-                    then
-                        oil.open_preview()
-                    end
-                end),
+            })
+            vim.keymap.set('n', '<leader>cs', ':Namu symbols<cr>', {
+                desc = '[C]ode [S]ymbols Buffer',
+                silent = true,
+            })
+            vim.keymap.set('n', '<leader>cS', ':Namu workspace<cr>', {
+                desc = '[C]ode [S]ymbols Workspace',
+                silent = true,
             })
         end,
     },
@@ -1020,8 +1003,6 @@ local M = {
                     map('<Leader>cr', telescope.lsp_references, '[C]ode [R]eferences')
                     map('<Leader>ci', telescope.lsp_implementations, '[C]ode [I]mplementation')
                     map('<Leader>ct', telescope.lsp_type_definitions, '[C]ode [T]ype Definition')
-                    map('<Leader>cs', telescope.lsp_document_symbols, '[C]ode [S]ymbols Buffer')
-                    map('<Leader>cS', telescope.lsp_workspace_symbols, '[C]ode [S]ymbols Workspace')
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
                     map('<Leader>cq', vim.diagnostic.setloclist, '[C]ode [Q]uickfix List')
@@ -1030,6 +1011,8 @@ local M = {
                         vim.diagnostic.open_float,
                         '[C]ode Diagnotic Float ([K]eywordprog)'
                     )
+                    -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
+                    -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 
