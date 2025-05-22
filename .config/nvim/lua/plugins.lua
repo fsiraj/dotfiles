@@ -1432,7 +1432,10 @@ local M = {
             -- UI
             {
                 'igorlfs/nvim-dap-view',
-                opts = { windows = { terminal = { position = 'right' } } },
+                opts = {
+                    winbar = { default_section = 'repl' },
+                    windows = { terminal = { position = 'right' } },
+                },
             },
             -- Installs dependencies
             'williamboman/mason.nvim',
@@ -1503,7 +1506,7 @@ local M = {
             })
 
             -- Dap setup
-            dap.defaults.fallback.switchbuf = 'useopen'
+            dap.defaults.fallback.switchbuf = 'uselast'
             local repl = require('dap.repl')
             repl.commands = vim.tbl_extend('force', repl.commands, {
                 help = { '.h', '.help' },
