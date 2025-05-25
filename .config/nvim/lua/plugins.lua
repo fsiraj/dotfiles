@@ -851,6 +851,10 @@ local M = {
                 '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
                 { desc = 'Toggle [C]ode [C]ompanion chat' }
             )
+            vim.api.nvim_create_user_command('CopilotListModels', function()
+                local models = require('codecompanion.adapters.copilot').schema.model.choices()
+                vim.print(models)
+            end, { desc = 'List available Copilot models' })
         end,
     },
 
