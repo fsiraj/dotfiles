@@ -135,9 +135,36 @@ local textobjects = {
     { '}', desc = '{} with ws' },
 }
 
+-- CodeCompanion lualine component
+local function codecompanion_lualine_component()
+    local component = require('lualine.component'):extend()
+    component.processing, component.spinner_index = false, 1
+    local spinners = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
+    function component:init(opts)
+        component.super.init(self, opts)
+        vim.api.nvim_create_autocmd('User', {
+            pattern = { 'CodeCompanionRequest*', 'CodeCompanionTool*' },
+            group = vim.api.nvim_create_augroup('CodeCompanionHooks', {}),
+            callback = function(req)
+                self.processing = req.match:match('Started') or req.match:match('Streaming')
+            end,
+        })
+    end
+    function component:update_status()
+        if self.processing then
+            self.spinner_index = self.spinner_index % 10 + 1
+            return spinners[self.spinner_index] .. '  '
+        else
+            return ' '
+        end
+    end
+    return component
+end
+
 -- To make UIs multiples of 50
 local unit_width = 50
 
+-- Plugin config
 local M = {
     -- NOTE: Essentials
 
@@ -163,16 +190,8 @@ local M = {
                 custom_textobjects = {
                     -- NOTE: The textobjects below are manually added to WhichKey
                     o = ai.gen_spec.treesitter({ -- code block
-                        a = {
-                            '@block.outer',
-                            '@conditional.outer',
-                            '@loop.outer',
-                        },
-                        i = {
-                            '@block.inner',
-                            '@conditional.inner',
-                            '@loop.inner',
-                        },
+                        a = { '@block.outer', '@conditional.outer', '@loop.outer' },
+                        i = { '@block.inner', '@conditional.inner', '@loop.inner' },
                     }),
                     f = ai.gen_spec.treesitter({
                         a = '@function.outer',
@@ -203,6 +222,7 @@ local M = {
                     signs = { add = '▎', change = '▎', delete = '' },
                     priority = 5,
                 },
+                options = { linematch = 0 },
             })
             vim.keymap.set(
                 'n',
@@ -213,24 +233,7 @@ local M = {
 
             -- Session management
             local sessions = require('mini.sessions')
-            sessions.setup({
-                hooks = {
-                    post = {
-                        read = function()
-                            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                                -- Targetting dead CodeCompanion buffers
-                                if
-                                    string.match(vim.api.nvim_buf_get_name(buf), 'CodeCompanion')
-                                then
-                                    vim.api.nvim_buf_delete(buf, {})
-                                    vim.cmd('CodeCompanionChat Toggle')
-                                    vim.cmd('wincmd =')
-                                end
-                            end
-                        end,
-                    },
-                },
-            })
+            sessions.setup()
             vim.keymap.set('n', '<Leader>Sw', function()
                 sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) ---@diagnostic disable-line
             end, { desc = '[S]ession [W]rite' })
@@ -540,7 +543,7 @@ local M = {
         },
     },
     { 'nvim-treesitter/nvim-treesitter-textobjects', event = 'VeryLazy' },
-    { 'nvim-treesitter/nvim-treesitter-context', event = 'VeryLazy' },
+    { 'nvim-treesitter/nvim-treesitter-context', event = 'VeryLazy', opts = { enable = true } },
 
     --IndentBlankline
     {
@@ -665,10 +668,10 @@ local M = {
                 show_modified_status = true,
             }
             local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
-            local showcmd = {
-                noice.api.status.command.get, ---@diagnostic disable-line
-                cond = noice.api.status.command.has, ---@diagnostic disable-line
-            } ---@diagnostic disable-line
+            local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
+            local text = function(t)
+                return function() return t end
+            end
 
             -- Minimal
             local minimal = {
@@ -679,7 +682,6 @@ local M = {
                 },
                 inactive_winbar = { lualine_c = { 'filetype' } },
                 filetypes = {
-                    'codecompanion',
                     'Outline',
                     'DiffviewFiles',
                     'dap-view-term',
@@ -689,10 +691,23 @@ local M = {
 
             -- Terminal (No filetype)
             local terminal = {
-                winbar = { lualine_a = { mode }, lualine_x = { showcmd } },
-                inactive_winbar = { lualine_a = { mode } },
+                winbar = {
+                    lualine_a = { text('Terminal') },
+                    lualine_x = { showcmd },
+                },
+                inactive_winbar = { lualine_a = { text('Terminal') } },
                 filetypes = { '' },
             }
+
+            -- Codecompanion
+            local codecompanion = vim.tbl_deep_extend('force', minimal, {
+                winbar = {
+                    lualine_a = { 'filename' },
+                    lualine_x = {},
+                    lualine_z = { codecompanion_lualine_component() },
+                },
+                filetypes = { 'codecompanion' },
+            })
 
             -- Lualine config
             require('lualine').setup({
@@ -705,14 +720,14 @@ local M = {
                         winbar = { 'dap-repl', 'dap-view', 'dashboard', 'toggleterm' },
                     },
                 },
-                extensions = { minimal, terminal },
+                extensions = { minimal, terminal, codecompanion },
                 sections = {},
                 inactive_sections = {},
                 winbar = {
                     lualine_a = { mode, 'filename' },
                     lualine_b = { tabs },
                     lualine_c = { 'branch', 'diff', 'diagnostics' },
-                    lualine_x = { showmode, showcmd, 'filetype', 'location' },
+                    lualine_x = { showmode, showcmd, 'filetype', 'lsp_status' },
                     lualine_y = {},
                     lualine_z = {},
                 },
@@ -736,6 +751,7 @@ local M = {
             messages = { enabled = true },
             popupmenu = { enabled = true },
             lsp = {
+                progress = { enabled = false },
                 hover = { enabled = true },
                 signature = { enabled = true },
                 override = {
@@ -814,10 +830,21 @@ local M = {
         build = ':Copilot auth',
         event = 'InsertEnter',
         opts = {
-            suggestion = { enabled = false },
+            suggestion = {
+                enabled = true,
+                auto_trigger = true,
+                keymap = { accept = '<S-Tab>', accept_word = '<C-l>' },
+            },
             panel = { enabled = false },
             server = { type = 'binary' },
         },
+        config = function(_, opts)
+            require('copilot').setup(opts)
+            vim.keymap.set('n', '<Leader>tc', require('copilot.suggestion').toggle_auto_trigger, {
+                desc = '[T]oggle [C]opilot Suggestions',
+                silent = true,
+            })
+        end,
     },
 
     --Codecompanion
@@ -828,18 +855,28 @@ local M = {
             'nvim-lua/plenary.nvim',
             'nvim-treesitter/nvim-treesitter',
             'echasnovski/mini.diff',
+            'ravitemer/codecompanion-history.nvim',
         },
         opts = {
             adapters = {
                 copilot = function()
                     return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'claude-3.7-sonnet' } },
+                        schema = { model = { default = 'claude-sonnet-4' } },
                     })
                 end,
             },
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false, show_settings = true },
+                chat = { auto_scroll = false },
+            },
+            extensions = {
+                history = {
+                    enabled = true,
+                    opts = {
+                        expiration_days = 7,
+                        delete_on_clearing_chat = true,
+                    },
+                },
             },
         },
         config = function(_, opts)
@@ -848,9 +885,15 @@ local M = {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
-                { desc = 'Toggle [C]ode [C]ompanion chat' }
+                '<Cmd>CodeCompanionChat Toggle<CR>',
+                { desc = '[C]ode [C]ompanion Toggle Chat' }
             )
+            vim.api.nvim_create_autocmd('BufEnter', {
+                pattern = '*',
+                callback = function()
+                    if vim.bo.filetype == 'codecompanion' then vim.cmd('wincmd =') end
+                end,
+            })
         end,
     },
 
@@ -910,7 +953,7 @@ local M = {
             require('namu').setup({
                 namu_symbols = {
                     options = {
-                        display = { format = 'tree_guides' },
+                        display = { mode = 'icons', format = 'tree_guides' },
                     },
                 },
             })
@@ -1129,7 +1172,6 @@ local M = {
         dependencies = {
             { 'saghen/blink.compat', version = '*', opts = {} },
             'rafamadriz/friendly-snippets',
-            'fang2hou/blink-copilot',
             'rcarriga/cmp-dap',
         },
         version = '*',
@@ -1161,13 +1203,10 @@ local M = {
             appearance = {
                 use_nvim_cmp_as_default = true,
                 nerd_font_variant = 'mono',
-                kind_icons = {
-                    Copilot = '',
-                },
             },
             sources = {
                 default = function()
-                    local sources = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' }
+                    local sources = { 'lsp', 'path', 'snippets', 'buffer' }
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
@@ -1175,16 +1214,6 @@ local M = {
                     codecompanion = { 'codecompanion' },
                 },
                 providers = {
-                    copilot = {
-                        name = 'copilot',
-                        module = 'blink-copilot',
-                        async = true,
-                        opts = {
-                            max_completions = 1,
-                            max_attempts = 2,
-                        },
-                        score_offset = -10,
-                    },
                     dap = {
                         name = 'dap',
                         module = 'blink.compat.source',
@@ -1506,19 +1535,7 @@ local M = {
             })
 
             -- Dap setup
-            dap.defaults.fallback.switchbuf = 'uselast'
-            local repl = require('dap.repl')
-            repl.commands = vim.tbl_extend('force', repl.commands, {
-                help = { '.h', '.help' },
-                into = { '.i', '.into' },
-                next_ = { '.o', '.over' },
-                out = { '.out' },
-                exit = {},
-                custom_commands = {
-                    ['.restart'] = dap.restart,
-                    ['.terminate'] = dap.terminate,
-                },
-            })
+            dap.defaults.fallback.switchbuf = 'usevisible,usetab,newtab'
 
             -- Dap View setup
             vim.api.nvim_create_autocmd('FileType', {
