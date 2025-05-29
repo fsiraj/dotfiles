@@ -833,13 +833,13 @@ local M = {
             adapters = {
                 copilot = function()
                     return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'claude-3.7-sonnet' } },
+                        schema = { model = { default = 'claude-sonnet-4' } },
                     })
                 end,
             },
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false, show_settings = true },
+                chat = { show_header_separator = false, auto_scroll = false },
             },
         },
         config = function(_, opts)
