@@ -814,10 +814,32 @@ local M = {
         build = ':Copilot auth',
         event = 'InsertEnter',
         opts = {
-            suggestion = { enabled = false },
+            suggestion = {
+                enabled = true,
+                auto_trigger = true,
+                keymap = { accept = '<S-Tab>', accept_word = '<C-l>' },
+            },
             panel = { enabled = false },
             server = { type = 'binary' },
         },
+        config = function(_, opts)
+            require('copilot').setup(opts)
+
+            vim.keymap.set('n', '<Leader>tc', require('copilot.suggestion').toggle_auto_trigger, {
+                desc = '[T]oggle [C]opilot Suggestions',
+                silent = true,
+            })
+
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'BlinkCmpMenuOpen',
+                callback = function() vim.b.copilot_suggestion_hidden = true end,
+            })
+
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'BlinkCmpMenuClose',
+                callback = function() vim.b.copilot_suggestion_hidden = false end,
+            })
+        end,
     },
 
     --Codecompanion
@@ -851,10 +873,6 @@ local M = {
                 '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
                 { desc = 'Toggle [C]ode [C]ompanion chat' }
             )
-            vim.api.nvim_create_user_command('CopilotListModels', function()
-                local models = require('codecompanion.adapters.copilot').schema.model.choices()
-                vim.print(models)
-            end, { desc = 'List available Copilot models' })
         end,
     },
 
@@ -1133,7 +1151,6 @@ local M = {
         dependencies = {
             { 'saghen/blink.compat', version = '*', opts = {} },
             'rafamadriz/friendly-snippets',
-            'fang2hou/blink-copilot',
             'rcarriga/cmp-dap',
         },
         version = '*',
@@ -1165,13 +1182,10 @@ local M = {
             appearance = {
                 use_nvim_cmp_as_default = true,
                 nerd_font_variant = 'mono',
-                kind_icons = {
-                    Copilot = '',
-                },
             },
             sources = {
                 default = function()
-                    local sources = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' }
+                    local sources = { 'lsp', 'path', 'snippets', 'buffer' }
                     if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
                     return sources
                 end,
@@ -1179,16 +1193,6 @@ local M = {
                     codecompanion = { 'codecompanion' },
                 },
                 providers = {
-                    copilot = {
-                        name = 'copilot',
-                        module = 'blink-copilot',
-                        async = true,
-                        opts = {
-                            max_completions = 1,
-                            max_attempts = 2,
-                        },
-                        score_offset = -10,
-                    },
                     dap = {
                         name = 'dap',
                         module = 'blink.compat.source',
