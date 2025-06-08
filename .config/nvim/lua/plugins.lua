@@ -135,9 +135,6 @@ local textobjects = {
     { '}', desc = '{} with ws' },
 }
 
--- To make UIs multiples of 50
-local unit_width = 50
-
 -- CodeCompanion lualine component
 local function codecompanion_lualine_component()
     local component = require('lualine.component'):extend()
@@ -146,20 +143,28 @@ local function codecompanion_lualine_component()
     function component:init(opts)
         component.super.init(self, opts)
         vim.api.nvim_create_autocmd('User', {
-            pattern = 'CodeCompanionRequest*',
+            pattern = { 'CodeCompanionRequest*', 'CodeCompanionTool*' },
             group = vim.api.nvim_create_augroup('CodeCompanionHooks', {}),
-            callback = function(req) self.processing = req.match:match('Started') end,
+            callback = function(req)
+                self.processing = req.match:match('Started') or req.match:match('Streaming')
+            end,
         })
     end
     function component:update_status()
         if self.processing then
             self.spinner_index = self.spinner_index % 10 + 1
             return spinners[self.spinner_index] .. '  '
+        else
+            return ' '
         end
     end
     return component
 end
 
+-- To make UIs multiples of 50
+local unit_width = 50
+
+-- Plugin config
 local M = {
     -- NOTE: Essentials
 
@@ -717,7 +722,10 @@ local M = {
 
             -- Codecompanion
             local codecompanion = vim.tbl_deep_extend('force', minimal, {
-                winbar = { lualine_b = { tabs, codecompanion_lualine_component() } },
+                winbar = {
+                    lualine_x = {},
+                    lualine_z = { codecompanion_lualine_component() },
+                },
                 filetypes = { 'codecompanion' },
             })
 
