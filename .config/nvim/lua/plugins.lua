@@ -685,10 +685,10 @@ local M = {
                 show_modified_status = true,
             }
             local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
-            local showcmd = {
-                noice.api.status.command.get, ---@diagnostic disable-line
-                cond = noice.api.status.command.has, ---@diagnostic disable-line
-            } ---@diagnostic disable-line
+            local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
+            local text = function(t)
+                return function() return t end
+            end
 
             -- Minimal
             local minimal = {
@@ -708,8 +708,11 @@ local M = {
 
             -- Terminal (No filetype)
             local terminal = {
-                winbar = { lualine_a = { mode }, lualine_x = { showcmd } },
-                inactive_winbar = { lualine_a = { mode } },
+                winbar = {
+                    lualine_a = { text('Terminal') },
+                    lualine_x = { showcmd },
+                },
+                inactive_winbar = { lualine_a = { text('Terminal') } },
                 filetypes = { '' },
             }
 
@@ -740,7 +743,7 @@ local M = {
                     lualine_a = { mode, 'filename' },
                     lualine_b = { tabs },
                     lualine_c = { 'branch', 'diff', 'diagnostics' },
-                    lualine_x = { showmode, showcmd, 'filetype', 'location' },
+                    lualine_x = { showmode, showcmd, 'filetype', 'lsp_status' },
                     lualine_y = {},
                     lualine_z = {},
                 },
@@ -764,6 +767,7 @@ local M = {
             messages = { enabled = true },
             popupmenu = { enabled = true },
             lsp = {
+                progress = { enabled = false },
                 hover = { enabled = true },
                 signature = { enabled = true },
                 override = {
