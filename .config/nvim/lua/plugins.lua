@@ -852,20 +852,9 @@ local M = {
         },
         config = function(_, opts)
             require('copilot').setup(opts)
-
             vim.keymap.set('n', '<Leader>tc', require('copilot.suggestion').toggle_auto_trigger, {
                 desc = '[T]oggle [C]opilot Suggestions',
                 silent = true,
-            })
-
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'BlinkCmpMenuOpen',
-                callback = function() vim.b.copilot_suggestion_hidden = true end,
-            })
-
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'BlinkCmpMenuClose',
-                callback = function() vim.b.copilot_suggestion_hidden = false end,
             })
         end,
     },
@@ -889,7 +878,7 @@ local M = {
             },
             display = {
                 diff = { provider = 'mini_diff' },
-                chat = { show_header_separator = false, auto_scroll = false },
+                chat = { auto_scroll = false },
             },
         },
         config = function(_, opts)
@@ -960,7 +949,7 @@ local M = {
             require('namu').setup({
                 namu_symbols = {
                     options = {
-                        display = { format = 'tree_guides' },
+                        display = { mode = 'icons', format = 'tree_guides' },
                     },
                 },
             })
