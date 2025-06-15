@@ -1535,19 +1535,7 @@ local M = {
             })
 
             -- Dap setup
-            dap.defaults.fallback.switchbuf = 'uselast'
-            local repl = require('dap.repl')
-            repl.commands = vim.tbl_extend('force', repl.commands, {
-                help = { '.h', '.help' },
-                into = { '.i', '.into' },
-                next_ = { '.o', '.over' },
-                out = { '.out' },
-                exit = {},
-                custom_commands = {
-                    ['.restart'] = dap.restart,
-                    ['.terminate'] = dap.terminate,
-                },
-            })
+            dap.defaults.fallback.switchbuf = 'usevisible,usetab,newtab'
 
             -- Dap View setup
             vim.api.nvim_create_autocmd('FileType', {
