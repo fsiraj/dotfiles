@@ -233,24 +233,7 @@ local M = {
 
             -- Session management
             local sessions = require('mini.sessions')
-            sessions.setup({
-                hooks = {
-                    post = {
-                        read = function()
-                            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-                                -- Targetting dead CodeCompanion buffers
-                                if
-                                    string.match(vim.api.nvim_buf_get_name(buf), 'CodeCompanion')
-                                then
-                                    vim.api.nvim_buf_delete(buf, {})
-                                    vim.cmd('CodeCompanionChat Toggle')
-                                    vim.cmd('wincmd =')
-                                end
-                            end
-                        end,
-                    },
-                },
-            })
+            sessions.setup()
             vim.keymap.set('n', '<Leader>Sw', function()
                 sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) ---@diagnostic disable-line
             end, { desc = '[S]ession [W]rite' })
@@ -719,6 +702,7 @@ local M = {
             -- Codecompanion
             local codecompanion = vim.tbl_deep_extend('force', minimal, {
                 winbar = {
+                    lualine_a = { 'filename' },
                     lualine_x = {},
                     lualine_z = { codecompanion_lualine_component() },
                 },
@@ -871,6 +855,7 @@ local M = {
             'nvim-lua/plenary.nvim',
             'nvim-treesitter/nvim-treesitter',
             'echasnovski/mini.diff',
+            'ravitemer/codecompanion-history.nvim',
         },
         opts = {
             adapters = {
@@ -884,6 +869,15 @@ local M = {
                 diff = { provider = 'mini_diff' },
                 chat = { auto_scroll = false },
             },
+            extensions = {
+                history = {
+                    enabled = true,
+                    opts = {
+                        expiration_days = 7,
+                        delete_on_clearing_chat = true,
+                    },
+                },
+            },
         },
         config = function(_, opts)
             require('codecompanion').setup(opts)
@@ -891,9 +885,15 @@ local M = {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR><C-w>=',
+                '<Cmd>CodeCompanionChat Toggle<CR>',
                 { desc = '[C]ode [C]ompanion Toggle Chat' }
             )
+            vim.api.nvim_create_autocmd('BufEnter', {
+                pattern = '*',
+                callback = function()
+                    if vim.bo.filetype == 'codecompanion' then vim.cmd('wincmd =') end
+                end,
+            })
         end,
     },
 
