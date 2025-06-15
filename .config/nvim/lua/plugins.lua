@@ -899,50 +899,21 @@ local M = {
 
     --Toggleterm
     {
-        'akinsho/toggleterm.nvim',
-        version = '*',
-        keys = {
-            {
-                '<Bslash>',
-                '<Cmd>ToggleTerm name=Terminal<CR>',
-                mode = 'n',
-                desc = 'Open Terminal',
-            },
-        },
-        ---@module 'toggleterm'
-        ---@type ToggleTermConfig
+        'nvzone/floaterm',
+        event = 'VeryLazy',
+        dependencies = 'nvzone/volt',
         opts = {
-            direction = 'float',
-            highlights = {
-                NormalFloat = { link = 'NormalFloat' },
-                FloatBorder = { link = 'FloatBorder' },
-            },
-            float_opts = {
-                width = math.floor(vim.o.columns * 0.6),
-                height = math.floor(vim.o.lines * 0.8),
-                border = 'single',
-                title_pos = 'center',
+            border = false,
+            size_h = math.floor(vim.o.lines * 0.8),
+            size_w = math.floor(vim.o.columns * 0.6),
+            terminals = {
+                { name = 'Terminal' },
             },
         },
         config = function(_, opts)
-            require('toggleterm').setup(opts)
-            vim.api.nvim_create_autocmd('TermOpen', {
-                pattern = 'term://*toggleterm#*',
-                callback = function()
-                    vim.keymap.set(
-                        'n',
-                        'q',
-                        '<Cmd>ToggleTerm<CR>',
-                        { buffer = true, desc = '[T]oggle [T]erm' }
-                    )
-                    vim.keymap.set(
-                        { 't', 'n' },
-                        '<Bslash>',
-                        '<Cmd>ToggleTerm<CR>',
-                        { buffer = true, desc = '[T]oggle [T]erm' }
-                    )
-                end,
-            })
+            local floaterm = require('floaterm')
+            floaterm.setup(opts)
+            vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
         end,
     },
 
