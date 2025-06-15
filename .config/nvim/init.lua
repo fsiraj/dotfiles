@@ -118,6 +118,7 @@ vim.api.nvim_create_autocmd('TermOpen', {
     desc = 'Set buffer local options for terminals',
     group = vim.api.nvim_create_augroup('terminal-options', { clear = true }),
     callback = function()
+        vim.bo.filetype = 'terminal'
         vim.opt.number = false
         vim.opt.relativenumber = false
         local winid = vim.api.nvim_get_current_win()
