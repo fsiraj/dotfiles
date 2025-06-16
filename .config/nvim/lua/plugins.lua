@@ -696,7 +696,7 @@ local M = {
                     lualine_x = { showcmd },
                 },
                 inactive_winbar = { lualine_a = { text('Terminal') } },
-                filetypes = { '' },
+                filetypes = { 'terminal' },
             }
 
             -- Codecompanion
