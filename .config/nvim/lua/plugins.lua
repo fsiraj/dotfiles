@@ -145,9 +145,7 @@ local function codecompanion_lualine_component()
         vim.api.nvim_create_autocmd('User', {
             pattern = { 'CodeCompanionRequest*', 'CodeCompanionTool*' },
             group = vim.api.nvim_create_augroup('CodeCompanionHooks', {}),
-            callback = function(req)
-                self.processing = req.match:match('Started') or req.match:match('Streaming')
-            end,
+            callback = function(req) self.processing = req.match:match('Started') or req.match:match('Streaming') end,
         })
     end
     function component:update_status()
@@ -224,12 +222,7 @@ local M = {
                 },
                 options = { linematch = 0 },
             })
-            vim.keymap.set(
-                'n',
-                '<Leader>gd',
-                MiniDiff.toggle_overlay,
-                { desc = 'Toggle Git Overlay' }
-            )
+            vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })
 
             -- Session management
             local sessions = require('mini.sessions')
@@ -431,66 +424,16 @@ local M = {
 
             -- Keymaps
             local builtin = require('telescope.builtin')
-            vim.keymap.set(
-                'n',
-                '<Leader>sh',
-                builtin.help_tags,
-                { desc = 'Telescope: [S]earch [H]elp' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sH',
-                builtin.highlights,
-                { desc = 'Telescope: [S]earch [H]ighlights' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sk',
-                builtin.keymaps,
-                { desc = 'Telescope: [S]earch [K]eymaps' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sf',
-                builtin.find_files,
-                { desc = 'Telescope: [S]earch [F]iles' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sb',
-                builtin.builtin,
-                { desc = 'Telescope: [S]earch [B]uiltin' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sw',
-                builtin.grep_string,
-                { desc = 'Telescope: [S]earch Current [W]ord' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sg',
-                builtin.live_grep,
-                { desc = 'Telescope: [S]earch by [G]rep' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sq',
-                builtin.diagnostics,
-                { desc = 'Telescope: [S]earch [Q]uickfix' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>sr',
-                builtin.resume,
-                { desc = 'Telescope: [S]earch [R]esume' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader><Leader>',
-                builtin.buffers,
-                { desc = ' [ ] Telescope: Find Existing Buffers' }
-            )
+            vim.keymap.set('n', '<Leader>sh', builtin.help_tags, { desc = 'Telescope: [S]earch [H]elp' })
+            vim.keymap.set('n', '<Leader>sH', builtin.highlights, { desc = 'Telescope: [S]earch [H]ighlights' })
+            vim.keymap.set('n', '<Leader>sk', builtin.keymaps, { desc = 'Telescope: [S]earch [K]eymaps' })
+            vim.keymap.set('n', '<Leader>sf', builtin.find_files, { desc = 'Telescope: [S]earch [F]iles' })
+            vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
+            vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
+            vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
+            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [Q]uickfix' })
+            vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
+            vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
             vim.keymap.set(
                 'v',
                 '<Leader>ss',
@@ -897,17 +840,29 @@ local M = {
         end,
     },
 
-    --Toggleterm
+    --Floaterm
     {
         'nvzone/floaterm',
         event = 'VeryLazy',
         dependencies = 'nvzone/volt',
         opts = {
             border = false,
-            size_h = math.floor(vim.o.lines * 0.8),
-            size_w = math.floor(vim.o.columns * 0.6),
+            size = { h = 80, w = 60 },
             terminals = {
                 { name = 'Terminal' },
+            },
+            mappings = {
+                sidebar = function(buf)
+                    local api = require('floaterm.api')
+                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set('n', '<C-h>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
+                    vim.keymap.set('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
+                end,
+                term = function(buf)
+                    local api = require('floaterm.api')
+                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                end,
             },
         },
         config = function(_, opts)
@@ -1005,12 +960,7 @@ local M = {
                     local telescope = require('telescope.builtin')
                     local map = function(keys, func, desc, mode)
                         mode = mode or 'n'
-                        vim.keymap.set(
-                            mode,
-                            keys,
-                            func,
-                            { buffer = event.buf, desc = 'LSP: ' .. desc }
-                        )
+                        vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
                     end
                     map('<Leader>cd', telescope.lsp_definitions, '[C]ode [D]efinition')
                     map('<Leader>cD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
@@ -1020,11 +970,7 @@ local M = {
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
                     map('<Leader>cq', vim.diagnostic.setloclist, '[C]ode [Q]uickfix List')
-                    map(
-                        '<Leader>ck',
-                        vim.diagnostic.open_float,
-                        '[C]ode Diagnotic Float ([K]eywordprog)'
-                    )
+                    map('<Leader>ck', vim.diagnostic.open_float, '[C]ode Diagnotic Float ([K]eywordprog)')
                     -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
                     -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
@@ -1034,13 +980,9 @@ local M = {
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if
                         client
-                        and client:supports_method(
-                            vim.lsp.protocol.Methods.textDocument_documentHighlight,
-                            event.buf
-                        )
+                        and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf)
                     then
-                        local highlight_augroup =
-                            vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
+                        local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
                         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
                             buffer = event.buf,
                             group = highlight_augroup,
@@ -1066,10 +1008,7 @@ local M = {
                     -- If LSP supports inlay hints, enable them
                     if
                         client
-                        and client:supports_method(
-                            vim.lsp.protocol.Methods.textDocument_inlayHint,
-                            event.buf
-                        )
+                        and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf)
                     then
                         map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({
@@ -1087,16 +1026,14 @@ local M = {
                 severity_sort = true,
                 float = { border = 'rounded', source = 'if_many' },
                 underline = { severity = vim.diagnostic.severity.ERROR },
-                signs = vim.g.have_nerd_font
-                        and {
-                            text = {
-                                [vim.diagnostic.severity.ERROR] = '󰅚 ',
-                                [vim.diagnostic.severity.WARN] = '󰀪 ',
-                                [vim.diagnostic.severity.INFO] = '󰋽 ',
-                                [vim.diagnostic.severity.HINT] = '󰌶 ',
-                            },
-                        }
-                    or {},
+                signs = vim.g.have_nerd_font and {
+                    text = {
+                        [vim.diagnostic.severity.ERROR] = '󰅚 ',
+                        [vim.diagnostic.severity.WARN] = '󰀪 ',
+                        [vim.diagnostic.severity.INFO] = '󰋽 ',
+                        [vim.diagnostic.severity.HINT] = '󰌶 ',
+                    },
+                } or {},
                 virtual_text = false,
             })
 
@@ -1279,18 +1216,8 @@ local M = {
             })
 
             -- Keymaps
-            vim.keymap.set(
-                'n',
-                '<Leader>nr',
-                function() neotest.run.run() end,
-                { desc = '[N]eotest [R]un' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>nl',
-                function() neotest.run.run_last() end,
-                { desc = '[N]eotest Run [L]ast' }
-            )
+            vim.keymap.set('n', '<Leader>nr', function() neotest.run.run() end, { desc = '[N]eotest [R]un' })
+            vim.keymap.set('n', '<Leader>nl', function() neotest.run.run_last() end, { desc = '[N]eotest Run [L]ast' })
             vim.keymap.set(
                 'n',
                 '<Leader>nf',
@@ -1303,12 +1230,7 @@ local M = {
                 function() neotest.run.run({ suite = true }) end,
                 { desc = '[N]eotest Run [A]ll' }
             )
-            vim.keymap.set(
-                'n',
-                '<Leader>nw',
-                function() neotest.watch.toggle() end,
-                { desc = '[N]eotest [W]atch' }
-            )
+            vim.keymap.set('n', '<Leader>nw', function() neotest.watch.toggle() end, { desc = '[N]eotest [W]atch' })
             vim.keymap.set(
                 'n',
                 '<Leader>no',
@@ -1339,14 +1261,7 @@ local M = {
             })
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = 'neotest-output',
-                callback = function()
-                    vim.keymap.set(
-                        'n',
-                        'q',
-                        '<Cmd>:q<CR>',
-                        { buffer = true, desc = 'Close Window' }
-                    )
-                end,
+                callback = function() vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' }) end,
             })
         end,
     },
@@ -1455,24 +1370,9 @@ local M = {
             vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
             vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
 
-            vim.keymap.set(
-                'n',
-                '<Leader>db',
-                dap.toggle_breakpoint,
-                { desc = '[D]ebug [B]reakpoint Toggle ' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dc',
-                dap.continue,
-                { desc = '[D]ebug [C]ontinue Session.' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dt',
-                dap.terminate,
-                { desc = '[D]ebug [T]erminate Session.' }
-            )
+            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = '[D]ebug [B]reakpoint Toggle ' })
+            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = '[D]ebug [C]ontinue Session.' })
+            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = '[D]ebug [T]erminate Session.' })
             vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = '[D]ebug [R]estart Session.' })
             vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = '[D]ebug [V]iew Toggle ' })
 
@@ -1491,9 +1391,7 @@ local M = {
 
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-float' },
-                callback = function(event)
-                    vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf })
-                end,
+                callback = function(event) vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf }) end,
             })
 
             -- Installs all dependencies with mason
