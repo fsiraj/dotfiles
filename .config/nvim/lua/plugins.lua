@@ -861,6 +861,7 @@ local M = {
                 term = function(buf)
                     local api = require('floaterm.api')
                     vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.del('n', '<Esc>', { buffer = buf })
                 end,
             },
         },
