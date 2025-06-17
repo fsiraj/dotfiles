@@ -817,7 +817,6 @@ local M = {
                     enabled = true,
                     opts = {
                         expiration_days = 7,
-                        delete_on_clearing_chat = true,
                     },
                 },
             },
