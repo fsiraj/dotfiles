@@ -180,6 +180,7 @@ local M = {
                 '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
                 { desc = 'Jump 2D' }
             )
+            vim.api.nvim_set_hl(0, 'MiniJump', { link = 'MiniJump2dSpot' })
 
             -- Better Around/Inside textobjects
             local ai = require('mini.ai')
@@ -1475,12 +1476,6 @@ local color_overrides = function(accent, mantle, palette)
         theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
         theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
     end
-    theme = vim.tbl_extend('error', theme, {
-        MiniJump = { bg = accent, fg = mantle, bold = true },
-        MiniJump2dSpot = { link = 'MiniJump' },
-        MiniJump2dSpotAhead = { link = 'MiniJump' },
-        MiniJump2dSpotUnique = { link = 'MiniJump' },
-    })
     theme.DapBreak = { fg = palette.red }
     theme.DapStop = { fg = palette.yellow }
     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
