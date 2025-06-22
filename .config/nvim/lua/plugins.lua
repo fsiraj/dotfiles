@@ -817,6 +817,7 @@ local M = {
                     enabled = true,
                     opts = {
                         expiration_days = 7,
+                        title_generation_opts = { refresh_every_n_prompts = 3 },
                     },
                 },
             },
@@ -880,15 +881,20 @@ local M = {
                 namu_symbols = {
                     options = {
                         display = { mode = 'icons', format = 'tree_guides' },
+                        window = { relative = 'win' },
                     },
                 },
             })
-            vim.keymap.set('n', '<leader>cs', ':Namu symbols<cr>', {
+            vim.keymap.set('n', '<leader>cs', '<Cmd>Namu symbols<CR>', {
                 desc = '[C]ode [S]ymbols Buffer',
                 silent = true,
             })
-            vim.keymap.set('n', '<leader>cS', ':Namu workspace<cr>', {
+            vim.keymap.set('n', '<leader>cS', '<Cmd>Namu workspace<CR>', {
                 desc = '[C]ode [S]ymbols Workspace',
+                silent = true,
+            })
+            vim.keymap.set('n', '<leader>cq', '<Cmd>Namu diagnostics<CR>', {
+                desc = '[C]ode [Q]uickfix Search',
                 silent = true,
             })
         end,
@@ -969,10 +975,9 @@ local M = {
                     map('<Leader>ct', telescope.lsp_type_definitions, '[C]ode [T]ype Definition')
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
-                    map('<Leader>cq', vim.diagnostic.setloclist, '[C]ode [Q]uickfix List')
-                    map('<Leader>ck', vim.diagnostic.open_float, '[C]ode Diagnotic Float ([K]eywordprog)')
                     -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
                     -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
+                    -- <Leader>cq = [C]ode [Q]uickfix Search (Namu)
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 
