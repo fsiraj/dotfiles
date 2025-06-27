@@ -179,7 +179,7 @@ local M = {
             })
             vim.keymap.set(
                 'n',
-                'G',
+                '<Tab>',
                 '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
                 { desc = 'Jump 2D' }
             )
