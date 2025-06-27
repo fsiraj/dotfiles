@@ -503,7 +503,6 @@ local M = {
                 blink_cmp = true,
                 neotest = true,
                 diffview = true,
-                notify = true,
             },
         },
     },
@@ -523,18 +522,19 @@ local M = {
         config = function() require('tiny-devicons-auto-colors').setup() end,
     },
 
-    -- Dashboard
+    --Dashboard
     {
         'nvimdev/dashboard-nvim',
         event = 'VimEnter',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
         config = function()
             require('dashboard').setup({
                 theme = 'hyper',
                 config = {
                     header = dashboard_header,
                     shortcut = {},
-                    project = { enable = true, limit = 3 },
-                    mru = { enable = true, limit = 5 },
+                    project = { enable = false },
+                    mru = { enable = false },
                     footer = {},
                 },
             })
@@ -547,7 +547,6 @@ local M = {
                 end,
             })
         end,
-        dependencies = { 'nvim-tree/nvim-web-devicons' },
     },
 
     --Lualine
@@ -646,7 +645,7 @@ local M = {
     {
         'folke/noice.nvim',
         event = 'VeryLazy',
-        dependencies = { 'MunifTanjim/nui.nvim', 'rcarriga/nvim-notify' },
+        dependencies = { 'MunifTanjim/nui.nvim' },
         opts = {
             cmdline = {
                 enabled = true,
@@ -679,15 +678,6 @@ local M = {
             },
         },
         config = function(_, opts)
-            require('notify').setup({
-                render = 'wrapped-compact',
-                stages = 'static',
-                minimum_width = unit_width,
-                max_width = unit_width,
-            })
-            for format, _ in pairs(require('noice.config').defaults().cmdline.format) do
-                opts.cmdline.format[format] = { conceal = false }
-            end
             require('noice').setup(opts)
         end,
     },
@@ -837,6 +827,7 @@ local M = {
     --Namu
     {
         'bassamsdata/namu.nvim',
+        event = 'VeryLazy',
         config = function()
             require('namu').setup({
                 namu_symbols = {
@@ -1415,16 +1406,7 @@ local M = {
 -- Override plugin colors using colorscheme
 local color_overrides = function(accent, mantle, palette)
     local theme = {}
-    theme = vim.tbl_extend('error', {
-        DashboardHeader = { fg = accent },
-        DashboardMruTitle = { link = 'DashboardDesc' },
-        DashboardProjectTitle = { link = 'DashboardDesc' },
-        DashboardFiles = { link = 'NormalFloat' },
-    }, theme)
-    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
-        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
-    end
+    theme.DashboardHeader = { fg = accent }
     theme.DapBreak = { fg = palette.red }
     theme.DapStop = { fg = palette.yellow }
     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
