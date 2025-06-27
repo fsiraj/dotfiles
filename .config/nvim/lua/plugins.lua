@@ -44,6 +44,8 @@ local language_servers = {
             },
         },
     },
+    -- C++
+    clangd = {},
     -- Bash
     bashls = {
         filetypes = { 'bash', 'sh' },
@@ -179,7 +181,7 @@ local M = {
             })
             vim.keymap.set(
                 'n',
-                'G',
+                '<Leader>j',
                 '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
                 { desc = 'Jump 2D' }
             )
@@ -273,52 +275,19 @@ local M = {
                 keys = {},
             },
             spec = {
-                {
-                    '<Leader>i',
-                    group = '[I]nfo',
-                    icon = { icon = ' ', color = 'cyan' },
-                },
-                {
-                    '<Leader>c',
-                    group = '[C]ode',
-                    mode = { 'n', 'x' },
-                    icon = { icon = ' ', color = 'orange' },
-                },
-                {
-                    '<Leader>d',
-                    group = '[D]ebug',
-                    icon = { icon = ' ', color = 'red' },
-                },
-                {
-                    '<Leader>s',
-                    group = '[S]earch',
-                    icon = { icon = ' ', color = 'green' },
-                },
-                {
-                    '<Leader>S',
-                    group = '[S]essions',
-                    icon = { icon = '󰙰 ', color = 'purple' },
-                },
-                {
-                    '<Leader>f',
-                    group = '[F]',
-                    icon = { icon = '󰈢 ', color = 'azure' },
-                },
-                {
-                    '<Leader>t',
-                    group = '[T]oggle',
-                    icon = { icon = ' ', color = 'yellow' },
-                },
+                { '<Leader>i', group = '[I]nfo', icon = { icon = ' ', color = 'cyan' } },
+                { '<Leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
+                { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
+                { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
+                { '<Leader>S', group = '[S]essions', icon = { icon = '󰙰 ', color = 'purple' } },
+                { '<Leader>f', group = '[F]', icon = { icon = '󰈢 ', color = 'azure' } },
+                { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
+                { '<Leader>n', group = '[N]eotest', icon = { icon = ' ', color = 'azure' } },
                 {
                     '<Leader>g',
                     group = '[G]it',
                     mode = { 'n', 'v' },
                     icon = { cat = 'filetype', name = 'git' },
-                },
-                {
-                    '<Leader>n',
-                    group = '[N]eotest',
-                    icon = { icon = ' ', color = 'azure' },
                 },
             },
         },
@@ -351,117 +320,73 @@ local M = {
         end,
     },
 
-    --Telescope
+    --Fzflua
     {
-        'nvim-telescope/telescope.nvim',
+        'ibhagwan/fzf-lua',
         event = 'VeryLazy',
-        dependencies = {
-            'nvim-lua/plenary.nvim',
-            {
-                'nvim-telescope/telescope-fzf-native.nvim',
-                build = 'make',
-                cond = function() return vim.fn.executable('make') == 1 end,
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        opts = {
+            defaults = { formatter = 'path.filename_first' },
+            winopts = {
+                width = math.min(unit_width * 3, math.floor(0.8 * vim.o.columns)),
+                height = 0.8,
+                row = 0.5,
             },
-            { 'nvim-telescope/telescope-ui-select.nvim' },
-            { 'nvim-tree/nvim-web-devicons' },
+            hls = { title = 'FloatTitle' },
+            keymap = {
+                builtin = {
+                    true,
+                    ['<C-u>'] = 'preview-up',
+                    ['<C-d>'] = 'preview-down',
+                },
+            },
+            files = { hidden = true },
+            grep = { hidden = true },
+            buffers = { previewer = false, winopts = { height = 12, width = unit_width } },
+            ui_select = function(fzf_opts, items)
+                return vim.tbl_deep_extend('force', fzf_opts, {
+                    prompt = ' ',
+                    winopts = {
+                        title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
+                        title_pos = 'center',
+                        width = unit_width,
+                        height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5),
+                    },
+                })
+            end,
         },
-        config = function()
-            require('telescope').setup({
-                defaults = {
-                    layout_strategy = 'horizontal',
-                    sorting_strategy = 'ascending',
-                    layout_config = {
-                        horizontal = {
-                            prompt_position = 'top',
-                            preview_width = 0.6,
-                            width = math.min(unit_width * 3, math.floor(0.8 * vim.o.columns)),
-                        },
-                    },
-                    wrap_results = false,
-                    file_ignore_patterns = { '%.git/' },
-                    mappings = {
-                        i = {
-                            ['<C-y>'] = 'select_default',
-                            ['<C-Bslash>'] = 'select_vertical',
-                            ['<C-->'] = 'select_horizontal',
-                            ['<C-x>'] = 'delete_buffer',
-                        },
-                    },
-                    vimgrep_arguments = {
-                        'rg',
-                        '--color=never',
-                        '--no-heading',
-                        '--with-filename',
-                        '--line-number',
-                        '--column',
-                        '--smart-case',
-                        '--hidden',
-                    },
-                },
+        config = function(_, opts)
+            local fzf = require('fzf-lua')
+            local actions = require('fzf-lua.actions')
+            opts.helptags = { actions = { ['enter'] = actions.help_vert } }
 
-                pickers = {
-                    find_files = { hidden = true },
-                    buffers = {
-                        previewer = false,
-                        layout_config = { width = unit_width, height = 16 },
-                        path_display = { 'tail' },
-                    },
-                    live_grep = { path_display = { 'tail' } },
-                    help_tags = {
-                        mappings = { i = { ['<CR>'] = 'select_vertical' } },
-                    },
-                    colorscheme = { enable_preview = true },
-                    lsp_references = { path_display = { 'tail' } },
-                    current_buffer_fuzzy_find = { previewer = false },
-                },
+            fzf.setup(opts)
 
-                extensions = {
-                    ['ui-select'] = {
-                        require('telescope.themes').get_dropdown(),
-                    },
-                },
-            })
-
-            -- Enable Telescope extensions if they are installed
-            require('telescope').load_extension('fzf')
-            require('telescope').load_extension('ui-select')
-
-            -- Keymaps
-            local builtin = require('telescope.builtin')
-            vim.keymap.set('n', '<Leader>sh', builtin.help_tags, { desc = 'Telescope: [S]earch [H]elp' })
-            vim.keymap.set('n', '<Leader>sH', builtin.highlights, { desc = 'Telescope: [S]earch [H]ighlights' })
-            vim.keymap.set('n', '<Leader>sk', builtin.keymaps, { desc = 'Telescope: [S]earch [K]eymaps' })
-            vim.keymap.set('n', '<Leader>sf', builtin.find_files, { desc = 'Telescope: [S]earch [F]iles' })
-            vim.keymap.set('n', '<Leader>sb', builtin.builtin, { desc = 'Telescope: [S]earch [B]uiltin' })
-            vim.keymap.set('n', '<Leader>sw', builtin.grep_string, { desc = 'Telescope: [S]earch Current [W]ord' })
-            vim.keymap.set('n', '<Leader>sg', builtin.live_grep, { desc = 'Telescope: [S]earch by [G]rep' })
-            vim.keymap.set('n', '<Leader>sq', builtin.diagnostics, { desc = 'Telescope: [S]earch [Q]uickfix' })
-            vim.keymap.set('n', '<Leader>sr', builtin.resume, { desc = 'Telescope: [S]earch [R]esume' })
-            vim.keymap.set('n', '<Leader><Leader>', builtin.buffers, { desc = ' [ ] Telescope: Find Existing Buffers' })
-            vim.keymap.set(
-                'v',
-                '<Leader>ss',
-                '"zy<Cmd>Telescope grep_string<CR><C-r>z',
-                { desc = 'Telescope: [S]earch [S]election' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>/',
-                builtin.current_buffer_fuzzy_find,
-                { desc = ' [/] Telescope: Fuzzy Search Current Buffer' }
-            )
+            vim.keymap.set('n', '<Leader>sb', fzf.builtin, { desc = 'FzfLua: [S]earch [B]uiltin' })
+            vim.keymap.set('n', '<Leader>sr', fzf.resume, { desc = 'FzfLua: [S]earch [R]esume' })
+            vim.keymap.set('n', '<Leader>sf', fzf.files, { desc = 'FzfLua: [S]earch [F]iles' })
+            vim.keymap.set('n', '<Leader>sw', fzf.grep_cword, { desc = 'FzfLua: [S]earch Current [W]ord' })
+            vim.keymap.set('n', '<Leader>sg', fzf.live_grep, { desc = 'FzfLua: [S]earch by [G]rep' })
+            vim.keymap.set('n', '<Leader>sh', fzf.helptags, { desc = 'FzfLua: [S]earch [H]elp' })
+            vim.keymap.set('n', '<Leader>sH', fzf.highlights, { desc = 'FzfLua: [S]earch [H]ighlights' })
+            vim.keymap.set('n', '<Leader>sk', fzf.keymaps, { desc = 'FzfLua: [S]earch [K]eymaps' })
+            vim.keymap.set('v', '<Leader>ss', fzf.grep_visual, { desc = 'FzfLua: [S]earch [S]election' })
+            vim.keymap.set('n', '<Leader>/', fzf.lgrep_curbuf, { desc = ' [/] FzfLua: Fuzzy Search Current Buffer' })
+            vim.keymap.set('n', '<Leader><Leader>', fzf.buffers, { desc = ' [ ] FzfLua: Find Existing Buffers' })
             vim.keymap.set(
                 'n',
                 '<Leader>sd',
-                function() builtin.find_files({ cwd = '~/dotfiles' }) end,
-                { desc = 'Telescope: [S]earch [D]otfiles' }
+                function() fzf.files({ cwd = '~/dotfiles' }) end,
+                { desc = 'FzfLua: [S]earch [D]otfiles' }
             )
             vim.keymap.set(
                 'n',
                 '<Leader>sp',
-                function() builtin.find_files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end,
-                { desc = 'Telescope: [S]earch [P]lugins' }
+                function() fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end,
+                { desc = 'FzfLua: [S]earch [P]lugins' }
             )
+
+            fzf.register_ui_select(opts.ui_select)
         end,
     },
 
@@ -490,7 +415,7 @@ local M = {
         },
     },
     { 'nvim-treesitter/nvim-treesitter-textobjects', event = 'VeryLazy' },
-    { 'nvim-treesitter/nvim-treesitter-context', event = 'VeryLazy', opts = { enable = true } },
+    { 'nvim-treesitter/nvim-treesitter-context', event = 'VeryLazy', opts = { enable = true, max_lines = 12 } },
 
     --IndentBlankline
     {
@@ -546,7 +471,6 @@ local M = {
                 blink_cmp = true,
                 neotest = true,
                 diffview = true,
-                notify = true,
             },
         },
     },
@@ -566,18 +490,19 @@ local M = {
         config = function() require('tiny-devicons-auto-colors').setup() end,
     },
 
-    -- Dashboard
+    --Dashboard
     {
         'nvimdev/dashboard-nvim',
         event = 'VimEnter',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
         config = function()
             require('dashboard').setup({
                 theme = 'hyper',
                 config = {
                     header = dashboard_header,
                     shortcut = {},
-                    project = { enable = true, limit = 3 },
-                    mru = { enable = true, limit = 5 },
+                    project = { enable = false },
+                    mru = { enable = false },
                     footer = {},
                 },
             })
@@ -590,7 +515,6 @@ local M = {
                 end,
             })
         end,
-        dependencies = { 'nvim-tree/nvim-web-devicons' },
     },
 
     --Lualine
@@ -689,14 +613,14 @@ local M = {
     {
         'folke/noice.nvim',
         event = 'VeryLazy',
-        dependencies = { 'MunifTanjim/nui.nvim', 'rcarriga/nvim-notify' },
+        dependencies = { 'MunifTanjim/nui.nvim' },
         opts = {
             cmdline = {
                 enabled = true,
                 format = {},
             },
-            messages = { enabled = true },
-            popupmenu = { enabled = true },
+            messages = { enabled = false },
+            popupmenu = { enabled = false },
             lsp = {
                 progress = { enabled = false },
                 hover = { enabled = true },
@@ -721,18 +645,7 @@ local M = {
                 },
             },
         },
-        config = function(_, opts)
-            require('notify').setup({
-                render = 'wrapped-compact',
-                stages = 'static',
-                minimum_width = unit_width,
-                max_width = unit_width,
-            })
-            for format, _ in pairs(require('noice.config').defaults().cmdline.format) do
-                opts.cmdline.format[format] = { conceal = false }
-            end
-            require('noice').setup(opts)
-        end,
+        config = function(_, opts) require('noice').setup(opts) end,
     },
 
     --NOTE: Extras
@@ -746,7 +659,7 @@ local M = {
         dependencies = {
             'nvim-lua/plenary.nvim',
             'sindrets/diffview.nvim',
-            'nvim-telescope/telescope.nvim',
+            'ibhagwan/fzf-lua',
         },
         config = true,
     },
@@ -832,15 +745,9 @@ local M = {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR>',
+                '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>',
                 { desc = '[C]ode [C]ompanion Toggle Chat' }
             )
-            vim.api.nvim_create_autocmd('BufEnter', {
-                pattern = '*',
-                callback = function()
-                    if vim.bo.filetype == 'codecompanion' then vim.cmd('wincmd =') end
-                end,
-            })
         end,
     },
 
@@ -874,12 +781,14 @@ local M = {
             local floaterm = require('floaterm')
             floaterm.setup(opts)
             vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
+            vim.keymap.set({ 't' }, '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
         end,
     },
 
     --Namu
     {
         'bassamsdata/namu.nvim',
+        event = 'VeryLazy',
         config = function()
             require('namu').setup({
                 namu_symbols = {
@@ -954,12 +863,11 @@ local M = {
         'neovim/nvim-lspconfig',
         event = 'VeryLazy',
         dependencies = {
-            -- Automatically install LSPs and related tools to stdpath for Neovim
             { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
             'williamboman/mason-lspconfig.nvim',
             'WhoIsSethDaniel/mason-tool-installer.nvim',
-            -- Allows extra capabilities provided by blink.cmp
             'saghen/blink.cmp',
+            'ibhagwan/fzf-lua',
         },
         config = function()
             vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'L[S]P' })
@@ -967,18 +875,17 @@ local M = {
                 group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
                 callback = function(event)
                     -- Keymaps
-                    local telescope = require('telescope.builtin')
+                    local fzf = require('fzf-lua')
                     local map = function(keys, func, desc, mode)
                         mode = mode or 'n'
                         vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
                     end
-                    map('<Leader>cd', telescope.lsp_definitions, '[C]ode [D]efinition')
+                    map('<Leader>cd', fzf.lsp_definitions, '[C]ode [D]efinition')
                     map('<Leader>cD', vim.lsp.buf.declaration, '[C]ode [D]eclaration')
-                    map('<Leader>cr', telescope.lsp_references, '[C]ode [R]eferences')
-                    map('<Leader>ci', telescope.lsp_implementations, '[C]ode [I]mplementation')
-                    map('<Leader>ct', telescope.lsp_type_definitions, '[C]ode [T]ype Definition')
+                    map('<Leader>cr', fzf.lsp_references, '[C]ode [R]eferences')
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
-                    map('<Leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+                    map('<Leader>ca', fzf.lsp_code_actions, '[C]ode [A]ction', { 'n', 'x' })
+                    -- <Leader>ca = [C]ode [A]ction (FzfLua)
                     -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
                     -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
                     -- <Leader>cq = [C]ode [Q]uickfix Search (Namu)
@@ -1460,25 +1367,7 @@ local M = {
 -- Override plugin colors using colorscheme
 local color_overrides = function(accent, mantle, palette)
     local theme = {}
-    theme = vim.tbl_extend('error', {
-        DashboardHeader = { fg = accent },
-        DashboardMruTitle = { link = 'DashboardDesc' },
-        DashboardProjectTitle = { link = 'DashboardDesc' },
-        DashboardFiles = { link = 'NormalFloat' },
-    }, theme)
-    theme = vim.tbl_extend('error', theme, {
-        TelescopePromptTitle = { bg = accent, fg = mantle },
-        TelescopeResultsTitle = { fg = mantle },
-        TelescopePreviewTitle = { bg = palette.green, fg = mantle },
-        TelescopePromptPrefix = { bg = mantle, fg = accent },
-    })
-    for _, section in ipairs({ 'Prompt', 'Results', 'Preview' }) do
-        theme['Telescope' .. section .. 'Normal'] = { link = 'NormalFloat' }
-    end
-    for _, level in ipairs({ 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE' }) do
-        theme['Notify' .. level .. 'Body'] = { link = 'NormalFloat' }
-        theme['Notify' .. level .. 'Border'] = { link = 'FloatBorder' }
-    end
+    theme.DashboardHeader = { fg = accent }
     theme.DapBreak = { fg = palette.red }
     theme.DapStop = { fg = palette.yellow }
     theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
