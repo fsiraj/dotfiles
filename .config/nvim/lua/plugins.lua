@@ -651,8 +651,8 @@ local M = {
                 enabled = true,
                 format = {},
             },
-            messages = { enabled = true },
-            popupmenu = { enabled = true },
+            messages = { enabled = false },
+            popupmenu = { enabled = false },
             lsp = {
                 progress = { enabled = false },
                 hover = { enabled = true },
@@ -677,9 +677,7 @@ local M = {
                 },
             },
         },
-        config = function(_, opts)
-            require('noice').setup(opts)
-        end,
+        config = function(_, opts) require('noice').setup(opts) end,
     },
 
     --NOTE: Extras

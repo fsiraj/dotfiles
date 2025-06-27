@@ -67,6 +67,9 @@ vim.opt.scrolloff = 12
 -- Disable tabline, shown with lualine instead
 vim.opt.showtabline = 0
 
+-- Disable defualt cmdline
+vim.opt.cmdheight = 0
+
 -- Use treesitter for folding
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
