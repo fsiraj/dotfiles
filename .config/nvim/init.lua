@@ -127,6 +127,12 @@ vim.api.nvim_create_autocmd('TermOpen', {
     end,
 })
 
+vim.api.nvim_create_autocmd('VimResized', {
+    desc = 'Equalize splits when nvim is resized',
+    group = vim.api.nvim_create_augroup('vim-resize', {clear = true}),
+    command = "wincmd ="
+})
+
 --NOTE: Plugins
 
 -- Bootstrap lazy
