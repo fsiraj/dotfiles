@@ -67,6 +67,9 @@ vim.opt.scrolloff = 12
 -- Disable tabline, shown with lualine instead
 vim.opt.showtabline = 0
 
+-- Disable defualt cmdline
+vim.opt.cmdheight = 0
+
 -- Use treesitter for folding
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
@@ -79,7 +82,7 @@ vim.opt.foldtext = ''
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
 vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = '[T]oggle [B]uffer Alternative (#)' })
-vim.keymap.set('n', '<C-\\>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
+vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
@@ -125,6 +128,12 @@ vim.api.nvim_create_autocmd('TermOpen', {
         vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
         vim.keymap.set('n', '<CR>', 'i', { buffer = true })
     end,
+})
+
+vim.api.nvim_create_autocmd('VimResized', {
+    desc = 'Equalize splits when nvim is resized',
+    group = vim.api.nvim_create_augroup('vim-resize', {clear = true}),
+    command = "wincmd ="
 })
 
 --NOTE: Plugins
