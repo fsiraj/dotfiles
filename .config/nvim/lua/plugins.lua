@@ -401,7 +401,6 @@ local M = {
             vim.keymap.set('n', '<Leader>sh', fzf.helptags, { desc = 'FzfLua: [S]earch [H]elp' })
             vim.keymap.set('n', '<Leader>sH', fzf.highlights, { desc = 'FzfLua: [S]earch [H]ighlights' })
             vim.keymap.set('n', '<Leader>sk', fzf.keymaps, { desc = 'FzfLua: [S]earch [K]eymaps' })
-            vim.keymap.set('n', '<Leader>sq', fzf.diagnostics_document, { desc = 'FzfLua: [S]earch [Q]uickfix' })
             vim.keymap.set('v', '<Leader>ss', fzf.grep_visual, { desc = 'FzfLua: [S]earch [S]election' })
             vim.keymap.set('n', '<Leader>/', fzf.lgrep_curbuf, { desc = ' [/] FzfLua: Fuzzy Search Current Buffer' })
             vim.keymap.set('n', '<Leader><Leader>', fzf.buffers, { desc = ' [ ] FzfLua: Find Existing Buffers' })
@@ -777,15 +776,9 @@ local M = {
             vim.keymap.set(
                 { 'n', 'v' },
                 '<Leader>cc',
-                '<Cmd>CodeCompanionChat Toggle<CR>',
+                '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>',
                 { desc = '[C]ode [C]ompanion Toggle Chat' }
             )
-            vim.api.nvim_create_autocmd('BufEnter', {
-                pattern = '*',
-                callback = function()
-                    if vim.bo.filetype == 'codecompanion' then vim.cmd('wincmd =') end
-                end,
-            })
         end,
     },
 
