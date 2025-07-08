@@ -44,6 +44,8 @@ local language_servers = {
             },
         },
     },
+    -- C++
+    clangd = {},
     -- Bash
     bashls = {
         filetypes = { 'bash', 'sh' },
@@ -273,52 +275,19 @@ local M = {
                 keys = {},
             },
             spec = {
-                {
-                    '<Leader>i',
-                    group = '[I]nfo',
-                    icon = { icon = ' ', color = 'cyan' },
-                },
-                {
-                    '<Leader>c',
-                    group = '[C]ode',
-                    mode = { 'n', 'x' },
-                    icon = { icon = ' ', color = 'orange' },
-                },
-                {
-                    '<Leader>d',
-                    group = '[D]ebug',
-                    icon = { icon = ' ', color = 'red' },
-                },
-                {
-                    '<Leader>s',
-                    group = '[S]earch',
-                    icon = { icon = ' ', color = 'green' },
-                },
-                {
-                    '<Leader>S',
-                    group = '[S]essions',
-                    icon = { icon = '󰙰 ', color = 'purple' },
-                },
-                {
-                    '<Leader>f',
-                    group = '[F]',
-                    icon = { icon = '󰈢 ', color = 'azure' },
-                },
-                {
-                    '<Leader>t',
-                    group = '[T]oggle',
-                    icon = { icon = ' ', color = 'yellow' },
-                },
+                { '<Leader>i', group = '[I]nfo', icon = { icon = ' ', color = 'cyan' } },
+                { '<Leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
+                { '<Leader>d', group = '[D]ebug', icon = { icon = ' ', color = 'red' } },
+                { '<Leader>s', group = '[S]earch', icon = { icon = ' ', color = 'green' } },
+                { '<Leader>S', group = '[S]essions', icon = { icon = '󰙰 ', color = 'purple' } },
+                { '<Leader>f', group = '[F]', icon = { icon = '󰈢 ', color = 'azure' } },
+                { '<Leader>t', group = '[T]oggle', icon = { icon = ' ', color = 'yellow' } },
+                { '<Leader>n', group = '[N]eotest', icon = { icon = ' ', color = 'azure' } },
                 {
                     '<Leader>g',
                     group = '[G]it',
                     mode = { 'n', 'v' },
                     icon = { cat = 'filetype', name = 'git' },
-                },
-                {
-                    '<Leader>n',
-                    group = '[N]eotest',
-                    icon = { icon = ' ', color = 'azure' },
                 },
             },
         },
@@ -811,7 +780,7 @@ local M = {
         config = function(_, opts)
             local floaterm = require('floaterm')
             floaterm.setup(opts)
-            vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
+            vim.keymap.set({ 'n', 't' }, '<C-t>', floaterm.toggle, { desc = 'Toggle Floaterm' })
         end,
     },
 
