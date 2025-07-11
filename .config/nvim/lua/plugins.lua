@@ -780,7 +780,8 @@ local M = {
         config = function(_, opts)
             local floaterm = require('floaterm')
             floaterm.setup(opts)
-            vim.keymap.set({ 'n', 't' }, '<C-t>', floaterm.toggle, { desc = 'Toggle Floaterm' })
+            vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
+            vim.keymap.set({ 't' }, '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
         end,
     },
 
