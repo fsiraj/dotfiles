@@ -619,7 +619,7 @@ local M = {
                 enabled = true,
                 format = {},
             },
-            messages = { enabled = false },
+            messages = { enabled = true },
             popupmenu = { enabled = false },
             lsp = {
                 progress = { enabled = false },
