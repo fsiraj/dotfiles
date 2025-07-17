@@ -4,7 +4,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_BIN_HOME="$HOME/.local/bin"
 export PATH="$XDG_BIN_HOME:$PATH"
 
-# Oh My Posh - Prompt
+# ohmyposh
 if ! command -v oh-my-posh &>/dev/null; then
     [ "$OS" = "Linux" ] && curl -s https://ohmyposh.dev/install.sh | bash -s
     [ "$OS" = "Darwin" ] && brew install jandedobbeleer/oh-my-posh/oh-my-posh
@@ -12,7 +12,7 @@ fi
 POSH_CONFIG_NAME="simple"
 eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/$POSH_CONFIG_NAME.omp.toml)"
 
-# Zinit - plugin manager
+# zinit
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
     mkdir -p "$(dirname "$ZINIT_HOME")"
@@ -20,16 +20,21 @@ if [ ! -d "$ZINIT_HOME" ]; then
 fi
 source "${ZINIT_HOME}/zinit.zsh"
 
-# fzf - fuzzy finder
+# fzf
 FZF_ROOT="$XDG_BIN_HOME/.fzf"
 if [ ! -d "$FZF_ROOT" ]; then
     git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_ROOT"
     "$FZF_ROOT"/install --bin && cp "$FZF_ROOT/bin/fzf" "$XDG_BIN_HOME"
 fi
 
-# zoxide - cd replacement
+# zoxide
 if ! command -v zoxide &>/dev/null; then
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+fi
+
+# uv
+if ! command -v uv &>/dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
 # Load plugins
@@ -97,14 +102,4 @@ alias gp="git pull"
 alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 alias grs="git restore --staged"
-alias suggest="gh copilot suggest"
-alias explain="gh copilot explain"
 
-# Define helpers
-src() {
-    source "$1/bin/activate"
-}
-pyvenv() {
-    python3 -m venv "$1"
-    src "$1"
-}
