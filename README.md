@@ -1,6 +1,6 @@
 # Neovim + Zsh + Tmux
 
-This repo contains my personal dotfiles configuration for Linux and Mac OS. Most of the things below can be installed using your package manager (`brew`, `apt`, ...).
+This repo contains my personal dotfiles configuration for Linux and Mac OS.
 
 ## Summary
 
@@ -11,7 +11,7 @@ This repo contains my personal dotfiles configuration for Linux and Mac OS. Most
     - Plugin Manager: [tpm](https://github.com/tmux-plugins/tpm)
   - Prompt: [Oh My Posh](https://ohmyposh.dev/)
   - Plugin Manager: [zinit](https://github.com/zdharma-continuum/zinit)
-- Color Scheme: [Tokyo Night](https://github.com/tokyo-night/tokyo-night-vscode-theme?tab=readme-ov-file#color-palette) and [Catppuccin Mocha](https://catppuccin.com/palette)
+- Color Scheme: [Catppuccin Mocha](https://catppuccin.com/palette)
 - Font: [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/JetBrainsMono)
 
 ## Setup Instructions
@@ -52,28 +52,10 @@ If you ran the `chsh` command above, your default terminal should now be `zsh` s
 
 #### Neovim
 
-Open a session with `nvim`. Lazy is automatically installed by `lazy-plugins.lua` which also installs all neovim plugins. Open a neovim session and run the command `:checkhealth` to diagnose your configuration, use `:Lazy` to manage plugins, and use `:Mason` to manage plugin dependencies. To see keybinds: `<Space>?`.
+Open a session with `nvim`. Lazy is automatically installed by `init.lua` which also installs all neovim plugins. Open a neovim session and run the command `:checkhealth` to diagnose your configuration, use `:Lazy` to manage plugins, and use `:Mason` to manage plugin dependencies. To see keybinds: `<Space>?`.
 
 #### Theme and Font
 
 Catppuccin Mocha is the primary theme, Tokyo Night is second. The themes are installed and set automatically in all cases except the terminal emulator. To install the theme in your terminal, find the relevant port from [Catppuccin Ports](https://catppuccin.com/ports).
 
 The JetbrainsMono Nerd Font has to be installed manually, download and install it using the instructions [here](https://gist.github.com/matthewjberger/7dd7e079f282f8138a9dc3b045ebefa0).
-
-### Notes
-
-#### Future
-
-- `fzf` outdated on Ubuntu so manually sourcing `zsh` integration.
-- `nodejs` and `npm` required by `mason.nvim` and `copilot.lua`, want to remove this dependency.
-
-#### VS Code Setup (if noevim doesn't work out...)
-
-VS Code removes symlinks on the `settings.json` file, so is a bit more tedious to work with:
-
-```bash
-# Likely won't be symlink but will copy file over
-ln -f .config/vscode/settings.json ~/.config/Code/User/settings.json
-# Install extensions with VS Code's CLI tool
-cat .config/vscode/extensions.txt | xargs -n 1 code --install-extension
-```
