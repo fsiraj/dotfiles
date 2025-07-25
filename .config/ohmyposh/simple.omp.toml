@@ -4,15 +4,11 @@ final_space = true
 
 # Catppuccin Mocha
 [palette]
-blue = '#89B4FA'
-teal = '#94e2d5'
-green = '#A6E3A1'
-red = '#F38BA8'
-peach = '#F5A97F'
-lavendar = '#B4BEFE'
-mauve = '#CBA6F7'
-pink = '#F5C2E7'
-os = '#ACB0BE'
+teal = '#7dcfff'
+green = '#1abc9c'
+mauve = '#bb9af7'
+pink = '#ea76cb'
+subtext = '#565f89'
 
 
 # Prompt - 'Zero-th' Line
@@ -24,7 +20,7 @@ newline = false
 [[blocks.segments]]
 type = "executiontime"
 style = "plain"
-foreground = "p:os"
+foreground = "p:subtext"
 template = "󱞽 {{ .FormattedMs }}\n"
 
 [blocks.segments.properties]
@@ -58,17 +54,6 @@ style = 'agnoster_short'
 max_depth = 3
 
 [[blocks.segments]]
-type = 'python'
-style = 'plain'
-template = """\
-    {{ if .Error }}{{ .Error }} {{ else }}\
-    {{ if .Venv }}({{ .Venv }}) {{ end }}\
-     {{ .Major }}.{{ .Minor }} \
-    {{ end }}\
-    """
-foreground = 'p:lavendar'
-
-[[blocks.segments]]
 type = 'git'
 style = 'plain'
 template = """\
@@ -91,6 +76,17 @@ rebase_icon = ' '
 revert_icon = ' '
 tag_icon = ' '
 
+[[blocks.segments]]
+type = 'python'
+style = 'plain'
+template = """ \
+    {{ if .Error }}{{ .Error }} {{ else }}\
+    {{ if .Venv }}({{ .Venv }}) {{ end }}\
+     {{ .Major }}.{{ .Minor }} \
+    {{ end }}\
+    """
+foreground = 'p:subtext'
+
 
 # Prompt - Second Line
 [[blocks]]
@@ -107,5 +103,5 @@ foreground = 'p:green'
 
 # Transient Prompt
 [transient_prompt]
-template = "<p:os>󱞽 {{ .Segments.Executiontime.FormattedMs }}</>\n\n󱞫 "
+template = "<p:subtext>󱞽 {{ .Segments.Executiontime.FormattedMs }}</>\n\n󱞫 "
 foreground = 'p:mauve'

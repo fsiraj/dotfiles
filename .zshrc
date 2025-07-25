@@ -48,6 +48,7 @@ autoload -U compinit && compinit
 zinit cdreplay -q
 
 # Configure completion behavior
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 bindkey "^[[Z" autosuggest-accept                                      # shift + tab
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'        # case insensitive matching
 zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'                # show color for matches
