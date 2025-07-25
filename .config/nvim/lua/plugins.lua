@@ -1,21 +1,4 @@
 -- Language support
-local treesitter_parsers = {
-    'python',
-    'bash',
-    'c',
-    'diff',
-    'html',
-    'lua',
-    'luadoc',
-    'markdown',
-    'markdown_inline',
-    'query',
-    'vim',
-    'vimdoc',
-    'tmux',
-    'yaml',
-    'regex',
-}
 
 local language_servers = {
     -- Python
@@ -152,7 +135,7 @@ local function codecompanion_lualine_component()
     end
     function component:update_status()
         if self.processing then
-            self.spinner_index = self.spinner_index % 10 + 1
+            self.spinner_index = self.spinner_index % #spinners + 1
             return spinners[self.spinner_index] .. '  '
         else
             return ' '
@@ -397,7 +380,6 @@ local M = {
         build = ':TSUpdate',
         main = 'nvim-treesitter.configs',
         opts = {
-            ensure_installed = treesitter_parsers,
             auto_install = true,
             highlight = {
                 enable = true,
@@ -449,19 +431,6 @@ local M = {
         priority = 1000,
         opts = {
             flavor = 'mocha',
-            custom_highlights = function(colors)
-                local mauve = colors.mauve
-                local mantle = colors.mantle
-                local base = colors.base
-                return {
-                    FloatTitle = { fg = mantle, bg = mauve, bold = true },
-                    FloatBorder = { fg = mantle, bg = mantle },
-                    Pmenu = { link = 'NormalFloat' },
-                    CursorLineNr = { fg = mauve },
-                    StatusLine = { fg = base, bg = base },
-                    StatusLineNC = { fg = base, bg = base },
-                }
-            end,
             default_integrations = true,
             integrations = {
                 -- Most common plugins enabled by default
@@ -673,12 +642,8 @@ local M = {
         opts = {
             enhanced_diff_hl = true,
             keymaps = {
-                view = {
-                    ['q'] = '<Cmd>DiffviewClose<CR>',
-                },
-                file_panel = {
-                    ['q'] = '<Cmd>DiffviewClose<CR>',
-                },
+                view = { ['q'] = '<Cmd>DiffviewClose<CR>' },
+                file_panel = { ['q'] = '<Cmd>DiffviewClose<CR>' },
             },
         },
     },
@@ -710,7 +675,7 @@ local M = {
     --Codecompanion
     {
         'olimorris/codecompanion.nvim',
-        event = 'VeryLazy',
+        keys = 'VeryLazy',
         dependencies = {
             'nvim-lua/plenary.nvim',
             'nvim-treesitter/nvim-treesitter',
@@ -1113,7 +1078,7 @@ local M = {
     --Neotest
     {
         'nvim-neotest/neotest',
-        event = 'VeryLazy',
+        keys = '<Leader>n',
         dependencies = {
             'nvim-neotest/nvim-nio',
             'nvim-lua/plenary.nvim',
@@ -1190,9 +1155,12 @@ local M = {
         event = 'VeryLazy',
         config = function()
             require('sniprun').setup({
-                display = { 'Classic', 'VirtualText' },
+                display = { 'Terminal' },
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
+                interpreter_options = {
+                    Lua_nvim = { use_on_filetypes = { 'codecompanion' } },
+                },
             })
             vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = ' [R]un Code' })
         end,
@@ -1364,34 +1332,33 @@ local M = {
     },
 }
 
--- Override plugin colors using colorscheme
-local color_overrides = function(accent, mantle, palette)
-    local theme = {}
-    theme.DashboardHeader = { fg = accent }
-    theme.DapBreak = { fg = palette.red }
-    theme.DapStop = { fg = palette.yellow }
-    theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
-    theme.WhichKeyDesc = { fg = accent }
-    theme.TreesitterContextBottom = { sp = accent, underline = true }
-    theme.SniprunVirtualTextOk = { bg = palette.green, fg = mantle }
-    theme.SniprunVirtualTextErr = { bg = palette.red, fg = mantle }
-    -- Apply themes
-    for hl, col in pairs(theme) do
-        vim.api.nvim_set_hl(0, hl, col)
-    end
-end
-
 -- Run overrides when colorscheme enabled
 vim.api.nvim_create_autocmd('Colorscheme', {
-    pattern = 'catppuccin-mocha',
+    pattern = '*',
     callback = function()
-        vim.api.nvim_create_autocmd('UIEnter', {
-            desc = 'Override plugin themes with catppuccin',
-            callback = function()
-                local colors = require('catppuccin.palettes').get_palette('mocha')
-                color_overrides(colors.mauve, colors.mantle, colors)
-            end,
-        })
+        local mantle = vim.api.nvim_get_hl(0, { name = 'NormalFloat' }).bg
+        local base = vim.api.nvim_get_hl(0, { name = 'Normal' }).bg
+        local accent = vim.api.nvim_get_hl(0, { name = 'Keyword' }).fg
+        local red = vim.api.nvim_get_hl(0, { name = 'ErrorMsg' }).fg
+        local yellow = vim.api.nvim_get_hl(0, { name = 'WarningMsg' }).fg
+
+        local theme = {}
+        theme.FloatTitle = { fg = mantle, bg = accent, bold = true }
+        theme.FloatBorder = { fg = mantle, bg = mantle }
+        theme.Pmenu = { link = 'NormalFloat' }
+        theme.CursorLineNr = { fg = accent }
+        theme.StatusLine = { fg = base, bg = base }
+        theme.StatusLineNC = { fg = base, bg = base }
+        theme.DashboardHeader = { fg = accent }
+        theme.DapBreak = { fg = red }
+        theme.DapStop = { fg = yellow }
+        theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
+        theme.TreesitterContext = { bg = mantle }
+        theme.TreesitterContextBottom = { sp = accent, underline = true }
+
+        for hl, col in pairs(theme) do
+            vim.api.nvim_set_hl(0, hl, col)
+        end
     end,
 })
 
