@@ -4,11 +4,11 @@ final_space = true
 
 # Catppuccin Mocha
 [palette]
-teal = '#94e2d6'
-green = '#a6e3a2'
-mauve = '#cba6f8'
-pink = '#f5c2e8'
-subtext = '#a6adc9'
+teal = '#7dcfff'
+green = '#1abc9c'
+mauve = '#bb9af7'
+pink = '#ea76cb'
+subtext = '#565f89'
 
 
 # Prompt - 'Zero-th' Line

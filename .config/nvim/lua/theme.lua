@@ -74,15 +74,30 @@ local function get_palette(colorscheme)
     }
 end
 
+local function ghostty_theme(colorscheme)
+    local cmd =
+        string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', colorscheme:gsub('[^%w]', ''))
+    local match = vim.fn.system(cmd):gsub('%s+$', '')
+    return match:match('^(.*)%s[^%s]+$') or 'catppuccin-mocha'
+end
+
 -- Helper to reassign variables with sed
-local function sed_reassign(var, color, file)
+local function sed_reassign(var, val, file)
     local cmd
     if string.find(file, 'tmux') then
-        cmd = string.format([[sed -i "s|^set -g @%s \".*\"|set -g @%s \"%s\"|" %s]], var, var, color, file)
+        cmd = string.format([[sed -i "s|^set -g @%s \".*\"|set -g @%s \"%s\"|" %s]], var, var, val, file)
+    elseif string.find(file, 'ghostty') then
+        cmd = string.format([[sed -i "s|^%s = .*|%s = %s|" %s]], var, var, val, file)
     else
-        cmd = string.format([[sed -i "s|^%s = '.*'|%s = '%s'|" %s]], var, var, color, file)
+        cmd = string.format([[sed -i "s|^%s = '.*'|%s = '%s'|" %s]], var, var, val, file)
     end
     vim.fn.system(cmd)
+end
+
+local function apply_overrides(path, overrides)
+    for var, val in pairs(overrides) do
+        sed_reassign(var, val, path)
+    end
 end
 
 local M = {}
@@ -97,9 +112,7 @@ function M.sync_theme()
     local nvim_overrides = {
         ['vim\\.g\\.colorscheme'] = p.name,
     }
-    for var, val in pairs(nvim_overrides) do
-        sed_reassign(var, val, nvim)
-    end
+    apply_overrides(nvim, nvim_overrides)
 
     local omp = '~/.config/ohmyposh/simple.omp.toml'
     local omp_overrides = {
@@ -109,9 +122,7 @@ function M.sync_theme()
         pink = p.pink,
         subtext = p.subtext,
     }
-    for var, val in pairs(omp_overrides) do
-        sed_reassign(var, val, omp)
-    end
+    apply_overrides(omp, omp_overrides)
 
     local tmux = '~/.config/tmux/tmux.conf'
     local tmux_overrides = {
@@ -124,9 +135,13 @@ function M.sync_theme()
         thm_sapphire = p.sapphire,
         thm_blue = p.blue,
     }
-    for var, val in pairs(tmux_overrides) do
-        sed_reassign(var, val, tmux)
-    end
+    apply_overrides(tmux, tmux_overrides)
+
+    local ghostty = '~/.config/ghostty/config'
+    local ghostty_overrides = {
+        theme = ghostty_theme(p.name),
+    }
+    apply_overrides(ghostty, ghostty_overrides)
 
     vim.print(p)
 end
