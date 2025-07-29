@@ -342,6 +342,14 @@ local M = {
             local fzf = require('fzf-lua')
             local actions = require('fzf-lua.actions')
             opts.helptags = { actions = { ['enter'] = actions.help_vert } }
+            opts.colorschemes = {
+                actions = {
+                    ['enter'] = function(...)
+                        actions.colorscheme(...)
+                        require('theme').sync_theme()
+                    end,
+                },
+            }
 
             fzf.setup(opts)
 
@@ -657,7 +665,7 @@ local M = {
         opts = {
             suggestion = {
                 enabled = true,
-                auto_trigger = true,
+                auto_trigger = false,
                 keymap = { accept = '<S-Tab>', accept_word = '<C-l>' },
             },
             panel = { enabled = false },
@@ -675,7 +683,7 @@ local M = {
     --Codecompanion
     {
         'olimorris/codecompanion.nvim',
-        keys = 'VeryLazy',
+        event = 'VeryLazy',
         dependencies = {
             'nvim-lua/plenary.nvim',
             'nvim-treesitter/nvim-treesitter',
@@ -686,7 +694,7 @@ local M = {
             adapters = {
                 copilot = function()
                     return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'claude-sonnet-4' } },
+                        schema = { model = { default = 'gpt-4.1' } },
                     })
                 end,
             },
@@ -801,6 +809,13 @@ local M = {
         event = 'VeryLazy',
         dependencies = { 'nvim-lua/plenary.nvim' },
         opts = { signs = false },
+    },
+
+    --HighlightColors
+    {
+        'brenoprata10/nvim-highlight-colors',
+        event = 'VeryLazy',
+        config = true,
     },
 
     --VimTmuxNavigator
@@ -1332,34 +1347,6 @@ local M = {
     },
 }
 
--- Run overrides when colorscheme enabled
-vim.api.nvim_create_autocmd('Colorscheme', {
-    pattern = '*',
-    callback = function()
-        local mantle = vim.api.nvim_get_hl(0, { name = 'NormalFloat' }).bg
-        local base = vim.api.nvim_get_hl(0, { name = 'Normal' }).bg
-        local accent = vim.api.nvim_get_hl(0, { name = 'Keyword' }).fg
-        local red = vim.api.nvim_get_hl(0, { name = 'ErrorMsg' }).fg
-        local yellow = vim.api.nvim_get_hl(0, { name = 'WarningMsg' }).fg
-
-        local theme = {}
-        theme.FloatTitle = { fg = mantle, bg = accent, bold = true }
-        theme.FloatBorder = { fg = mantle, bg = mantle }
-        theme.Pmenu = { link = 'NormalFloat' }
-        theme.CursorLineNr = { fg = accent }
-        theme.StatusLine = { fg = base, bg = base }
-        theme.StatusLineNC = { fg = base, bg = base }
-        theme.DashboardHeader = { fg = accent }
-        theme.DapBreak = { fg = red }
-        theme.DapStop = { fg = yellow }
-        theme.NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' }
-        theme.TreesitterContext = { bg = mantle }
-        theme.TreesitterContextBottom = { sp = accent, underline = true }
-
-        for hl, col in pairs(theme) do
-            vim.api.nvim_set_hl(0, hl, col)
-        end
-    end,
-})
+require('theme').hl_autocmd()
 
 return M
