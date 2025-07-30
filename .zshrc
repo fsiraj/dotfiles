@@ -84,18 +84,11 @@ fi
 
 alias c="clear -x"
 alias cd..="cd .."
-alias py="python3"
-alias pyv="python3 --version"
-alias d="deactivate"
 alias reload="source ~/.zshrc"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
 alias gs="git status -sb"
-alias gst="git stash"
-alias gstl="git stash list"
-alias gsta="git stash apply"
-alias gstp="git stash pop"
 alias gl="git log --oneline -n 10"
 alias gb="git branch"
 alias gch="git checkout"
@@ -104,3 +97,8 @@ alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 alias grs="git restore --staged"
 
+alias py="python3"
+alias venv="source .venv/bin/activate"
+alias d="deactivate"
+
+alias n="nvim"

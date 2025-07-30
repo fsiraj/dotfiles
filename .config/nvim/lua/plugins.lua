@@ -1,3 +1,5 @@
+local style = require('style')
+
 -- Language support
 
 local language_servers = {
@@ -323,7 +325,11 @@ local M = {
                     ['<C-d>'] = 'preview-down',
                 },
             },
-            files = { hidden = true },
+            files = {
+                hidden = true,
+                follow = true,
+                fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
+            },
             grep = { hidden = true },
             buffers = { previewer = false, winopts = { height = 12, width = unit_width } },
             ui_select = function(fzf_opts, items)
@@ -346,7 +352,7 @@ local M = {
                 actions = {
                     ['enter'] = function(...)
                         actions.colorscheme(...)
-                        require('style').sync_theme()
+                        vim.schedule(style.sync_theme)
                     end,
                 },
             }
@@ -1350,6 +1356,6 @@ local M = {
     },
 }
 
-require('style').hl_autocmd()
+style.hl_autocmd()
 
 return M
