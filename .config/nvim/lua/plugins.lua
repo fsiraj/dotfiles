@@ -597,6 +597,7 @@ local M = {
                 format = {},
             },
             messages = { enabled = true },
+            notify = { enabled = true },
             popupmenu = { enabled = false },
             lsp = {
                 progress = { enabled = false },
@@ -608,6 +609,7 @@ local M = {
                 },
             },
             views = {
+                mini = { timeout = 5000 },
                 cmdline_popup = {
                     size = { width = unit_width, max_width = unit_width },
                     border = { style = 'none', padding = { 1, 2 } },

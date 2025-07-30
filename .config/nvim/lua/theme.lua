@@ -1,23 +1,25 @@
---- @class Palette
---- @field name string
---- @field accent string
---- @field text string
---- @field base string
---- @field mantle string
---- @field surface string
---- @field subtext string
---- @field red string
---- @field yellow string
---- @field green string
---- @field teal string
---- @field sky string
---- @field sapphire string
---- @field blue string
---- @field mauve string
---- @field pink string
+local COLORS = {
+    'name',
+    'accent',
+    'text',
+    'base',
+    'mantle',
+    'surface',
+    'subtext',
+    'red',
+    'yellow',
+    'green',
+    'teal',
+    'sky',
+    'sapphire',
+    'blue',
+    'mauve',
+    'pink',
+}
 
---- @param colorscheme string
---- @return Palette
+--- Constructs and returns a palette object from the current colorscheme
+--- @param colorscheme string name of the colorscheme
+--- @return table
 local function get_palette(colorscheme)
     if string.find(colorscheme, 'catppuccin') then
         local flavor = vim.fn.split(colorscheme, '-')[2]
@@ -74,6 +76,28 @@ local function get_palette(colorscheme)
     }
 end
 
+--- Check for missing colors in the palette and convert numeric values to hex strings.
+--- @param p table palette object
+--- @return table
+local function sanitize_palette(p)
+    local missing = {}
+    for _, c in ipairs(COLORS) do
+        if not p[c] then table.insert(missing, c) end
+    end
+    if #missing > 0 then
+        vim.print("colorscheme " .. p.name .. " is missing colors:")
+        vim.print(missing)
+    end
+    for k, v in pairs(p) do
+        if type(v) == 'number' then p[k] = string.format('#%06x', v) end
+    end
+    return p
+end
+
+--- Uses fzf to find the builtin ghostty theme corresponding to
+--- the given colorscheme, defaults to catppuccin-mocha.
+--- @param colorscheme string name of the colorscheme
+--- @return string
 local function ghostty_theme(colorscheme)
     local cmd =
         string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', colorscheme:gsub('[^%w]', ''))
@@ -81,7 +105,11 @@ local function ghostty_theme(colorscheme)
     return match:match('^(.*)%s[^%s]+$') or 'catppuccin-mocha'
 end
 
--- Helper to reassign variables with sed
+--- Uses sed to reassign a variable in a file.
+--- @param var string variable to reassign
+--- @param val string value to assign to the variable
+--- @param file string file to modify
+--- @return nil
 local function sed_reassign(var, val, file)
     local cmd
     if string.find(file, 'tmux') then
@@ -94,6 +122,10 @@ local function sed_reassign(var, val, file)
     vim.fn.system(cmd)
 end
 
+--- Applies overrides to a file by reassigning variables.
+--- @param path string path to the file
+--- @param overrides table table of variable-value pairs to override
+--- @return nil
 local function apply_overrides(path, overrides)
     for var, val in pairs(overrides) do
         sed_reassign(var, val, path)
@@ -102,17 +134,24 @@ end
 
 local M = {}
 
--- Fzflua colorscheme picker callback
+--- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
+--- Used as a callback for fzf-lua's colorscheme picker.
+--- @return nil
 function M.sync_theme()
-    -- Apply persistent changes to neovim, omp, and tmux if colorscheme changes
     if vim.g.colors_name == vim.g.colorscheme then return end
-    local p = get_palette(vim.g.colors_name)
+    local p = sanitize_palette(get_palette(vim.g.colors_name))
 
     local nvim = '~/.config/nvim/init.lua'
     local nvim_overrides = {
         ['vim\\.g\\.colorscheme'] = p.name,
     }
     apply_overrides(nvim, nvim_overrides)
+
+    local ghostty = '~/.config/ghostty/config'
+    local ghostty_overrides = {
+        theme = ghostty_theme(p.name),
+    }
+    apply_overrides(ghostty, ghostty_overrides)
 
     local omp = '~/.config/ohmyposh/simple.omp.toml'
     local omp_overrides = {
@@ -137,16 +176,10 @@ function M.sync_theme()
     }
     apply_overrides(tmux, tmux_overrides)
 
-    local ghostty = '~/.config/ghostty/config'
-    local ghostty_overrides = {
-        theme = ghostty_theme(p.name),
-    }
-    apply_overrides(ghostty, ghostty_overrides)
-
     vim.print(p)
 end
 
--- Apply non-persistent changes immediately
+--- Sets up an autocmd to apply neovim highlights based on the current colorscheme.
 function M.hl_autocmd()
     vim.api.nvim_create_autocmd('ColorScheme', {
         pattern = '*',
