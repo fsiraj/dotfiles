@@ -83,16 +83,6 @@ local function sanitize_palette(p)
     for k, v in pairs(p) do
         if type(v) == 'number' then p[k] = string.format('#%06x', v) end
     end
-    vim.print('colorscheme: ' .. p.name)
-    vim.print(p)
-    local missing = {}
-    for _, c in ipairs(COLORS) do
-        if not p[c] then table.insert(missing, c) end
-    end
-    if #missing > 0 then
-        vim.print('missing colors:')
-        vim.print(missing)
-    end
     return p
 end
 
@@ -104,7 +94,6 @@ local function ghostty_theme(colorscheme)
     local cmd =
         string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', colorscheme:gsub('[^%w]', ''))
     local match = vim.fn.system(cmd):gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
-    vim.print('ghostty match for ' .. colorscheme .. ' is ' .. match)
     return match
 end
 
@@ -169,8 +158,9 @@ function M.sync_theme()
     local tmux = '~/.config/tmux/tmux.conf'
     local tmux_overrides = {
         thm_fg = p.text,
+        thm_surface_0 = p.base,
+        thm_surface_1 = p.surface,
         thm_mantle = p.mantle,
-        thm_surface = p.surface,
         thm_mauve = p.mauve,
         thm_teal = p.teal,
         thm_sky = p.sky,
