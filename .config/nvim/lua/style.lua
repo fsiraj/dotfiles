@@ -80,29 +80,32 @@ end
 --- @param p table palette object
 --- @return table
 local function sanitize_palette(p)
+    for k, v in pairs(p) do
+        if type(v) == 'number' then p[k] = string.format('#%06x', v) end
+    end
+    vim.print('colorscheme: ' .. p.name)
+    vim.print(p)
     local missing = {}
     for _, c in ipairs(COLORS) do
         if not p[c] then table.insert(missing, c) end
     end
     if #missing > 0 then
-        vim.print("colorscheme " .. p.name .. " is missing colors:")
+        vim.print('missing colors:')
         vim.print(missing)
-    end
-    for k, v in pairs(p) do
-        if type(v) == 'number' then p[k] = string.format('#%06x', v) end
     end
     return p
 end
 
 --- Uses fzf to find the builtin ghostty theme corresponding to
---- the given colorscheme, defaults to catppuccin-mocha.
+--- the given colorscheme.
 --- @param colorscheme string name of the colorscheme
 --- @return string
 local function ghostty_theme(colorscheme)
     local cmd =
         string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', colorscheme:gsub('[^%w]', ''))
-    local match = vim.fn.system(cmd):gsub('%s+$', '')
-    return match:match('^(.*)%s[^%s]+$') or 'catppuccin-mocha'
+    local match = vim.fn.system(cmd):gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
+    vim.print('ghostty match for ' .. colorscheme .. ' is ' .. match)
+    return match
 end
 
 --- Uses sed to reassign a variable in a file.
@@ -175,8 +178,6 @@ function M.sync_theme()
         thm_blue = p.blue,
     }
     apply_overrides(tmux, tmux_overrides)
-
-    vim.print(p)
 end
 
 --- Sets up an autocmd to apply neovim highlights based on the current colorscheme.

@@ -346,7 +346,7 @@ local M = {
                 actions = {
                     ['enter'] = function(...)
                         actions.colorscheme(...)
-                        require('theme').sync_theme()
+                        require('style').sync_theme()
                     end,
                 },
             }
@@ -360,6 +360,7 @@ local M = {
             vim.keymap.set('n', '<Leader>sg', fzf.live_grep, { desc = 'FzfLua: [S]earch by [G]rep' })
             vim.keymap.set('n', '<Leader>sh', fzf.helptags, { desc = 'FzfLua: [S]earch [H]elp' })
             vim.keymap.set('n', '<Leader>sH', fzf.highlights, { desc = 'FzfLua: [S]earch [H]ighlights' })
+            vim.keymap.set('n', '<Leader>sc', fzf.colorschemes, { desc = 'FzfLua: [S]earch [C]olorschemes' })
             vim.keymap.set('n', '<Leader>sk', fzf.keymaps, { desc = 'FzfLua: [S]earch [K]eymaps' })
             vim.keymap.set('v', '<Leader>ss', fzf.grep_visual, { desc = 'FzfLua: [S]earch [S]election' })
             vim.keymap.set('n', '<Leader>/', fzf.lgrep_curbuf, { desc = ' [/] FzfLua: Fuzzy Search Current Buffer' })
@@ -1349,6 +1350,6 @@ local M = {
     },
 }
 
-require('theme').hl_autocmd()
+require('style').hl_autocmd()
 
 return M
