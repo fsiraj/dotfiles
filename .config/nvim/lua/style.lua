@@ -79,21 +79,19 @@ local function ghostty_theme(colorscheme)
     return match
 end
 
---- Uses sed to reassign a variable in a file.
+--- Generates a sed expression to reassign a variable in a file.
 --- @param var string variable to reassign
 --- @param val string value to assign to the variable
 --- @param file string file to modify
 --- @return nil
-local function sed_reassign(var, val, file)
-    local cmd
+local function sed_expr(var, val, file)
     if string.find(file, 'tmux') then
-        cmd = string.format([[sed -i "s|^set -g @%s \".*\"|set -g @%s \"%s\"|" %s]], var, var, val, file)
+        return string.format([[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val)
     elseif string.find(file, 'ghostty') then
-        cmd = string.format([[sed -i "s|^%s = .*|%s = %s|" %s]], var, var, val, file)
+        return string.format([[ -e "s|^%s = .*|%s = %s|"]], var, var, val)
     else
-        cmd = string.format([[sed -i "s|^%s = '.*'|%s = '%s'|" %s]], var, var, val, file)
+        return string.format([[ -e "s|^%s = '.*'|%s = '%s'|"]], var, var, val)
     end
-    vim.fn.system(cmd)
 end
 
 --- Applies overrides to a file by reassigning variables.
@@ -101,9 +99,12 @@ end
 --- @param overrides table table of variable-value pairs to override
 --- @return nil
 local function apply_overrides(path, overrides)
+    local exprs = {}
     for var, val in pairs(overrides) do
-        sed_reassign(var, val, path)
+        table.insert(exprs, sed_expr(var, val, path))
     end
+    local cmd = string.format('sed -i%s \\\n%s', table.concat(exprs, ' \\\n      '), path)
+    vim.fn.system(cmd)
 end
 
 local M = {}
@@ -112,7 +113,6 @@ local M = {}
 --- Used as a callback for fzf-lua's colorscheme picker.
 --- @return nil
 function M.sync_theme()
-    if vim.g.colors_name == vim.g.colorscheme then return end
     local p = sanitize_palette(get_palette(vim.g.colors_name))
 
     local nvim = '~/.config/nvim/init.lua'
