@@ -1,23 +1,5 @@
-local COLORS = {
-    'name',
-    'accent',
-    'text',
-    'base',
-    'mantle',
-    'surface',
-    'subtext',
-    'red',
-    'yellow',
-    'green',
-    'teal',
-    'sky',
-    'sapphire',
-    'blue',
-    'mauve',
-    'pink',
-}
-
---- Constructs and returns a palette object from the current colorscheme
+--- Constructs and returns a palette object from the current colorscheme.
+--- Use catppuccin as the template for required colors.
 --- @param colorscheme string name of the colorscheme
 --- @return table
 local function get_palette(colorscheme)
@@ -76,7 +58,7 @@ local function get_palette(colorscheme)
     }
 end
 
---- Check for missing colors in the palette and convert numeric values to hex strings.
+--- Convert numeric values to hex strings.
 --- @param p table palette object
 --- @return table
 local function sanitize_palette(p)
