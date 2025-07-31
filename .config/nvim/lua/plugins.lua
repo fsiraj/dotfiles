@@ -146,8 +146,8 @@ local function codecompanion_lualine_component()
     return component
 end
 
--- To make UIs multiples of 50
-local unit_width = 50
+-- To make UIs multiples of consistent width
+local unit_width = 40
 
 -- Plugin config
 local M = {
@@ -350,8 +350,11 @@ local M = {
             opts.helptags = { actions = { ['enter'] = actions.help_vert } }
             opts.colorschemes = {
                 actions = {
-                    ['enter'] = function(...)
-                        actions.colorscheme(...)
+                    ['enter'] = function(selected, opts)
+                        if #selected == 0 then return end
+                        local colorscheme = selected[1]:match('^[^:]+')
+                        pcall(function() vim.cmd('colorscheme ' .. colorscheme) end)
+                        vim.notify("Syncing colors to " .. colorscheme .. "...")
                         vim.schedule(style.sync_theme)
                     end,
                 },
@@ -799,7 +802,6 @@ local M = {
     --Outline
     {
         'hedyhli/outline.nvim',
-        cmd = { 'Outline', 'OutlineOpen' },
         keys = {
             { '<leader>fo', '<cmd>Outline<CR>', desc = '[F]ile [O]utline' },
         },
@@ -816,17 +818,16 @@ local M = {
     --Neotree
     {
         'nvim-neo-tree/neo-tree.nvim',
+        keys = {
+            { '<leader>ft', '<Cmd>Neotree toggle<CR>', desc = '[F]ile [T]ree' },
+        },
         branch = 'v3.x',
         dependencies = {
             'nvim-lua/plenary.nvim',
             'MunifTanjim/nui.nvim',
             'nvim-tree/nvim-web-devicons',
         },
-        lazy = false,
-        config = function()
-            require('neo-tree').setup({ window = { width = unit_width } })
-            vim.keymap.set('n', '<Leader>ft', '<Cmd>Neotree<CR>', { desc = '[F]ile [T]ree' })
-        end,
+        opts = { window = { width = unit_width } },
     },
 
     --TodoComments
@@ -869,7 +870,7 @@ local M = {
         'neovim/nvim-lspconfig',
         event = 'VeryLazy',
         dependencies = {
-            { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+            { 'williamboman/mason.nvim', config = true },
             'williamboman/mason-lspconfig.nvim',
             'WhoIsSethDaniel/mason-tool-installer.nvim',
             'saghen/blink.cmp',
@@ -1119,7 +1120,7 @@ local M = {
     --Neotest
     {
         'nvim-neotest/neotest',
-        keys = '<Leader>n',
+        event = 'VeryLazy',
         dependencies = {
             'nvim-neotest/nvim-nio',
             'nvim-lua/plenary.nvim',
