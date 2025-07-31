@@ -4,6 +4,7 @@ This repo contains my personal dotfiles configuration for Linux and Mac OS.
 
 ## Summary
 
+- Terminal Emulator: [Ghostty](https://ghostty.org/)
 - Editor: [Neovim](https://neovim.io/)
   - Plugin Manager: [Lazy](https://github.com/folke/lazy.nvim)
 - Shell: [ZSH](https://www.zsh.org/)
@@ -44,8 +45,6 @@ cd dotfiles
 stow .
 ```
 
-### Install Plugins
-
 #### Zsh and Tmux
 
 If you ran the `chsh` command above, your default terminal should now be `zsh` so open a new terminal to check. Oh My Posh and Zinit are installed automatically by `.zshrc`. TPM is installed automatically by `tmux.conf`. To install tmux plugins, open a session with `tmux` and press `<C-a> I`. To update, press `<C-a> U`.
@@ -54,8 +53,11 @@ If you ran the `chsh` command above, your default terminal should now be `zsh` s
 
 Open a session with `nvim`. Lazy is automatically installed by `init.lua` which also installs all neovim plugins. Open a neovim session and run the command `:checkhealth` to diagnose your configuration, use `:Lazy` to manage plugins, and use `:Mason` to manage plugin dependencies. To see keybinds: `<Space>?`.
 
-#### Theme and Font
+#### Theme
 
-Catppuccin Mocha is the primary theme, Tokyo Night is second. The themes are installed and set automatically in all cases except the terminal emulator. To install the theme in your terminal, find the relevant port from [Catppuccin Ports](https://catppuccin.com/ports).
+Themes are automatically synced across everything if you use fzf-lua's colorscheme picker in neovim to change it. This is achieved using the `style.lua` file, where you can add any additional themes you want. Currently, it supports tokyonight, catppuccin, rose-pine, and nord.
 
-The JetbrainsMono Nerd Font has to be installed manually, download and install it using the instructions [here](https://gist.github.com/matthewjberger/7dd7e079f282f8138a9dc3b045ebefa0).
+JetbrainsMono Nerd Font has to be installed manually, download and install it using the instructions [here](https://gist.github.com/matthewjberger/7dd7e079f282f8138a9dc3b045ebefa0).
+
+> [!NOTE]
+> This setup is for my own use on MacOS, Arch, and Ubuntu.
