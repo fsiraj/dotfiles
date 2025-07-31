@@ -7,8 +7,8 @@ adjust-cell-width = -10%
 # Styling - Window
 title = " "
 window-theme = ghostty
-window-padding-x = 16
-window-padding-y = 16
+window-padding-x = 32
+window-padding-y = 32
 window-padding-balance = true
 gtk-tabs-location = hidden
 adw-toolbar-style = flat
