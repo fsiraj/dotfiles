@@ -541,6 +541,7 @@ local M = {
                     'DiffviewFiles',
                     'dap-view-term',
                     'neotest-summary',
+                    'neo-tree',
                 },
             }
 
@@ -810,6 +811,22 @@ local M = {
             outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
         },
+    },
+
+    --Neotree
+    {
+        'nvim-neo-tree/neo-tree.nvim',
+        branch = 'v3.x',
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'MunifTanjim/nui.nvim',
+            'nvim-tree/nvim-web-devicons',
+        },
+        lazy = false,
+        config = function()
+            require('neo-tree').setup({ window = { width = unit_width } })
+            vim.keymap.set('n', '<Leader>ft', '<Cmd>Neotree<CR>', { desc = '[F]ile [T]ree' })
+        end,
     },
 
     --TodoComments
