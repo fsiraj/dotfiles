@@ -216,8 +216,8 @@ function M.sync_theme()
     -- HyDE
     local hyde_theme = get_hyde_theme(p.name)
     if hyde_theme then
-        local cmd = string.format('hydectl theme set "%s"', hyde_theme)
-        vim.fn.system(cmd)
+        local cmd = {'hydectl', 'theme', 'set', hyde_theme}
+        vim.system(cmd)
     end
 end
 
