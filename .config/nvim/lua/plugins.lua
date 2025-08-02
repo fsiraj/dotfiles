@@ -250,6 +250,7 @@ local M = {
         },
         opts = {
             preset = 'modern',
+            delay = 500,
             win = { width = { max = unit_width * 3 } },
             triggers = {
                 { '<auto>', mode = 'nixsotc' },
@@ -354,7 +355,7 @@ local M = {
                         if #selected == 0 then return end
                         local colorscheme = selected[1]:match('^[^:]+')
                         pcall(function() vim.cmd('colorscheme ' .. colorscheme) end)
-                        vim.notify("Syncing colors to " .. colorscheme .. "...")
+                        vim.notify('Syncing colors to ' .. colorscheme .. '...')
                         vim.schedule(style.sync_theme)
                     end,
                 },
@@ -467,6 +468,21 @@ local M = {
         'folke/tokyonight.nvim',
         priority = 1000,
         opts = { plugins = { auto = true } },
+    },
+
+    --RosePine
+    {
+        'rose-pine/neovim',
+        priority = 1000,
+        name = 'rose-pine',
+    },
+
+    --Nord
+    {
+        'shaunsingh/nord.nvim',
+        priority = 1000,
+        lazy = false,
+        name = nord,
     },
 
     --TinyDeviconsAutoColors
