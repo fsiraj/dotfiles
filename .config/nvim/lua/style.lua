@@ -157,11 +157,13 @@ end
 --- @param path string path to the file
 --- @param overrides table table of variable-value pairs to override
 local function run_sed_cmd(path, overrides)
+    local sed = 'sed' and vim.uv.os_uname().sysname ~= 'Darwin' or 'gsed'
     local exprs = {}
     for var, val in pairs(overrides) do
         table.insert(exprs, sed_expr(var, val, path))
     end
-    local cmd = string.format('sed -i%s \\\n%s', table.concat(exprs, ' \\\n      '), path)
+    local exprs_string = table.concat(exprs, ' \\\n      ')
+    local cmd = string.format('%s -i%s \\\n%s', sed, exprs_string, path)
     vim.fn.system(cmd)
 end
 
