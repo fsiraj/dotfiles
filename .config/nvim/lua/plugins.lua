@@ -223,22 +223,12 @@ local M = {
             vim.keymap.set('n', '<Leader>Sw', function()
                 sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
             end, { desc = '[S]ession [W]rite' })
-            vim.keymap.set(
-                'n',
-                '<Leader>Sr',
-                function()
-                    sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
-                end,
-                { desc = '[S]ession [R]estore' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>Sd',
-                function()
-                    sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
-                end,
-                { desc = '[S]ession [D]elete' }
-            )
+            vim.keymap.set('n', '<Leader>Sr', function()
+                sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
+            end, { desc = '[S]ession [R]estore' })
+            vim.keymap.set('n', '<Leader>Sd', function()
+                sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
+            end, { desc = '[S]ession [D]elete' })
             vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = '[S]ession [S]elect' })
         end,
     },
@@ -720,7 +710,10 @@ local M = {
         },
         config = function(_, opts)
             require('copilot').setup(opts)
-            vim.keymap.set('n', '<Leader>tc', require('copilot.suggestion').toggle_auto_trigger, {
+            vim.keymap.set('n', '<Leader>tc', function()
+                require('copilot.suggestion').toggle_auto_trigger()
+                vim.notify('Copilot Auto-suggestions: ' .. tostring(vim.b.copilot_suggestion_auto_trigger))
+            end, {
                 desc = '[T]oggle [C]opilot Suggestions',
                 silent = true,
             })
@@ -978,7 +971,7 @@ local M = {
                                 bufnr = event.buf,
                             })
                             vim.lsp.inlay_hint.enable(not is_enabled)
-                            vim.print('Inlay Hints: ' .. tostring(not is_enabled))
+                            vim.notify('Inlay Hints: ' .. tostring(not is_enabled))
                         end, '[T]oggle [I]nlay Hints')
                     end
                 end,
@@ -1133,7 +1126,7 @@ local M = {
             -- Toggle format on save
             vim.keymap.set('n', '<Leader>tf', function()
                 vim.g.format_on_save = not vim.g.format_on_save
-                vim.print('Format On Save: ' .. tostring(vim.g.format_on_save))
+                vim.notify('Format On Save: ' .. tostring(vim.g.format_on_save))
             end, { desc = '[T]oggle [F]ormat On Save' })
         end,
     },
@@ -1402,15 +1395,8 @@ local M = {
             dap.listeners.before.event_exited['dap-view-config'] = dv.close
 
             -- Python specific config
-            local python_path = vim.fs.joinpath(
-                vim.fn.stdpath('data'),
-                'mason',
-                'packages',
-                'debugpy',
-                'venv',
-                'bin',
-                'python'
-            )
+            local python_path =
+                vim.fs.joinpath(vim.fn.stdpath('data'), 'mason', 'packages', 'debugpy', 'venv', 'bin', 'python')
             require('dap-python').setup(python_path)
         end,
     },
