@@ -174,8 +174,6 @@ local M = {}
 function M.sync_theme()
     -- Palette
     local p = sanitize_palette(get_palette(vim.g.colors_name))
-    local hypr_available = vim.fn.executable('hyprctl') == 1
-    local hyde_available = vim.fn.executable('hydectl') == 1
 
     -- Nvim
     local nvim = '~/.config/nvim/init.lua'
@@ -186,17 +184,7 @@ function M.sync_theme()
     local ghostty_theme = get_ghostty_theme(p.name)
     if ghostty_theme then
         run_sed_cmd(ghostty, { theme = ghostty_theme })
-        if hypr_available then
-            vim.system({
-                'hyprctl',
-                'dispatch',
-                'sendshortcut',
-                'ctrl',
-                'shift,',
-                'comma,',
-                'class:^.*ghostty$',
-            })
-        end
+        vim.system({'pkill', '-SIGUSR2', '-a', 'ghostty'})
     end
 
     -- Oh My Posh
@@ -231,7 +219,7 @@ function M.sync_theme()
     })
 
     -- HyDE
-    if hyde_available then
+    if vim.fn.executable('hydectl') == 1 then
         local hyde_theme = get_hyde_theme(p.name)
         if hyde_theme then
             vim.system({

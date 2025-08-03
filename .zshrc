@@ -8,6 +8,7 @@ export PATH="$XDG_BIN_HOME:$PATH"
 eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/config.omp.toml)"
 
 # Load plugins
+ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
