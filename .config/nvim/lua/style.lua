@@ -1,3 +1,9 @@
+--- We're either on arch, ubuntu, or macos
+local on_ubuntu = vim.fn.executable('apt') == 1
+local on_arch = vim.fn.executable('pacman') == 1
+local on_linux = on_arch or on_ubuntu
+local on_mac = not on_linux
+
 --- Constructs and returns a palette object from the current colorscheme.
 --- Use catppuccin as the template for required colors.
 --- @param colorscheme string name of the colorscheme
@@ -113,11 +119,11 @@ end
 --- @param colorscheme string name of the colorscheme
 --- @return string|nil
 local function get_ghostty_theme(colorscheme)
-    local cmd = string.format(
-        'ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1',
-        string.lower(colorscheme:gsub('[^%w]', ''))
-    )
-    return vim.fn.system(cmd):gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
+    local query = string.lower(colorscheme:gsub('[^%w]', ''))
+    local cmd = string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', query)
+    local out = vim.fn.system(cmd)
+    local match = out:gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
+    return match
 end
 
 --- Maps the colorscheme to a HyDE theme.
@@ -157,7 +163,7 @@ end
 --- @param path string path to the file
 --- @param overrides table table of variable-value pairs to override
 local function run_sed_cmd(path, overrides)
-    local sed = 'sed' and vim.uv.os_uname().sysname ~= 'Darwin' or 'gsed'
+    local sed = on_linux and 'sed' or 'gsed'
     local exprs = {}
     for var, val in pairs(overrides) do
         table.insert(exprs, sed_expr(var, val, path))
@@ -184,11 +190,17 @@ function M.sync_theme()
     local ghostty_theme = get_ghostty_theme(p.name)
     if ghostty_theme then
         run_sed_cmd(ghostty, { theme = ghostty_theme })
-        vim.system({'pkill', '-SIGUSR2', '-a', 'ghostty'})
+        if on_linux then
+            if not on_ubuntu then -- Ubuntu ghostty is not on tip
+                vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+            end
+        else
+            vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
+        end
     end
 
     -- Oh My Posh
-    local omp = '~/.config/ohmyposh/simple.omp.toml'
+    local omp = '~/.config/ohmyposh/config.omp.toml'
     local omp_overrides = {
         teal = p.teal,
         green = p.green,
