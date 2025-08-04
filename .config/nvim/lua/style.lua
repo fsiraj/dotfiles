@@ -192,7 +192,7 @@ function M.sync_theme()
     end
 
     -- Oh My Posh
-    local omp = '~/.config/ohmyposh/simple.omp.toml'
+    local omp = '~/.config/ohmyposh/config.omp.toml'
     local omp_overrides = {
         teal = p.teal,
         green = p.green,
