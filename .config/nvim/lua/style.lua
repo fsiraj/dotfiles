@@ -116,11 +116,14 @@ end
 --- @param colorscheme string name of the colorscheme
 --- @return string|nil
 local function get_ghostty_theme(colorscheme)
+    local query =  string.lower(colorscheme:gsub('[^%w]', ''))
     local cmd = string.format(
         'ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1',
-        string.lower(colorscheme:gsub('[^%w]', ''))
+        query
     )
-    return vim.fn.system(cmd):gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
+    local out = vim.fn.system(cmd)
+    local match = out:gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
+    return match
 end
 
 --- Maps the colorscheme to a HyDE theme.
@@ -187,8 +190,11 @@ function M.sync_theme()
     local ghostty_theme = get_ghostty_theme(p.name)
     if ghostty_theme then
         run_sed_cmd(ghostty, { theme = ghostty_theme })
-        local pkill_flags = on_linux and '-SIGUSR2' or '-SIGUSR2 -a'
-        vim.system({ 'pkill', pkill_flags, 'ghostty' })
+        if on_linux then
+            vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+        else
+            vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
+        end
     end
 
     -- Oh My Posh
