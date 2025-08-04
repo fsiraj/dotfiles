@@ -16,6 +16,7 @@ vim.g.expandtab = true
 -- Enable relative line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
+vim.opt.fillchars:append({ eob = " " })
 
 -- Enable mouse mode
 vim.opt.mouse = 'a'
