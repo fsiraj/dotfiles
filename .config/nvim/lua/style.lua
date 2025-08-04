@@ -1,5 +1,8 @@
---- We're either on linux or macos
-local on_linux = vim.uv.os_uname().sysname == 'Linux'
+--- We're either on arch, ubuntu, or macos
+local on_ubuntu = vim.fn.executable('apt') == 1
+local on_arch = vim.fn.executable('pacman') == 1
+local on_linux = on_arch or on_ubuntu
+local on_mac = not on_linux
 
 --- Constructs and returns a palette object from the current colorscheme.
 --- Use catppuccin as the template for required colors.
@@ -116,11 +119,8 @@ end
 --- @param colorscheme string name of the colorscheme
 --- @return string|nil
 local function get_ghostty_theme(colorscheme)
-    local query =  string.lower(colorscheme:gsub('[^%w]', ''))
-    local cmd = string.format(
-        'ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1',
-        query
-    )
+    local query = string.lower(colorscheme:gsub('[^%w]', ''))
+    local cmd = string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', query)
     local out = vim.fn.system(cmd)
     local match = out:gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
     return match
@@ -191,7 +191,9 @@ function M.sync_theme()
     if ghostty_theme then
         run_sed_cmd(ghostty, { theme = ghostty_theme })
         if on_linux then
-            vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+            if not on_ubuntu then -- Ubuntu ghostty is not on tip
+                vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+            end
         else
             vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
         end
