@@ -103,10 +103,10 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
 
 -- Keymaps to scroll lsp hover and signature
 vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
-    if not require('noice.lsp').scroll(4) then return '10jzz' end
+    if not require('noice.lsp').scroll(4) then return '10j' end
 end, { silent = true, expr = true })
 vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
-    if not require('noice.lsp').scroll(-4) then return '10kzz' end
+    if not require('noice.lsp').scroll(-4) then return '10k' end
 end, { silent = true, expr = true })
 
 --NOTE: Autocommands
