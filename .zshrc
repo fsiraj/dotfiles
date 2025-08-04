@@ -46,7 +46,7 @@ source <(fzf --zsh)
 # Define aliases
 if command -v eza &>/dev/null; then
     alias ls="eza --git-ignore --group-directories-first --color=auto --icons=auto"
-    alias ll="eza -al --group-directories-first --color=auto --icons=auto"
+    alias ll="eza --git-ignore -al --group-directories-first --color=auto --icons=auto"
     alias la="eza -a --group-directories-first --color=auto --icons=auto"
 else
     alias ls="ls"
