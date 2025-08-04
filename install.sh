@@ -30,22 +30,26 @@ arch)
         git make unzip base-devel \
         zsh tmux stow \
         fzf zoxide eza fd ripgrep \
-        lua node \
+        lua nodejs \
         ttf-jetbrains-mono-nerd
     sudo pacman -S --needed yay
-    yay -S neovim-git ghostty-git
-    curl -s https://ohmyposh.dev/install.sh | bash -s
+    yay -S --needed neovim-git ghostty-git
+    if ! command -v oh-my-posh >/dev/null 2>&1; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
     ;;
 
 ubuntu)
-    sudo add-apt-repository ppa:neovim-ppa/unstable -y
+    sudo add-apt-repository ppa:neovim-ppa/unstable
     sudo apt install \
         git make unzip \
         zsh tmux xsel stow \
         eza fd-find ripgrep \
-        lua nodejs npm \
+        lua5.4 nodejs npm \
         neovim
-    curl -s https://ohmyposh.dev/install.sh | bash -s
+    if ! command -v oh-my-posh >/dev/null 2>&1; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
     # Ubuntu's packaged fzf is outdated, install from source...
     XDG_BIN_HOME="$HOME/.local/bin"
     FZF_ROOT="$XDG_BIN_HOME/.fzf"
@@ -54,8 +58,10 @@ ubuntu)
         "$FZF_ROOT"/install --bin && cp "$FZF_ROOT/bin/fzf" "$XDG_BIN_HOME"
     fi
     # Ubuntu's zoxide package has extra steps, this is easier...
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    # Ubuntu's fd is called fdfind
+    if ! command -v zoxide >/dev/null 2>&1; then
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+    # Ubuntu's fd is called fdfind...
     ln -sf "$(which fdfind)" ~/.local/bin/fd
     # Ubuntu doesn't package the nerd fonts...
     if ! fc-list | grep -qi "JetBrainsMono Nerd Font"; then
