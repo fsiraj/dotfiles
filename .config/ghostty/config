@@ -3,6 +3,7 @@ theme = tokyonight_night
 font-family = JetBrainsMono Nerd Font
 font-size = 10
 adjust-cell-width = -10%
+custom-shader = cursor-trail.glsl
 
 # Styling - Window
 title = " "
