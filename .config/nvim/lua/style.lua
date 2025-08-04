@@ -1,3 +1,6 @@
+--- We're either on linux or macos
+local on_linux = vim.uv.os_uname().sysname == 'Linux'
+
 --- Constructs and returns a palette object from the current colorscheme.
 --- Use catppuccin as the template for required colors.
 --- @param colorscheme string name of the colorscheme
@@ -157,7 +160,7 @@ end
 --- @param path string path to the file
 --- @param overrides table table of variable-value pairs to override
 local function run_sed_cmd(path, overrides)
-    local sed = 'sed' and vim.uv.os_uname().sysname ~= 'Darwin' or 'gsed'
+    local sed = on_linux and 'sed' or 'gsed'
     local exprs = {}
     for var, val in pairs(overrides) do
         table.insert(exprs, sed_expr(var, val, path))
@@ -184,7 +187,8 @@ function M.sync_theme()
     local ghostty_theme = get_ghostty_theme(p.name)
     if ghostty_theme then
         run_sed_cmd(ghostty, { theme = ghostty_theme })
-        vim.system({'pkill', '-SIGUSR2', '-a', 'ghostty'})
+        local pkill_flags = on_linux and '-SIGUSR2' or '-SIGUSR2 -a'
+        vim.system({ 'pkill', pkill_flags, 'ghostty' })
     end
 
     -- Oh My Posh

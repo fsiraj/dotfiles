@@ -30,11 +30,13 @@ arch)
         git make unzip base-devel \
         zsh tmux stow \
         fzf zoxide eza fd ripgrep \
-        lua node \
+        lua nodejs \
         ttf-jetbrains-mono-nerd
     sudo pacman -S --needed yay
-    yay -S neovim-git ghostty-git
-    curl -s https://ohmyposh.dev/install.sh | bash -s
+    yay -S --needed neovim-git ghostty-git
+    if ! command -v oh-my-posh >/dev/null 2>&1; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
     ;;
 
 ubuntu)
@@ -45,7 +47,9 @@ ubuntu)
         eza fd-find ripgrep \
         lua nodejs npm \
         neovim
-    curl -s https://ohmyposh.dev/install.sh | bash -s
+    if ! command -v oh-my-posh >/dev/null 2>&1; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
     # Ubuntu's packaged fzf is outdated, install from source...
     XDG_BIN_HOME="$HOME/.local/bin"
     FZF_ROOT="$XDG_BIN_HOME/.fzf"
