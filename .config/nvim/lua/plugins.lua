@@ -512,14 +512,6 @@ local M = {
                     footer = {},
                 },
             })
-
-            vim.api.nvim_create_autocmd('FileType', {
-                pattern = 'dashboard',
-                callback = function()
-                    local winid = vim.api.nvim_get_current_win()
-                    vim.wo[winid][0].winhighlight = 'Normal:NormalFloat'
-                end,
-            })
         end,
     },
 
