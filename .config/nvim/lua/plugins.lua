@@ -356,11 +356,14 @@ local M = {
                             return
                         end
                         local colorscheme = selected[1]:match('^[^:]+')
-                        pcall(function()
+                        local ok = pcall(function()
                             vim.cmd('colorscheme ' .. colorscheme)
+                            vim.notify('Syncing colors to ' .. colorscheme .. '...')
+                            vim.schedule(style.sync_theme)
                         end)
-                        vim.notify('Syncing colors to ' .. colorscheme .. '...')
-                        vim.schedule(style.sync_theme)
+                        if not ok then
+                            vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR)
+                        end
                     end,
                 },
             }
