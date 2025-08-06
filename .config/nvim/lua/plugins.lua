@@ -332,7 +332,7 @@ local M = {
                 fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
             },
             grep = { hidden = true },
-            buffers = { previewer = false, winopts = { height = 12, width = unit_width } },
+            buffers = { previewer = false, winopts = { height = 16, width = unit_width * 2 } },
             ui_select = function(fzf_opts, items)
                 return vim.tbl_deep_extend('force', fzf_opts, {
                     prompt = ' ',
@@ -647,7 +647,7 @@ local M = {
             views = {
                 mini = { timeout = 5000 },
                 cmdline_popup = {
-                    size = { width = unit_width, max_width = unit_width },
+                    size = { min_width = unit_width, max_width = unit_width * 2 },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
                     win_options = {
@@ -1057,7 +1057,7 @@ local M = {
                     auto_show = function(ctx)
                         return ctx.mode ~= 'cmdline'
                     end,
-                    draw = { components = { label = { width = { max = unit_width / 2 } } } },
+                    draw = { components = { label = { width = { max = unit_width } } } },
                 },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
