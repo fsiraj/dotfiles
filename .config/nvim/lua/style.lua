@@ -268,6 +268,9 @@ function M.hl_autocmd()
                 NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
                 TreesitterContext = { bg = p.mantle },
                 TreesitterContextBottom = { sp = p.accent, underline = true },
+                WhichKeyBorder = { link = 'FloatBorder' },
+                NeotreeNormal = { link = 'NormalFloat' },
+                NeoTreeNormalNC = { link = 'NeotreeNormal' },
             }
 
             -- Apply neovim highlights
