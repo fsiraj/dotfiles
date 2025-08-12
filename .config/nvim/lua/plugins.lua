@@ -64,6 +64,7 @@ vim.list_extend(ensure_installed, {
     'jsonlint',
     'shellcheck',
     'shfmt',
+    'codelldb',
 })
 
 local dashboard_header = {
@@ -1012,7 +1013,9 @@ local M = {
             require('mason-tool-installer').setup({
                 ensure_installed = ensure_installed,
             })
-            require('mason-lspconfig').setup()
+            require('mason-lspconfig').setup({
+                automatic_enable = { exclude = { 'rust_analyzer' } },
+            })
 
             -- Add custom configs to LSPs
             for server_name, server_config in pairs(language_servers) do
@@ -1238,6 +1241,13 @@ local M = {
         end,
     },
 
+    --Rustaceanvim
+    {
+        'mrcjkb/rustaceanvim',
+        version = '^6', -- Recommended
+        lazy = false, -- This plugin is already lazy
+    },
+
     --Lazydev
     {
         'folke/lazydev.nvim',
@@ -1307,7 +1317,6 @@ local M = {
                 'igorlfs/nvim-dap-view',
                 opts = {
                     winbar = { default_section = 'repl' },
-                    windows = { terminal = { position = 'right' } },
                 },
             },
             -- Installs dependencies
