@@ -1,7 +1,7 @@
 -- NOTE: Options
 
 -- Colorscheme
-vim.g.colorscheme = 'tokyonight-night'
+vim.g.colorscheme = 'rose-pine'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '

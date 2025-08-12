@@ -39,6 +39,7 @@ local language_servers = {
     marksman = {},
     -- TOML
     taplo = {},
+    -- Rust handled by Rustaceanvim
 }
 
 local formatters_by_ft = {
@@ -64,6 +65,7 @@ vim.list_extend(ensure_installed, {
     'jsonlint',
     'shellcheck',
     'shfmt',
+    'codelldb',
 })
 
 local dashboard_header = {
@@ -314,7 +316,7 @@ local M = {
         opts = {
             defaults = { formatter = 'path.filename_first' },
             winopts = {
-                width = math.min(unit_width * 3, math.floor(0.8 * vim.o.columns)),
+                width = math.min(unit_width * 4, math.floor(0.8 * vim.o.columns)),
                 height = 0.8,
                 row = 0.5,
             },
@@ -339,7 +341,7 @@ local M = {
                     winopts = {
                         title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                         title_pos = 'center',
-                        width = unit_width,
+                        width = unit_width * 2,
                         height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5),
                     },
                 })
@@ -373,6 +375,7 @@ local M = {
             vim.keymap.set('n', '<Leader>sb', fzf.builtin, { desc = 'FzfLua: [S]earch [B]uiltin' })
             vim.keymap.set('n', '<Leader>sr', fzf.resume, { desc = 'FzfLua: [S]earch [R]esume' })
             vim.keymap.set('n', '<Leader>sf', fzf.files, { desc = 'FzfLua: [S]earch [F]iles' })
+            vim.keymap.set('n', '<Leader>so', fzf.oldfiles, { desc = 'FzfLua: [S]earch [O]ldfiles' })
             vim.keymap.set('n', '<Leader>sw', fzf.grep_cword, { desc = 'FzfLua: [S]earch Current [W]ord' })
             vim.keymap.set('n', '<Leader>sg', fzf.live_grep, { desc = 'FzfLua: [S]earch by [G]rep' })
             vim.keymap.set('n', '<Leader>sh', fzf.helptags, { desc = 'FzfLua: [S]earch [H]elp' })
@@ -388,6 +391,9 @@ local M = {
             vim.keymap.set('n', '<Leader>sp', function()
                 fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
             end, { desc = 'FzfLua: [S]earch [P]lugins' })
+            -- <Leader>ss = [S]earch [S]ymbol Buffer (Namu)
+            -- <Leader>sS = [S]earch [S]ymbol Workspace (Namu)
+            -- <Leader>sq = [S]earch [Q]uickfix (Namu)
 
             fzf.register_ui_select(opts.ui_select)
         end,
@@ -727,11 +733,13 @@ local M = {
         },
         opts = {
             adapters = {
-                copilot = function()
-                    return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'gpt-4.1' } },
-                    })
-                end,
+                http = {
+                    copilot = function()
+                        return require('codecompanion.adapters').extend('copilot', {
+                            schema = { model = { default = 'gpt-4.1' } },
+                        })
+                    end,
+                },
             },
             display = {
                 diff = { provider = 'mini_diff' },
@@ -805,21 +813,34 @@ local M = {
             require('namu').setup({
                 namu_symbols = {
                     options = {
-                        display = { mode = 'icons', format = 'tree_guides' },
+                        display = { mode = 'icon', format = 'tree_guides' },
                         window = { relative = 'win' },
+                        AllowKinds = {
+                            rust = { -- explicit for rust
+                                'Function',
+                                'Method',
+                                'Struct',
+                                'Field',
+                                'Enum',
+                                'Constant',
+                                'Variable',
+                                'Module',
+                                'Property',
+                            },
+                        },
                     },
                 },
             })
-            vim.keymap.set('n', '<leader>cs', '<Cmd>Namu symbols<CR>', {
-                desc = '[C]ode [S]ymbols Buffer',
+            vim.keymap.set('n', '<leader>ss', '<Cmd>Namu symbols<CR>', {
+                desc = '[S]earch [S]ymbols Buffer',
                 silent = true,
             })
-            vim.keymap.set('n', '<leader>cS', '<Cmd>Namu workspace<CR>', {
-                desc = '[C]ode [S]ymbols Workspace',
+            vim.keymap.set('n', '<leader>sS', '<Cmd>Namu workspace<CR>', {
+                desc = '[S]earch [S]ymbols Workspace',
                 silent = true,
             })
-            vim.keymap.set('n', '<leader>cq', '<Cmd>Namu diagnostics<CR>', {
-                desc = '[C]ode [Q]uickfix Search',
+            vim.keymap.set('n', '<leader>sq', '<Cmd>Namu diagnostics<CR>', {
+                desc = '[S]earch [Q]uickfix',
                 silent = true,
             })
         end,
@@ -868,7 +889,9 @@ local M = {
     {
         'brenoprata10/nvim-highlight-colors',
         event = 'VeryLazy',
-        config = true,
+        opts = {
+            exclude_filetypes = { 'lazy' },
+        },
     },
 
     --VimTmuxNavigator
@@ -921,9 +944,6 @@ local M = {
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', fzf.lsp_code_actions, '[C]ode [A]ction', { 'n', 'x' })
                     -- <Leader>ca = [C]ode [A]ction (FzfLua)
-                    -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
-                    -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
-                    -- <Leader>cq = [C]ode [Q]uickfix Search (Namu)
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 
@@ -991,6 +1011,7 @@ local M = {
             -- Toggle diagnostic information
             vim.keymap.set('n', '<Leader>td', function()
                 vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+                vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
             end, { desc = 'LSP: [T]oggle [D]iagnostics' })
             vim.api.nvim_create_autocmd({ 'CursorHold' }, {
                 pattern = '*',
@@ -999,7 +1020,7 @@ local M = {
                         vim.diagnostic.open_float({
                             scope = 'line',
                             focusable = false,
-                            close_events = { 'CursorMoved', 'CursorMovedI' },
+                            close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave' },
                         })
                     end
                 end,
@@ -1012,7 +1033,9 @@ local M = {
             require('mason-tool-installer').setup({
                 ensure_installed = ensure_installed,
             })
-            require('mason-lspconfig').setup()
+            require('mason-lspconfig').setup({
+                automatic_enable = { exclude = { 'rust_analyzer' } },
+            })
 
             -- Add custom configs to LSPs
             for server_name, server_config in pairs(language_servers) do
@@ -1238,6 +1261,13 @@ local M = {
         end,
     },
 
+    --Rustaceanvim
+    {
+        'mrcjkb/rustaceanvim',
+        version = '^6',
+        lazy = false,
+    },
+
     --Lazydev
     {
         'folke/lazydev.nvim',
@@ -1357,9 +1387,6 @@ local M = {
                 },
             })
 
-            -- Dap setup
-            dap.defaults.fallback.switchbuf = 'usevisible,usetab,newtab'
-
             -- Dap View setup
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-view', 'dap-repl' },
@@ -1367,6 +1394,8 @@ local M = {
                     vim.wo.winhl = 'Normal:NormalFloat'
                 end,
             })
+            dap.defaults.fallback.switchbuf = 'usevisible,useopen,uselast'
+
             -- Change breakpoint icons
             local breakpoint_icons = vim.g.have_nerd_font
                     and {
