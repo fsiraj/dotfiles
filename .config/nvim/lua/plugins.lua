@@ -335,13 +335,15 @@ local M = {
             grep = { hidden = true },
             buffers = { previewer = false, winopts = { height = 16, width = unit_width * 2 } },
             ui_select = function(fzf_opts, items)
+                local width = math.max(unpack(vim.tbl_map(function(v) return #v.name end, items))) + 8
+                local height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5)
                 return vim.tbl_deep_extend('force', fzf_opts, {
                     prompt = ' ',
                     winopts = {
                         title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                         title_pos = 'center',
-                        width = unit_width,
-                        height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5),
+                        width = width,
+                        height = height
                     },
                 })
             end,
@@ -1244,8 +1246,8 @@ local M = {
     --Rustaceanvim
     {
         'mrcjkb/rustaceanvim',
-        version = '^6', -- Recommended
-        lazy = false, -- This plugin is already lazy
+        version = '^6',
+        lazy = false,
     },
 
     --Lazydev
@@ -1317,6 +1319,7 @@ local M = {
                 'igorlfs/nvim-dap-view',
                 opts = {
                     winbar = { default_section = 'repl' },
+                    windows = { terminal = { position = 'right' } },
                 },
             },
             -- Installs dependencies
@@ -1366,9 +1369,6 @@ local M = {
                 },
             })
 
-            -- Dap setup
-            dap.defaults.fallback.switchbuf = 'usevisible,usetab,newtab'
-
             -- Dap View setup
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-view', 'dap-repl' },
@@ -1376,6 +1376,8 @@ local M = {
                     vim.wo.winhl = 'Normal:NormalFloat'
                 end,
             })
+            dap.defaults.fallback.switchbuf = 'usevisible,useopen,uselast'
+
             -- Change breakpoint icons
             local breakpoint_icons = vim.g.have_nerd_font
                     and {
