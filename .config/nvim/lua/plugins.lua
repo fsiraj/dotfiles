@@ -335,15 +335,13 @@ local M = {
             grep = { hidden = true },
             buffers = { previewer = false, winopts = { height = 16, width = unit_width * 2 } },
             ui_select = function(fzf_opts, items)
-                local width = math.max(unpack(vim.tbl_map(function(v) return #v.name end, items))) + 8
-                local height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5)
                 return vim.tbl_deep_extend('force', fzf_opts, {
                     prompt = ' ',
                     winopts = {
                         title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                         title_pos = 'center',
-                        width = width,
-                        height = height
+                        width = unit_width * 2,
+                        height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5),
                     },
                 })
             end,
@@ -808,8 +806,21 @@ local M = {
             require('namu').setup({
                 namu_symbols = {
                     options = {
-                        display = { mode = 'icons', format = 'tree_guides' },
+                        display = { mode = 'icon', format = 'tree_guides' },
                         window = { relative = 'win' },
+                        AllowKinds = {
+                            rust = { -- explicit for rust
+                                'Function',
+                                'Method',
+                                'Struct',
+                                'Field',
+                                'Enum',
+                                'Constant',
+                                'Variable',
+                                'Module',
+                                'Property',
+                            },
+                        },
                     },
                 },
             })
