@@ -824,16 +824,16 @@ local M = {
                     },
                 },
             })
-            vim.keymap.set('n', '<leader>cs', '<Cmd>Namu symbols<CR>', {
-                desc = '[C]ode [S]ymbols Buffer',
+            vim.keymap.set('n', '<leader>ss', '<Cmd>Namu symbols<CR>', {
+                desc = '[S]earch [S]ymbols Buffer',
                 silent = true,
             })
-            vim.keymap.set('n', '<leader>cS', '<Cmd>Namu workspace<CR>', {
-                desc = '[C]ode [S]ymbols Workspace',
+            vim.keymap.set('n', '<leader>sS', '<Cmd>Namu workspace<CR>', {
+                desc = '[S]earch [S]ymbols Workspace',
                 silent = true,
             })
-            vim.keymap.set('n', '<leader>cq', '<Cmd>Namu diagnostics<CR>', {
-                desc = '[C]ode [Q]uickfix Search',
+            vim.keymap.set('n', '<leader>sq', '<Cmd>Namu diagnostics<CR>', {
+                desc = '[S]earch [Q]uickfix',
                 silent = true,
             })
         end,
@@ -1005,6 +1005,7 @@ local M = {
             -- Toggle diagnostic information
             vim.keymap.set('n', '<Leader>td', function()
                 vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+                vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
             end, { desc = 'LSP: [T]oggle [D]iagnostics' })
             vim.api.nvim_create_autocmd({ 'CursorHold' }, {
                 pattern = '*',
@@ -1013,7 +1014,7 @@ local M = {
                         vim.diagnostic.open_float({
                             scope = 'line',
                             focusable = false,
-                            close_events = { 'CursorMoved', 'CursorMovedI' },
+                            close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave' },
                         })
                     end
                 end,
