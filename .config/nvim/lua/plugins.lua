@@ -39,6 +39,7 @@ local language_servers = {
     marksman = {},
     -- TOML
     taplo = {},
+    -- Rust handled by Rustaceanvim
 }
 
 local formatters_by_ft = {
@@ -389,6 +390,9 @@ local M = {
             vim.keymap.set('n', '<Leader>sp', function()
                 fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
             end, { desc = 'FzfLua: [S]earch [P]lugins' })
+            -- <Leader>ss = [S]earch [S]ymbol Buffer (Namu)
+            -- <Leader>sS = [S]earch [S]ymbol Workspace (Namu)
+            -- <Leader>sq = [S]earch [Q]uickfix (Namu)
 
             fzf.register_ui_select(opts.ui_select)
         end,
@@ -882,8 +886,11 @@ local M = {
     {
         'brenoprata10/nvim-highlight-colors',
         event = 'VeryLazy',
-        config = true,
+        opts = {
+            exclude_filetypes = { 'lazy' }
+        },
     },
+
 
     --VimTmuxNavigator
     {
@@ -935,9 +942,6 @@ local M = {
                     map('<Leader>cv', vim.lsp.buf.rename, '[C]ode [V]ariable Rename')
                     map('<Leader>ca', fzf.lsp_code_actions, '[C]ode [A]ction', { 'n', 'x' })
                     -- <Leader>ca = [C]ode [A]ction (FzfLua)
-                    -- <Leader>cs = [C]ode [S]ymbol Buffer (Namu)
-                    -- <Leader>cS = [C]ode [S]ymbol Workspace (Namu)
-                    -- <Leader>cq = [C]ode [Q]uickfix Search (Namu)
                     -- <Leader>cf = [C]ode [F]ormat (Conform)
                     -- <Leader>cc = [C]ode [C]ompanion Chat (Codecompanion)
 

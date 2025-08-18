@@ -1,5 +1,5 @@
 # Styling - Editor
-theme = tokyonight_night
+theme = rose-pine
 font-family = JetBrainsMono Nerd Font
 font-size = 10
 adjust-cell-width = -10%

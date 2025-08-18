@@ -4,11 +4,11 @@ final_space = true
 
 # Colors
 [palette]
-teal = '#7dcfff'
-green = '#1abc9c'
-mauve = '#bb9af7'
-pink = '#ea76cb'
-subtext = '#565f89'
+teal = '#9ccfd8'
+green = '#95b1ac'
+mauve = '#c4a7e7'
+pink = '#ebbcba'
+subtext = '#908caa'
 
 
 # Prompt - 'Zero-th' Line
