@@ -732,11 +732,13 @@ local M = {
         },
         opts = {
             adapters = {
-                copilot = function()
-                    return require('codecompanion.adapters').extend('copilot', {
-                        schema = { model = { default = 'gpt-4.1' } },
-                    })
-                end,
+                http = {
+                    copilot = function()
+                        return require('codecompanion.adapters').extend('copilot', {
+                            schema = { model = { default = 'gpt-4.1' } },
+                        })
+                    end,
+                },
             },
             display = {
                 diff = { provider = 'mini_diff' },
@@ -887,10 +889,9 @@ local M = {
         'brenoprata10/nvim-highlight-colors',
         event = 'VeryLazy',
         opts = {
-            exclude_filetypes = { 'lazy' }
+            exclude_filetypes = { 'lazy' },
         },
     },
-
 
     --VimTmuxNavigator
     {
