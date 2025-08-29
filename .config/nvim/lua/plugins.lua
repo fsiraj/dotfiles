@@ -316,7 +316,7 @@ local M = {
         opts = {
             defaults = { formatter = 'path.filename_first' },
             winopts = {
-                width = math.min(unit_width * 3, math.floor(0.8 * vim.o.columns)),
+                width = math.min(unit_width * 4, math.floor(0.8 * vim.o.columns)),
                 height = 0.8,
                 row = 0.5,
             },
