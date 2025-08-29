@@ -375,6 +375,7 @@ local M = {
             vim.keymap.set('n', '<Leader>sb', fzf.builtin, { desc = 'FzfLua: [S]earch [B]uiltin' })
             vim.keymap.set('n', '<Leader>sr', fzf.resume, { desc = 'FzfLua: [S]earch [R]esume' })
             vim.keymap.set('n', '<Leader>sf', fzf.files, { desc = 'FzfLua: [S]earch [F]iles' })
+            vim.keymap.set('n', '<Leader>so', fzf.oldfiles, { desc = 'FzfLua: [S]earch [O]ldfiles' })
             vim.keymap.set('n', '<Leader>sw', fzf.grep_cword, { desc = 'FzfLua: [S]earch Current [W]ord' })
             vim.keymap.set('n', '<Leader>sg', fzf.live_grep, { desc = 'FzfLua: [S]earch by [G]rep' })
             vim.keymap.set('n', '<Leader>sh', fzf.helptags, { desc = 'FzfLua: [S]earch [H]elp' })
