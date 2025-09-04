@@ -45,8 +45,9 @@ ubuntu)
         git make unzip \
         zsh tmux xsel stow \
         eza fd-find ripgrep \
-        lua5.4 nodejs npm \
+        lua5.4 \
         neovim
+    sudo snap install node --classic
     if ! command -v oh-my-posh >/dev/null 2>&1; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
