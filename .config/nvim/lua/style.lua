@@ -107,9 +107,7 @@ end
 --- @return table
 local function sanitize_palette(p)
     for k, v in pairs(p) do
-        if type(v) == 'number' then
-            p[k] = string.format('#%06x', v)
-        end
+        if type(v) == 'number' then p[k] = string.format('#%06x', v) end
     end
     return p
 end
@@ -130,18 +128,10 @@ end
 --- @param colorscheme string name of the colorscheme
 --- @return string|nil
 local function get_hyde_theme(colorscheme)
-    if string.find(colorscheme, 'tokyonight') then
-        return 'Tokyo Night'
-    end
-    if string.find(colorscheme, 'catppuccin') then
-        return string.find(colorscheme, 'latte') and 'Catppucin Latte' or 'Catppuccin Mocha'
-    end
-    if string.find(colorscheme, 'rose') then
-        return 'Rosé Pine'
-    end
-    if string.find(colorscheme, 'nord') then
-        return 'Nordic Blue'
-    end
+    if string.find(colorscheme, 'tokyonight') then return 'Tokyo Night' end
+    if string.find(colorscheme, 'catppuccin') then return string.find(colorscheme, 'latte') and 'Catppucin Latte' or 'Catppuccin Mocha' end
+    if string.find(colorscheme, 'rose') then return 'Rosé Pine' end
+    if string.find(colorscheme, 'nord') then return 'Nordic Blue' end
     return nil
 end
 
@@ -186,16 +176,18 @@ function M.sync_theme()
     run_sed_cmd(nvim, { ['vim\\.g\\.colorscheme'] = p.name })
 
     -- Ghostty
-    local ghostty = '~/.config/ghostty/config'
-    local ghostty_theme = get_ghostty_theme(p.name)
-    if ghostty_theme then
-        run_sed_cmd(ghostty, { theme = ghostty_theme })
-        if on_linux then
-            if not on_ubuntu then -- Ubuntu ghostty is not on tip
-                vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+    if vim.fn.executable('ghostty') == 1 then
+        local ghostty = '~/.config/ghostty/config'
+        local ghostty_theme = get_ghostty_theme(p.name)
+        if ghostty_theme then
+            run_sed_cmd(ghostty, { theme = ghostty_theme })
+            if on_linux then
+                if not on_ubuntu then -- Ubuntu ghostty is not on tip
+                    vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+                end
+            else
+                vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
             end
-        else
-            vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
         end
     end
 
@@ -218,7 +210,7 @@ function M.sync_theme()
         thm_surface_1 = p.subtext,
         thm_mantle = p.mantle,
         thm_mauve = p.mauve,
-        thm_teal = p.accent,
+        thm_accent = p.accent,
         thm_sky = p.sky,
         thm_sapphire = p.sapphire,
         thm_blue = p.blue,
@@ -233,14 +225,12 @@ function M.sync_theme()
     -- HyDE
     if vim.fn.executable('hydectl') == 1 then
         local hyde_theme = get_hyde_theme(p.name)
-        if hyde_theme then
-            vim.system({
-                'hydectl',
-                'theme',
-                'set',
-                hyde_theme,
-            })
-        end
+        if hyde_theme then vim.system({
+            'hydectl',
+            'theme',
+            'set',
+            hyde_theme,
+        }) end
     end
 end
 
