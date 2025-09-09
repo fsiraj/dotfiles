@@ -844,6 +844,8 @@ local M = {
         'brenoprata10/nvim-highlight-colors',
         event = 'VeryLazy',
         opts = {
+            render = 'virtual',
+            virtual_symbol = '',
             exclude_filetypes = { 'lazy' },
         },
     },
@@ -959,6 +961,8 @@ local M = {
                 vim.diagnostic.enable(not vim.diagnostic.is_enabled())
                 vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
             end, { desc = 'LSP: [T]oggle [D]iagnostics' })
+
+            -- Display floating diagnostic window
             vim.api.nvim_create_autocmd({ 'CursorHold' }, {
                 pattern = '*',
                 callback = function()
