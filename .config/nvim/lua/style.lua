@@ -218,7 +218,7 @@ function M.sync_theme()
         thm_surface_1 = p.subtext,
         thm_mantle = p.mantle,
         thm_mauve = p.mauve,
-        thm_teal = p.accent,
+        thm_accent = p.accent,
         thm_sky = p.sky,
         thm_sapphire = p.sapphire,
         thm_blue = p.blue,
