@@ -314,7 +314,7 @@ local M = {
                         title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                         title_pos = 'center',
                         width = unit_width * 2,
-                        height = math.floor(math.min(vim.o.lines * 0.8, #items + 2) + 0.5),
+                        height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
                     },
                 })
             end,
