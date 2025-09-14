@@ -1,7 +1,7 @@
 -- NOTE: Options
 
 -- Colorscheme
-vim.g.colorscheme = 'rose-pine'
+vim.g.colorscheme = 'catppuccin-mocha'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
@@ -82,13 +82,13 @@ vim.opt.foldtext = ''
 
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
-vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = '[T]oggle [B]uffer Alternative (#)' })
+vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
 vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
-vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = '[F]ind [R]eplace Word' })
-vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = '[F]ind [R]eplace Selection' })
+vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
+vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selection' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
@@ -159,5 +159,5 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup('plugins', {
     defaults = { version = nil },
 })
-vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = '[L]azy' })
+vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = 'Lazy' })
 vim.cmd.colorscheme(vim.g.colorscheme)
