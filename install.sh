@@ -48,6 +48,9 @@ ubuntu)
         lua5.4 \
         neovim
     sudo snap install node --classic
+    # Ghostty (stable)
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+    # Oh My Posh
     if ! command -v oh-my-posh >/dev/null 2>&1; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi

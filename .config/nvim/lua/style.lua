@@ -1,13 +1,8 @@
 --- We're either on arch, ubuntu, or macos
 local on_ubuntu = vim.fn.executable('apt') == 1
 local on_arch = vim.fn.executable('pacman') == 1
-local on_linux = on_arch or on_ubuntu
-local on_mac = not on_linux
+local on_mac = vim.fn.executable('brew') == 1
 
---- Constructs and returns a palette object from the current colorscheme.
---- Use catppuccin as the template for required colors.
---- @param colorscheme string name of the colorscheme
---- @return table
 local function get_palette(colorscheme)
     if string.find(colorscheme, 'catppuccin') then
         local flavor = vim.fn.split(colorscheme, '-')[2]
@@ -102,20 +97,13 @@ local function get_palette(colorscheme)
     }
 end
 
---- Convert numeric values to hex strings.
---- @param p table palette object
---- @return table
-local function sanitize_palette(p)
+local function num_to_hex(p)
     for k, v in pairs(p) do
         if type(v) == 'number' then p[k] = string.format('#%06x', v) end
     end
     return p
 end
 
---- Uses fzf to find the builtin ghostty theme corresponding to
---- the given colorscheme.
---- @param colorscheme string name of the colorscheme
---- @return string|nil
 local function get_ghostty_theme(colorscheme)
     local query = string.lower(colorscheme:gsub('[^%w]', ''))
     local cmd = string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', query)
@@ -124,9 +112,6 @@ local function get_ghostty_theme(colorscheme)
     return match
 end
 
---- Maps the colorscheme to a HyDE theme.
---- @param colorscheme string name of the colorscheme
---- @return string|nil
 local function get_hyde_theme(colorscheme)
     if string.find(colorscheme, 'tokyonight') then return 'Tokyo Night' end
     if string.find(colorscheme, 'catppuccin') then return string.find(colorscheme, 'latte') and 'Catppucin Latte' or 'Catppuccin Mocha' end
@@ -135,10 +120,6 @@ local function get_hyde_theme(colorscheme)
     return nil
 end
 
---- Generates a sed expression to reassign a variable in a file.
---- @param var string variable to reassign
---- @param val string value to assign to the variable
---- @param file string file to modify
 local function sed_expr(var, val, file)
     if string.find(file, 'tmux') then
         return string.format([[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val)
@@ -149,11 +130,8 @@ local function sed_expr(var, val, file)
     end
 end
 
---- Runs sed command to reassign variables in a file
---- @param path string path to the file
---- @param overrides table table of variable-value pairs to override
 local function run_sed_cmd(path, overrides)
-    local sed = on_linux and 'sed' or 'gsed'
+    local sed = on_mac and 'gsed' or 'sed'
     local exprs = {}
     for var, val in pairs(overrides) do
         table.insert(exprs, sed_expr(var, val, path))
@@ -163,13 +141,38 @@ local function run_sed_cmd(path, overrides)
     vim.fn.system(cmd)
 end
 
+local function reload_(app, ...)
+    if app == 'ghostty' then
+        if on_arch then
+            vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
+        elseif on_ubuntu then
+            vim.system({ 'pkill', '-SIGUSR2', 'x-terminal-emul' })
+        elseif on_mac then
+            vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
+        end
+    elseif app == 'tmux' then
+        vim.system({
+            'tmux',
+            'source',
+            vim.env.HOME .. '/.config/tmux/tmux.conf',
+        })
+    elseif app == 'hyde' then
+        vim.system({
+            'hydectl',
+            'theme',
+            'set',
+            ...,
+        })
+    end
+end
+
 local M = {}
 
 --- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
 --- Used as a callback for fzf-lua's colorscheme picker.
 function M.sync_theme()
     -- Palette
-    local p = sanitize_palette(get_palette(vim.g.colors_name))
+    local p = num_to_hex(get_palette(vim.g.colors_name))
 
     -- Nvim
     local nvim = '~/.config/nvim/init.lua'
@@ -181,13 +184,7 @@ function M.sync_theme()
         local ghostty_theme = get_ghostty_theme(p.name)
         if ghostty_theme then
             run_sed_cmd(ghostty, { theme = ghostty_theme })
-            if on_linux then
-                if not on_ubuntu then -- Ubuntu ghostty is not on tip
-                    vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
-                end
-            else
-                vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
-            end
+            reload_('ghostty')
         end
     end
 
@@ -214,27 +211,19 @@ function M.sync_theme()
         thm_sky = p.sky,
         thm_sapphire = p.sapphire,
         thm_blue = p.blue,
+        thm_green = p.green,
     }
     run_sed_cmd(tmux, tmux_overrides)
-    vim.system({
-        'tmux',
-        'source',
-        vim.env.HOME .. '/.config/tmux/tmux.conf',
-    })
+    reload_('tmux')
 
     -- HyDE
     if vim.fn.executable('hydectl') == 1 then
         local hyde_theme = get_hyde_theme(p.name)
-        if hyde_theme then vim.system({
-            'hydectl',
-            'theme',
-            'set',
-            hyde_theme,
-        }) end
+        if hyde_theme then reload_('hyde', hyde_theme) end
     end
 end
 
---- Sets up an autocmd to apply neovim highlights based on the current colorscheme.
+--- Sets up an autocmd to override neovim highlights based on the current colorscheme.
 function M.hl_autocmd()
     vim.api.nvim_create_autocmd('ColorScheme', {
         pattern = '*',
@@ -252,7 +241,9 @@ function M.hl_autocmd()
                 CursorLineNr = { fg = p.accent },
                 StatusLine = { fg = p.base, bg = p.base },
                 StatusLineNC = { fg = p.base, bg = p.base },
-                DashboardHeader = { fg = p.accent },
+                SnacksDashboardHeader = { fg = p.green },
+                SnacksDashboardFooter = { fg = p.subtext },
+                SnacksDashboardSpecial = { fg = p.accent },
                 DapBreak = { fg = p.red },
                 DapStop = { fg = p.yellow },
                 NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
