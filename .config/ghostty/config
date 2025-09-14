@@ -1,5 +1,5 @@
 # Styling - Editor
-theme = rose-pine
+theme = Catppuccin Mocha
 font-family = JetBrainsMono Nerd Font
 font-size = 10
 adjust-cell-width = -10%
@@ -10,7 +10,7 @@ custom-shader = cursor-trail.glsl
 title = " "
 window-theme = ghostty
 window-padding-x = 32
-window-padding-y = 32
+window-padding-y = 32,0
 window-padding-balance = true
 gtk-tabs-location = hidden
 adw-toolbar-style = flat
