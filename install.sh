@@ -27,7 +27,8 @@ printf "\033[1;32mDetected OS: %s\033[0m\n" "$OS"
 case "$OS" in
 arch)
     sudo pacman -Syu --needed \
-        git make unzip base-devel \
+        base-devel \
+        git unzip \
         zsh tmux stow \
         fzf zoxide eza fd ripgrep \
         lua nodejs \
@@ -42,7 +43,8 @@ arch)
 ubuntu)
     sudo add-apt-repository ppa:neovim-ppa/unstable
     sudo apt install \
-        git make unzip \
+        build-essential \
+        git unzip \
         zsh tmux xsel stow \
         eza fd-find ripgrep \
         lua5.4 \
@@ -92,12 +94,17 @@ macos)
         neovim \
         jandedobbeleer/oh-my-posh/oh-my-posh
     brew install --quiet --cask ghostty@tip font-jetbrains-mono-nerd-font
+    xcode-select --install
     ;;
 esac
 
 # Install language tools
 if ! command -v uv >/dev/null 2>&1; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+if ! command -v uv >/dev/null 2>&1; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 fi
 
 # Change shell to zsh
