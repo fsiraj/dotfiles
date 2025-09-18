@@ -131,7 +131,7 @@ local M = {
                 view = { n_steps_ahead = 1 },
                 mappings = { start_jumping = '' },
             })
-            vim.keymap.set('n', '<Leader>j', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>', { desc = 'Jump 2D' })
+            vim.keymap.set('n', '<BS>', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>', { desc = 'Jump 2D' })
             vim.api.nvim_set_hl(0, 'MiniJump', { link = 'MiniJump2dSpot' })
 
             -- Better Around/Inside textobjects
@@ -139,7 +139,6 @@ local M = {
             ai.setup({
                 n_lines = 500,
                 custom_textobjects = {
-                    -- NOTE: The textobjects below are manually added to WhichKey
                     o = ai.gen_spec.treesitter({ -- code block
                         a = { '@block.outer', '@conditional.outer', '@loop.outer' },
                         i = { '@block.inner', '@conditional.inner', '@loop.inner' },
@@ -205,6 +204,13 @@ local M = {
                     vim.api.nvim_set_hl(0, 'SnacksDashboardHeaderSecondary', { fg = vim.g.palette.blue })
                     vim.cmd('match SnacksDashboardHeaderSecondary /#/')
                     vim.cmd('2match WarningMsg /⚡/')
+                end,
+            })
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'SnacksDashboardClosed',
+                callback = function()
+                    vim.cmd('match none')
+                    vim.cmd('2match none')
                 end,
             })
         end,
@@ -551,7 +557,10 @@ local M = {
                 },
             },
             views = {
-                mini = { timeout = 5000 },
+                mini = {
+                    timeout = 5000,
+                    size = { max_width = unit_width * 2 },
+                },
                 cmdline_popup = {
                     size = { min_width = unit_width, max_width = unit_width * 2 },
                     border = { style = 'none', padding = { 1, 2 } },
@@ -563,6 +572,9 @@ local M = {
                 },
                 cmdline_input = {
                     border = { style = 'solid', padding = { 0, 2 } },
+                },
+                confirm = {
+                    position = { row = '50%' },
                 },
             },
         },
@@ -662,7 +674,6 @@ local M = {
                 },
             },
             display = {
-                diff = { provider = 'mini_diff' },
                 chat = { auto_scroll = false },
             },
             extensions = {
