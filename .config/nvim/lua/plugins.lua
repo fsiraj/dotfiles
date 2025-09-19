@@ -790,7 +790,10 @@ local M = {
             'MunifTanjim/nui.nvim',
             'nvim-tree/nvim-web-devicons',
         },
-        opts = { window = { width = unit_width } },
+        opts = {
+            window = { width = unit_width },
+            filesystem = { filtered_items = { children_inherit_highlights = false } },
+        },
     },
 
     --TodoComments
@@ -832,14 +835,29 @@ local M = {
 
     -- NOTE: Language Tools
 
+    -- Mason
+    {
+        'williamboman/mason.nvim',
+        dependencies = {
+            'WhoIsSethDaniel/mason-tool-installer.nvim',
+        },
+        config = function()
+            -- Mason installs external tools
+            require('mason').setup()
+            vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
+
+            require('mason-tool-installer').setup({
+                ensure_installed = ensure_installed,
+            })
+        end,
+    },
+
     --Lspconfig
     {
         'neovim/nvim-lspconfig',
         event = 'VeryLazy',
         dependencies = {
-            { 'williamboman/mason.nvim', config = true },
             'williamboman/mason-lspconfig.nvim',
-            'WhoIsSethDaniel/mason-tool-installer.nvim',
             'saghen/blink.cmp',
             'ibhagwan/fzf-lua',
         },
@@ -938,13 +956,6 @@ local M = {
                 end,
             })
 
-            -- Mason installs external tools
-            require('mason').setup()
-            vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
-
-            require('mason-tool-installer').setup({
-                ensure_installed = ensure_installed,
-            })
             require('mason-lspconfig').setup({
                 automatic_enable = { exclude = { 'rust_analyzer' } },
             })
