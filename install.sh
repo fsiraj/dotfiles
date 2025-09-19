@@ -1,6 +1,16 @@
 #!/bin/sh
 
+# Colored logging function
+log() {
+    # Usage: log "message" "color_code" "emoji"
+    msg="$1"
+    color="${2:-1;36}" # Default: bold cyan
+    emoji="${3:-🚀}"
+    printf "\033[%sm%s %s\033[0m\n" "$color" "$emoji" "$msg"
+}
+
 # Determine the OS
+log "Detecting operating system..." "1;35" "🔍"
 if [ "$(uname)" = "Darwin" ]; then
     OS="macos"
 elif [ -f /etc/os-release ]; then
@@ -8,7 +18,7 @@ elif [ -f /etc/os-release ]; then
     . /etc/os-release
     OS="$ID"
 else
-    echo "Unsupported OS"
+    log "Unsupported OS" "1;31" "    ⛔"
     exit 1
 fi
 
@@ -16,14 +26,15 @@ fi
 case "$OS" in
 arch | ubuntu | macos) ;;
 *)
-    echo "Unsupported OS: $OS"
+    log "Unsupported OS: $OS" "1;31" "    ⛔"
     exit 1
     ;;
 esac
 
-printf "\033[1;32mDetected OS: %s\033[0m\n" "$OS"
+log "Detected OS: $OS" "1;32" "    ✅"
 
 # Install (most) packages
+log "Installing packages for $OS..." "1;35" "📦"
 case "$OS" in
 arch)
     sudo pacman -Syu --needed \
@@ -38,11 +49,13 @@ arch)
     if ! command -v oh-my-posh >/dev/null 2>&1; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
+    log "Arch packages installed!" "1;32" "    🎉"
     ;;
 
 ubuntu)
-    sudo add-apt-repository ppa:neovim-ppa/unstable
-    sudo apt install \
+    sudo add-apt-repository ppa:neovim-ppa/unstable -y >/dev/null 2>&1
+    sudo apt update -qq
+    sudo apt install -qq \
         build-essential \
         git unzip \
         zsh tmux xsel stow \
@@ -51,7 +64,9 @@ ubuntu)
         neovim
     sudo snap install node --classic
     # Ghostty (stable)
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+    if ! command -v ghostty >/dev/null 2>&1; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+    fi
     # Oh My Posh
     if ! command -v oh-my-posh >/dev/null 2>&1; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
@@ -77,6 +92,7 @@ ubuntu)
         fc-cache -fv
         rm JetBrainsMono.zip
     fi
+    log "Ubuntu packages installed!" "1;32" "    🎉"
     ;;
 
 macos)
@@ -95,27 +111,69 @@ macos)
         jandedobbeleer/oh-my-posh/oh-my-posh
     brew install --quiet --cask ghostty@tip font-jetbrains-mono-nerd-font
     xcode-select --install
+    log "macOS packages installed!" "1;32" "    🎉"
     ;;
 esac
 
 # Install language tools
+log "Setting up language tools..." "1;35" "🛠️"
 if ! command -v uv >/dev/null 2>&1; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
+    log "uv installed!" "1;32" "    🐍"
+else
+    log "uv already installed!" "1;34" "    🐍"
 fi
-
-if ! command -v uv >/dev/null 2>&1; then
+if ! command -v rustup >/dev/null 2>&1; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    log "rustup installed!" "1;32" "    🦀"
+else
+    log "rustup already installed!" "1;34" "    🦀"
 fi
 
+# Setup zsh
+log "Setting up zsh..." "1;35" "🐚"
 # Change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
     chsh -s "$(which zsh)"
+    log "Shell changed to zsh!" "1;32" "    🐚"
+else
+    log "zsh already the default shell!" "1;34" "    🐚"
 fi
-
 # Install zinit for zsh plugins
 XDG_DATA_HOME="$HOME/.local/share"
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
     mkdir -p "$(dirname "$ZINIT_HOME")"
     git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+    log "zinit installed!" "1;32" "    🔌"
+else
+    log "zinit already installed!" "1;34" "    🔌"
 fi
+
+# Clone dotfiles to home directory
+log "Setting up dotfiles..." "1;35" "📁"
+if [ ! -d "$HOME/dotfiles" ]; then
+    log "Cloning dotfiles..." "1;35" "🧬"
+    git clone https://github.com/fsiraj/dotfiles.git "$HOME/dotfiles"
+    cd "$HOME/dotfiles" || exit
+    stow .
+    log "Dotfiles stowed!" "1;32" "    🔗"
+else
+    log "Dotfiles already present!" "1;34" "    📁"
+fi
+
+log "Setting up tmux plugins..." "1;35" "🪟"
+# Install tmux plugins
+if [ ! -d "$HOME/.config/tmux/plugins/tpm" ]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+    ~/.config/tmux/plugins/tpm/bin/install_plugins
+    log "tmux plugins installed!" "1;32" "    🔌"
+else
+    log "tmux plugins already installed!" "1;34" "    🔌"
+fi
+
+# Install neovim plugins and language tools
+log "Installing Neovim plugins and language tools..." "1;35" "💤"
+nvim --headless "+Lazy! sync --quiet" +qa
+nvim --headless "+MasonToolsUpdateSync" +qa
+log "Neovim plugins and language tools installed!" "1;32" "    🔌"
