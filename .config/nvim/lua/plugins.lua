@@ -68,30 +68,6 @@ vim.list_extend(ensure_installed, {
     'codelldb',
 })
 
--- CodeCompanion lualine component
-local function codecompanion_lualine_component()
-    local component = require('lualine.component'):extend()
-    component.processing, component.spinner_index = false, 1
-    local spinners = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
-    function component:init(opts)
-        component.super.init(self, opts)
-        vim.api.nvim_create_autocmd('User', {
-            pattern = { 'CodeCompanionRequest*', 'CodeCompanionTool*' },
-            group = vim.api.nvim_create_augroup('CodeCompanionHooks', {}),
-            callback = function(req) self.processing = req.match:match('Started') or req.match:match('Streaming') end,
-        })
-    end
-    function component:update_status()
-        if self.processing then
-            self.spinner_index = self.spinner_index % #spinners + 1
-            return spinners[self.spinner_index] .. '  '
-        else
-            return ' '
-        end
-    end
-    return component
-end
-
 -- To make UIs multiples of consistent width
 local unit_width = 40
 
@@ -472,8 +448,7 @@ local M = {
             local minimal = {
                 winbar = {
                     lualine_a = { 'filetype' },
-                    lualine_b = { tabs },
-                    lualine_x = { showcmd },
+                    lualine_x = { text(' ') },
                 },
                 inactive_winbar = { lualine_c = { 'filetype' } },
                 filetypes = {
@@ -496,14 +471,16 @@ local M = {
             }
 
             -- Codecompanion
-            local codecompanion = vim.tbl_deep_extend('force', minimal, {
+            local codecompanion = {
                 winbar = {
                     lualine_a = { 'filename' },
                     lualine_x = {},
-                    lualine_z = { codecompanion_lualine_component() },
+                    lualine_z = { require('codecompanion._extensions.spinner.styles.lualine').get_lualine_component(), function() return 'CodeCompanion' end },
                 },
+                inactive_winbar = nil,
                 filetypes = { 'codecompanion' },
-            })
+            }
+            codecompanion.inactive_winbar = vim.deepcopy(codecompanion.winbar)
 
             -- Lualine config
             require('lualine').setup({
@@ -651,6 +628,7 @@ local M = {
             'nvim-treesitter/nvim-treesitter',
             'echasnovski/mini.diff',
             'ravitemer/codecompanion-history.nvim',
+            'lalitmee/codecompanion-spinners.nvim',
         },
         opts = {
             adapters = {
@@ -678,10 +656,14 @@ local M = {
             },
             extensions = {
                 history = {
-                    enabled = true,
                     opts = {
                         expiration_days = 7,
                         title_generation_opts = { refresh_every_n_prompts = 3 },
+                    },
+                },
+                spinner = {
+                    opts = {
+                        style = 'lualine',
                     },
                 },
             },
