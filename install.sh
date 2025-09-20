@@ -49,7 +49,7 @@ arch)
     if ! command -v oh-my-posh >/dev/null 2>&1; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
-    log "Arch packages installed!" "1;32" "    🎉"
+    log "arch packages installed!" "1;32" "    🎉"
     ;;
 
 ubuntu)
@@ -92,7 +92,7 @@ ubuntu)
         fc-cache -fv
         rm JetBrainsMono.zip
     fi
-    log "Ubuntu packages installed!" "1;32" "    🎉"
+    log "ubuntu packages installed!" "1;32" "    🎉"
     ;;
 
 macos)
@@ -101,7 +101,7 @@ macos)
             "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
     # shellcheck disable=2034
-    HOMEBREW_NO_ENV_HINTS=true
+    export HOMEBREW_NO_ENV_HINTS=true
     brew install --quiet \
         git make unzip gnu-sed \
         zsh tmux stow \
@@ -109,8 +109,8 @@ macos)
         lua node \
         neovim \
         jandedobbeleer/oh-my-posh/oh-my-posh
-    brew install --quiet --cask ghostty@tip font-jetbrains-mono-nerd-font
-    xcode-select --install
+    brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font
+    xcode-select --install 2>/dev/null
     log "macOS packages installed!" "1;32" "    🎉"
     ;;
 esac
@@ -135,7 +135,7 @@ log "Setting up zsh..." "1;35" "🐚"
 # Change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
     chsh -s "$(which zsh)"
-    log "Shell changed to zsh!" "1;32" "    🐚"
+    log "shell changed to zsh!" "1;32" "    🐚"
 else
     log "zsh already the default shell!" "1;34" "    🐚"
 fi
@@ -157,9 +157,9 @@ if [ ! -d "$HOME/dotfiles" ]; then
     git clone https://github.com/fsiraj/dotfiles.git "$HOME/dotfiles"
     cd "$HOME/dotfiles" || exit
     stow .
-    log "Dotfiles stowed!" "1;32" "    🔗"
+    log "dotfiles stowed!" "1;32" "    🔗"
 else
-    log "Dotfiles already present!" "1;34" "    📁"
+    log "dotfiles already present!" "1;34" "    📁"
 fi
 
 log "Setting up tmux plugins..." "1;35" "🪟"
@@ -176,4 +176,4 @@ fi
 log "Installing Neovim plugins and language tools..." "1;35" "💤"
 nvim --headless "+Lazy! sync --quiet" +qa
 nvim --headless "+MasonToolsUpdateSync" +qa
-log "Neovim plugins and language tools installed!" "1;32" "    🔌"
+log "neovim plugins and language tools installed!" "1;32" "    🔌"
