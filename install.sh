@@ -134,6 +134,8 @@ fi
 log "Setting up zsh..." "1;35" "🐚"
 # Change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
+    # shellcheck disable=SC2016
+    echo 'export ZDOTDIR="$HOME/.config/zsh"' >> ~/.zshenv
     chsh -s "$(which zsh)"
     log "shell changed to zsh!" "1;32" "    🐚"
 else
@@ -156,7 +158,7 @@ if [ ! -d "$HOME/dotfiles" ]; then
     log "Cloning dotfiles..." "1;35" "🧬"
     git clone https://github.com/fsiraj/dotfiles.git "$HOME/dotfiles"
     cd "$HOME/dotfiles" || exit
-    stow .
+    stow -t ~/.config -S .config
     log "dotfiles stowed!" "1;32" "    🔗"
 else
     log "dotfiles already present!" "1;34" "    📁"

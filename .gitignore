@@ -1,3 +1,5 @@
 .config/tmux/plugins/
 *.py
 *.log
+.config/zsh/.zcompdump
+.config/zsh/.zsh_history
