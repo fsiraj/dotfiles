@@ -29,7 +29,7 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -a $realpath' # preview
 
 # Configure history
 HISTSIZE=5000
-HISTFILE=~/.zsh_history
+HISTFILE=~/.config/zsh/.zsh_history
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
 setopt appendhistory
@@ -57,7 +57,7 @@ fi
 
 alias c="clear -x"
 alias cd..="cd .."
-alias reload="source ~/.zshrc"
+alias reload="source ~/.config/zsh/.zshrc"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
