@@ -1,4 +1,4 @@
-## ✨ Minimal, Fast, Beautiful
+# ✨ Minimal, Fast, Beautiful
 
 > A carefully crafted development environment that just works (most of the time)
 
@@ -35,7 +35,7 @@
 **Supported Systems:** macOS • Ubuntu • Arch Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | sh
 ```
 
 ## 🛠️ What's Included
