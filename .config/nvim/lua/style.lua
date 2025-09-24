@@ -111,7 +111,10 @@ end
 
 local function get_ghostty_theme(colorscheme)
     local query = string.lower(colorscheme:gsub('[^%w]', ''))
-    local cmd = string.format('ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1', query)
+    local cmd = string.format(
+        'ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1',
+        query
+    )
     local out = vim.fn.system(cmd)
     local match = out:gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
     return match
@@ -119,7 +122,10 @@ end
 
 local function get_hyde_theme(colorscheme)
     if string.find(colorscheme, 'tokyonight') then return 'Tokyo Night' end
-    if string.find(colorscheme, 'catppuccin') then return string.find(colorscheme, 'latte') and 'Catppucin Latte' or 'Catppuccin Mocha' end
+    if string.find(colorscheme, 'catppuccin') then
+        return string.find(colorscheme, 'latte') and 'Catppucin Latte'
+            or 'Catppuccin Mocha'
+    end
     if string.find(colorscheme, 'rose') then return 'Rosé Pine' end
     if string.find(colorscheme, 'nord') then return 'Nordic Blue' end
     return nil
@@ -127,7 +133,12 @@ end
 
 local function sed_expr(var, val, file)
     if string.find(file, 'tmux') then
-        return string.format([[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val)
+        return string.format(
+            [[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]],
+            var,
+            var,
+            val
+        )
     elseif string.find(file, 'ghostty') then
         return string.format([[ -e "s|^%s = .*|%s = %s|"]], var, var, val)
     else

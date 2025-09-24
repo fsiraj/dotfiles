@@ -109,8 +109,12 @@ local M = {
                 view = { n_steps_ahead = 1 },
                 mappings = { start_jumping = '' },
             })
-            vim.keymap.set('n', '<BS>', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>', { desc = 'Jump 2D' })
-            vim.api.nvim_set_hl(0, 'MiniJump', { link = 'MiniJump2dSpot' })
+            vim.keymap.set(
+                'n',
+                '<BS>',
+                '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
+                { desc = 'Jump 2D' }
+            )
 
             -- Better Around/Inside textobjects
             local ai = require('mini.ai')
@@ -118,11 +122,25 @@ local M = {
                 n_lines = 500,
                 custom_textobjects = {
                     o = ai.gen_spec.treesitter({ -- code block
-                        a = { '@block.outer', '@conditional.outer', '@loop.outer' },
-                        i = { '@block.inner', '@conditional.inner', '@loop.inner' },
+                        a = {
+                            '@block.outer',
+                            '@conditional.outer',
+                            '@loop.outer',
+                        },
+                        i = {
+                            '@block.inner',
+                            '@conditional.inner',
+                            '@loop.inner',
+                        },
                     }),
-                    f = ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }), -- function
-                    c = ai.gen_spec.treesitter({ a = '@class.outer', i = '@class.inner' }), -- class
+                    f = ai.gen_spec.treesitter({
+                        a = '@function.outer',
+                        i = '@function.inner',
+                    }), -- function
+                    c = ai.gen_spec.treesitter({
+                        a = '@class.outer',
+                        i = '@class.inner',
+                    }), -- class
                     u = ai.gen_spec.function_call(), -- u for "Usage"
                     U = ai.gen_spec.function_call({ name_pattern = '[%w_]' }), -- without dot in function name
                 },
@@ -146,15 +164,44 @@ local M = {
                 },
                 options = { linematch = 0 },
             })
-            vim.keymap.set('n', '<Leader>gd', MiniDiff.toggle_overlay, { desc = 'Toggle Git Overlay' })
+            vim.keymap.set(
+                'n',
+                '<Leader>gd',
+                MiniDiff.toggle_overlay,
+                { desc = 'Toggle Git Overlay' }
+            )
 
             -- Session management
             local sessions = require('mini.sessions')
             sessions.setup()
-            vim.keymap.set('n', '<Leader>Sw', function() sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, { desc = 'Session Write' })
-            vim.keymap.set('n', '<Leader>Sr', function() sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, { desc = 'Session Restore' })
-            vim.keymap.set('n', '<Leader>Sd', function() sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end, { desc = 'Session Delete' })
-            vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = 'Session Select' })
+            vim.keymap.set(
+                'n',
+                '<Leader>Sw',
+                function()
+                    sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
+                end,
+                { desc = 'Session Write' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>Sr',
+                function() sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end,
+                { desc = 'Session Restore' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>Sd',
+                function()
+                    sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
+                end,
+                { desc = 'Session Delete' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>Ss',
+                sessions.select,
+                { desc = 'Session Select' }
+            )
         end,
     },
 
@@ -162,20 +209,23 @@ local M = {
     {
         'folke/snacks.nvim',
         opts = {
+            image = { enabled = true },
             bigfile = { enabled = true },
             git = { enabled = true },
             dashboard = {
                 enabled = true,
-                sections = {
-                    { section = 'header' },
-                    { section = 'startup' },
-                },
+                sections = { { section = 'header' }, { section = 'startup' } },
                 preset = { header = neovim_logo },
             },
         },
         config = function(_, opts)
             require('snacks').setup(opts)
-            vim.keymap.set('n', '<Leader>gb', Snacks.git.blame_line, { desc = 'Blame' })
+            vim.keymap.set(
+                'n',
+                '<Leader>gb',
+                Snacks.git.blame_line,
+                { desc = 'Blame' }
+            )
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'SnacksDashboardOpened',
                 callback = function()
@@ -217,15 +267,53 @@ local M = {
                 keys = {},
             },
             spec = {
-                { '<Leader>i', group = 'Info', icon = { icon = ' ', color = 'cyan' } },
-                { '<Leader>c', group = 'Code', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
-                { '<Leader>d', group = 'Debug', icon = { icon = ' ', color = 'red' } },
-                { '<Leader>s', group = 'Search', icon = { icon = ' ', color = 'green' } },
-                { '<Leader>S', group = 'Sessions', icon = { icon = '󰙰 ', color = 'purple' } },
-                { '<Leader>f', group = 'F', icon = { icon = '󰈢 ', color = 'azure' } },
-                { '<Leader>t', group = 'Toggle', icon = { icon = ' ', color = 'yellow' } },
-                { '<Leader>n', group = 'Neotest', icon = { icon = ' ', color = 'azure' } },
-                { '<Leader>g', group = 'Git', mode = { 'n', 'v' }, icon = { cat = 'filetype', name = 'git' } },
+                {
+                    '<Leader>i',
+                    group = 'Info',
+                    icon = { icon = ' ', color = 'cyan' },
+                },
+                {
+                    '<Leader>c',
+                    group = 'Code',
+                    mode = { 'n', 'x' },
+                    icon = { icon = ' ', color = 'orange' },
+                },
+                {
+                    '<Leader>d',
+                    group = 'Debug',
+                    icon = { icon = ' ', color = 'red' },
+                },
+                {
+                    '<Leader>s',
+                    group = 'Search',
+                    icon = { icon = ' ', color = 'green' },
+                },
+                {
+                    '<Leader>S',
+                    group = 'Sessions',
+                    icon = { icon = '󰙰 ', color = 'purple' },
+                },
+                {
+                    '<Leader>f',
+                    group = 'F',
+                    icon = { icon = '󰈢 ', color = 'azure' },
+                },
+                {
+                    '<Leader>t',
+                    group = 'Toggle',
+                    icon = { icon = ' ', color = 'yellow' },
+                },
+                {
+                    '<Leader>n',
+                    group = 'Neotest',
+                    icon = { icon = ' ', color = 'azure' },
+                },
+                {
+                    '<Leader>g',
+                    group = 'Git',
+                    mode = { 'n', 'v' },
+                    icon = { cat = 'filetype', name = 'git' },
+                },
             },
         },
     },
@@ -238,7 +326,10 @@ local M = {
         opts = {
             defaults = { formatter = 'path.filename_first' },
             winopts = {
-                width = math.min(unit_width * 4, math.floor(0.8 * vim.o.columns)),
+                width = math.min(
+                    unit_width * 4,
+                    math.floor(0.8 * vim.o.columns)
+                ),
                 height = 0.8,
                 row = 0.5,
             },
@@ -256,15 +347,27 @@ local M = {
                 fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
             },
             grep = { hidden = true },
-            buffers = { previewer = false, winopts = { height = 16, width = unit_width * 2 } },
+            buffers = {
+                previewer = false,
+                winopts = { height = 16, width = unit_width * 2 },
+            },
             ui_select = function(fzf_opts, items)
                 return vim.tbl_deep_extend('force', fzf_opts, {
                     prompt = ' ',
                     winopts = {
-                        title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
+                        title = ' '
+                            .. vim.trim(
+                                (fzf_opts.prompt or 'Select'):gsub(
+                                    '%s*:%s*$',
+                                    ''
+                                )
+                            )
+                            .. ' ',
                         title_pos = 'center',
                         width = unit_width * 2,
-                        height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
+                        height = math.ceil(
+                            math.min(vim.o.lines * 0.8, #items + 4)
+                        ),
                     },
                 })
             end,
@@ -280,10 +383,17 @@ local M = {
                         local colorscheme = selected[1]:match('^[^:]+')
                         local ok = pcall(function()
                             vim.cmd('colorscheme ' .. colorscheme)
-                            vim.notify('Syncing colors to ' .. colorscheme .. '...')
+                            vim.notify(
+                                'Syncing colors to ' .. colorscheme .. '...'
+                            )
                             vim.schedule(style.sync_theme)
                         end)
-                        if not ok then vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR) end
+                        if not ok then
+                            vim.notify(
+                                'Failed to load ' .. colorscheme,
+                                vim.log.levels.ERROR
+                            )
+                        end
                     end,
                 },
             }
@@ -303,16 +413,43 @@ local M = {
                 { 'n', '<Leader>sc', fzf.colorschemes, 'Search Colorschemes' },
                 { 'n', '<Leader>sk', fzf.keymaps, 'Search Keymaps' },
                 { 'v', '<Leader>ss', fzf.grep_visual, 'Search Selection' },
-                { 'n', '<Leader>/', fzf.lgrep_curbuf, ' [/] Fuzzy Search Current Buffer' },
-                { 'n', '<Leader><Leader>', fzf.buffers, ' [ ] Find Existing Buffers' },
-                { 'n', '<Leader>sd', function() fzf.files({ cwd = '~/dotfiles' }) end, 'Search Dotfiles' },
-                { 'n', '<Leader>sp', function() fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end, 'Search Plugins' },
+                {
+                    'n',
+                    '<Leader>/',
+                    fzf.lgrep_curbuf,
+                    ' [/] Fuzzy Search Current Buffer',
+                },
+                {
+                    'n',
+                    '<Leader><Leader>',
+                    fzf.buffers,
+                    ' [ ] Find Existing Buffers',
+                },
+                {
+                    'n',
+                    '<Leader>sd',
+                    function() fzf.files({ cwd = '~/dotfiles' }) end,
+                    'Search Dotfiles',
+                },
+                {
+                    'n',
+                    '<Leader>sp',
+                    function()
+                        fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
+                    end,
+                    'Search Plugins',
+                },
             }
             -- <Leader>ss = Search Symbol Buffer (Namu)
             -- <Leader>sS = Search Symbol Workspace (Namu)
             -- <Leader>sq = Search Quickfix (Namu)
             for _, map in ipairs(keymaps) do
-                vim.keymap.set(map[1], map[2], map[3], { desc = 'FzfLua: ' .. map[4] })
+                vim.keymap.set(
+                    map[1],
+                    map[2],
+                    map[3],
+                    { desc = 'FzfLua: ' .. map[4] }
+                )
             end
         end,
     },
@@ -341,7 +478,11 @@ local M = {
         },
     },
     { 'nvim-treesitter/nvim-treesitter-textobjects', event = 'VeryLazy' },
-    { 'nvim-treesitter/nvim-treesitter-context', event = 'VeryLazy', opts = { enable = true, max_lines = 12 } },
+    {
+        'nvim-treesitter/nvim-treesitter-context',
+        event = 'VeryLazy',
+        opts = { enable = true, max_lines = 12 },
+    },
 
     --IndentBlankline
     {
@@ -432,12 +573,28 @@ local M = {
             local noice = require('noice')
 
             -- Custom components
-            local mode = { function() return string.upper(vim.api.nvim_get_mode().mode) end }
-            local branch = { 'branch', icon = ' ' }
-            local tabs = { 'tabs', cond = function() return #vim.fn.gettabinfo() > 1 end, show_modified_status = true }
-            local lsp_status = { 'lsp_status', icon = { '󱚠 ', color = 'MiniIconsGreen' }, ignore_lsp = { 'copilot' } }
-            local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
-            local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
+            local mode = {
+                function() return string.upper(vim.api.nvim_get_mode().mode) end,
+            }
+            local branch = { 'branch', icon = '' }
+            local tabs = {
+                'tabs',
+                cond = function() return #vim.fn.gettabinfo() > 1 end,
+                show_modified_status = true,
+            }
+            local lsp_status = {
+                'lsp_status',
+                icon = { '󱚠 ', color = 'MiniIconsGreen' },
+                ignore_lsp = { 'copilot' },
+            }
+            local showmode = {
+                noice.api.status.mode.get, ---@diagnostic disable-line
+                cond = noice.api.status.mode.has, ---@diagnostic disable-line
+            }
+            local showcmd = {
+                noice.api.status.command.get, ---@diagnostic disable-line
+                cond = noice.api.status.command.has, ---@diagnostic disable-line
+            }
             local text = function(t)
                 return function() return t end
             end
@@ -473,7 +630,12 @@ local M = {
                 winbar = {
                     lualine_a = { 'filename' },
                     lualine_x = {},
-                    lualine_z = { require('codecompanion._extensions.spinner.styles.lualine').get_lualine_component(), function() return 'CodeCompanion' end },
+                    lualine_z = {
+                        require(
+                            'codecompanion._extensions.spinner.styles.lualine'
+                        ).get_lualine_component(),
+                        function() return 'CodeCompanion' end,
+                    },
                 },
                 inactive_winbar = nil,
                 filetypes = { 'codecompanion' },
@@ -488,7 +650,12 @@ local M = {
                     section_separators = { left = '', right = '' },
                     component_separators = { left = '󰇝', right = '󰇝' },
                     disabled_filetypes = {
-                        winbar = { 'dap-repl', 'dap-view', 'snacks_dashboard', 'toggleterm' },
+                        winbar = {
+                            'dap-repl',
+                            'dap-view',
+                            'snacks_dashboard',
+                            'toggleterm',
+                        },
                     },
                 },
                 extensions = { minimal, terminal, codecompanion },
@@ -537,7 +704,10 @@ local M = {
                     size = { max_width = unit_width * 2 },
                 },
                 cmdline_popup = {
-                    size = { min_width = unit_width, max_width = unit_width * 2 },
+                    size = {
+                        min_width = unit_width,
+                        max_width = unit_width * 2,
+                    },
                     border = { style = 'none', padding = { 1, 2 } },
                     filter_options = {},
                     win_options = {
@@ -555,7 +725,12 @@ local M = {
         },
         config = function(_, opts)
             require('noice').setup(opts)
-            vim.keymap.set('n', '<Leader>ii', '<Cmd>NoiceAll<CR>', { desc = 'Messages' })
+            vim.keymap.set(
+                'n',
+                '<Leader>ii',
+                '<Cmd>NoiceAll<CR>',
+                { desc = 'Messages' }
+            )
         end,
     },
 
@@ -609,7 +784,10 @@ local M = {
             require('copilot').setup(opts)
             vim.keymap.set('n', '<Leader>tc', function()
                 require('copilot.suggestion').toggle_auto_trigger()
-                vim.notify('Copilot Auto-suggestions: ' .. tostring(vim.b.copilot_suggestion_auto_trigger))
+                vim.notify(
+                    'Copilot Auto-suggestions: '
+                        .. tostring(vim.b.copilot_suggestion_auto_trigger)
+                )
             end, {
                 desc = 'Toggle Copilot Suggestions',
                 silent = true,
@@ -632,20 +810,36 @@ local M = {
             adapters = {
                 http = {
                     copilot = function()
-                        return require('codecompanion.adapters').extend('copilot', {
-                            schema = { model = { default = 'gpt-4.1' } },
-                        })
+                        return require('codecompanion.adapters').extend(
+                            'copilot',
+                            {
+                                schema = { model = { default = 'gpt-4.1' } },
+                            }
+                        )
                     end,
                 },
                 acp = {
                     gemini_cli = function()
-                        return require('codecompanion.adapters').extend('gemini_cli', {
-                            commands = {
-                                flash = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-flash' },
-                                pro = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-pro' },
-                            },
-                            defaults = { auth_method = 'oauth-personal' },
-                        })
+                        return require('codecompanion.adapters').extend(
+                            'gemini_cli',
+                            {
+                                commands = {
+                                    flash = {
+                                        'gemini',
+                                        '--experimental-acp',
+                                        '-m',
+                                        'gemini-2.5-flash',
+                                    },
+                                    pro = {
+                                        'gemini',
+                                        '--experimental-acp',
+                                        '-m',
+                                        'gemini-2.5-pro',
+                                    },
+                                },
+                                defaults = { auth_method = 'oauth-personal' },
+                            }
+                        )
                     end,
                 },
             },
@@ -655,7 +849,7 @@ local M = {
             extensions = {
                 history = {
                     opts = {
-                        expiration_days = 7,
+                        expiration_days = 30,
                         title_generation_opts = { refresh_every_n_prompts = 3 },
                     },
                 },
@@ -669,7 +863,12 @@ local M = {
         config = function(_, opts)
             require('codecompanion').setup(opts)
             vim.keymap.set('ca', 'cc', 'CodeCompanion')
-            vim.keymap.set({ 'n', 'v' }, '<Leader>cc', '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>', { desc = 'Code Companion Toggle Chat' })
+            vim.keymap.set(
+                { 'n', 'v' },
+                '<Leader>cc',
+                '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>',
+                { desc = 'Code Companion Toggle Chat' }
+            )
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'CodeCompanionChatCreated',
                 callback = function() vim.wo.winhl = 'NormalFloat:Normal' end,
@@ -691,14 +890,39 @@ local M = {
             mappings = {
                 sidebar = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
-                    vim.keymap.set('n', '<C-h>', api.switch_wins, { buffer = buf })
-                    vim.keymap.set('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
-                    vim.keymap.set('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
+                    vim.keymap.set(
+                        'n',
+                        '<C-l>',
+                        api.switch_wins,
+                        { buffer = buf }
+                    )
+                    vim.keymap.set(
+                        'n',
+                        '<C-h>',
+                        api.switch_wins,
+                        { buffer = buf }
+                    )
+                    vim.keymap.set(
+                        'n',
+                        '<C-j>',
+                        function() api.cycle_term_bufs('next') end,
+                        { buffer = buf }
+                    )
+                    vim.keymap.set(
+                        'n',
+                        '<C-k>',
+                        function() api.cycle_term_bufs('prev') end,
+                        { buffer = buf }
+                    )
                 end,
                 term = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set(
+                        'n',
+                        '<C-l>',
+                        api.switch_wins,
+                        { buffer = buf }
+                    )
                     vim.keymap.del('n', '<Esc>', { buffer = buf })
                 end,
             },
@@ -706,14 +930,25 @@ local M = {
         config = function(_, opts)
             local floaterm = require('floaterm')
             floaterm.setup(opts)
-            vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
-            vim.keymap.set({ 't' }, '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
+            vim.keymap.set(
+                { 'n', 't' },
+                '<Bslash>',
+                floaterm.toggle,
+                { desc = 'Toggle Floaterm' }
+            )
+            vim.keymap.set(
+                { 't' },
+                '<C-Bslash>',
+                '<Bslash>',
+                { desc = 'Toggle Floaterm' }
+            )
             vim.api.nvim_create_autocmd('TermOpen', {
                 desc = 'Set Floaterm Normal',
                 callback = function()
                     local state = require('floaterm.state')
                     if state.volt_set then
-                        vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder'
+                        vim.wo[state.win].winhl =
+                            'Normal:exdarkbg,floatBorder:exdarkborder'
                     end
                 end,
             })
@@ -747,13 +982,33 @@ local M = {
                 },
             })
             local keymaps = {
-                { 'n', '<leader>ss', '<Cmd>Namu symbols<CR>', 'Search Symbols Buffer' },
-                { 'n', '<leader>sS', '<Cmd>Namu workspace<CR>', 'Search Symbols Workspace' },
-                { 'n', '<leader>sq', '<Cmd>Namu diagnostics<CR>', 'Search Quickfix' },
+                {
+                    'n',
+                    '<leader>ss',
+                    '<Cmd>Namu symbols<CR>',
+                    'Search Symbols Buffer',
+                },
+                {
+                    'n',
+                    '<leader>sS',
+                    '<Cmd>Namu workspace<CR>',
+                    'Search Symbols Workspace',
+                },
+                {
+                    'n',
+                    '<leader>sq',
+                    '<Cmd>Namu diagnostics<CR>',
+                    'Search Quickfix',
+                },
             }
 
             for _, map in ipairs(keymaps) do
-                vim.keymap.set(map[1], map[2], map[3], { desc = 'Namu  : ' .. map[4], silent = true })
+                vim.keymap.set(
+                    map[1],
+                    map[2],
+                    map[3],
+                    { desc = 'Namu  : ' .. map[4], silent = true }
+                )
             end
         end,
     },
@@ -765,7 +1020,10 @@ local M = {
             { '<leader>fo', '<cmd>Outline<CR>', desc = 'File Outline' },
         },
         opts = {
-            outline_window = { split_command = unit_width .. 'vsplit', winhl = 'Normal:NormalFloat' },
+            outline_window = {
+                split_command = unit_width .. 'vsplit',
+                winhl = 'Normal:NormalFloat',
+            },
             outline_items = { show_symbol_details = true },
             preview_window = { winhl = 'NormalFloat:NormalFloat' },
         },
@@ -785,7 +1043,9 @@ local M = {
         },
         opts = {
             window = { width = unit_width },
-            filesystem = { filtered_items = { children_inherit_highlights = false } },
+            filesystem = {
+                filtered_items = { children_inherit_highlights = false },
+            },
         },
     },
 
@@ -837,7 +1097,12 @@ local M = {
         config = function()
             -- Mason installs external tools
             require('mason').setup()
-            vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
+            vim.keymap.set(
+                'n',
+                '<Leader>im',
+                '<Cmd>Mason<CR>',
+                { desc = 'Mason' }
+            )
 
             require('mason-tool-installer').setup({
                 ensure_installed = ensure_installed,
@@ -855,41 +1120,86 @@ local M = {
             'ibhagwan/fzf-lua',
         },
         config = function()
-            vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'LSP' })
+            vim.keymap.set(
+                'n',
+                '<Leader>is',
+                '<Cmd>LspInfo<CR>',
+                { desc = 'LSP' }
+            )
             vim.api.nvim_create_autocmd('LspAttach', {
-                group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
+                group = vim.api.nvim_create_augroup(
+                    'lsp-attach',
+                    { clear = true }
+                ),
                 callback = function(event)
                     -- Keymaps
                     local fzf = require('fzf-lua')
                     local map = function(keys, func, desc, mode)
                         mode = mode or 'n'
-                        vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+                        vim.keymap.set(
+                            mode,
+                            keys,
+                            func,
+                            { buffer = event.buf, desc = 'LSP: ' .. desc }
+                        )
                     end
                     map('<Leader>cd', fzf.lsp_definitions, 'Code Definition')
-                    map('<Leader>cD', vim.lsp.buf.declaration, 'Code Declaration')
+                    map(
+                        '<Leader>cD',
+                        vim.lsp.buf.declaration,
+                        'Code Declaration'
+                    )
                     map('<Leader>cr', fzf.lsp_references, 'Code References')
-                    map('<Leader>cv', vim.lsp.buf.rename, 'Code Variable Rename')
-                    map('<Leader>ca', fzf.lsp_code_actions, 'Code Action', { 'n', 'x' })
+                    map(
+                        '<Leader>cv',
+                        vim.lsp.buf.rename,
+                        'Code Variable Rename'
+                    )
+                    map(
+                        '<Leader>ca',
+                        fzf.lsp_code_actions,
+                        'Code Action',
+                        { 'n', 'x' }
+                    )
                     -- <Leader>ca = Code Action (FzfLua)
                     -- <Leader>cf = Code Format (Conform)
                     -- <Leader>cc = Code Companion Chat (Codecompanion)
 
                     -- Highlight references on hover
-                    local client = vim.lsp.get_client_by_id(event.data.client_id)
-                    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
-                        local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
-                        vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-                            buffer = event.buf,
-                            group = highlight_augroup,
-                            callback = vim.lsp.buf.document_highlight,
-                        })
-                        vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-                            buffer = event.buf,
-                            group = highlight_augroup,
-                            callback = vim.lsp.buf.clear_references,
-                        })
+                    local client =
+                        vim.lsp.get_client_by_id(event.data.client_id)
+                    if
+                        client
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_documentHighlight,
+                            event.buf
+                        )
+                    then
+                        local highlight_augroup = vim.api.nvim_create_augroup(
+                            'lsp-highlight',
+                            { clear = false }
+                        )
+                        vim.api.nvim_create_autocmd(
+                            { 'CursorHold', 'CursorHoldI' },
+                            {
+                                buffer = event.buf,
+                                group = highlight_augroup,
+                                callback = vim.lsp.buf.document_highlight,
+                            }
+                        )
+                        vim.api.nvim_create_autocmd(
+                            { 'CursorMoved', 'CursorMovedI' },
+                            {
+                                buffer = event.buf,
+                                group = highlight_augroup,
+                                callback = vim.lsp.buf.clear_references,
+                            }
+                        )
                         vim.api.nvim_create_autocmd('LspDetach', {
-                            group = vim.api.nvim_create_augroup('lsp-detach', { clear = true }),
+                            group = vim.api.nvim_create_augroup(
+                                'lsp-detach',
+                                { clear = true }
+                            ),
                             callback = function(event2)
                                 vim.lsp.buf.clear_references()
                                 vim.api.nvim_clear_autocmds({
@@ -901,13 +1211,21 @@ local M = {
                     end
 
                     -- If LSP supports inlay hints, enable them
-                    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+                    if
+                        client
+                        and client:supports_method(
+                            vim.lsp.protocol.Methods.textDocument_inlayHint,
+                            event.buf
+                        )
+                    then
                         map('<Leader>ti', function()
                             local is_enabled = vim.lsp.inlay_hint.is_enabled({
                                 bufnr = event.buf,
                             })
                             vim.lsp.inlay_hint.enable(not is_enabled)
-                            vim.notify('Inlay Hints: ' .. tostring(not is_enabled))
+                            vim.notify(
+                                'Inlay Hints: ' .. tostring(not is_enabled)
+                            )
                         end, 'Toggle Inlay Hints')
                     end
                 end,
@@ -918,21 +1236,25 @@ local M = {
                 severity_sort = true,
                 float = { border = 'rounded', source = 'if_many' },
                 underline = { severity = vim.diagnostic.severity.ERROR },
-                signs = vim.g.have_nerd_font and {
-                    text = {
-                        [vim.diagnostic.severity.ERROR] = '󰅚 ',
-                        [vim.diagnostic.severity.WARN] = '󰀪 ',
-                        [vim.diagnostic.severity.INFO] = '󰋽 ',
-                        [vim.diagnostic.severity.HINT] = '󰌶 ',
-                    },
-                } or {},
+                signs = vim.g.have_nerd_font
+                        and {
+                            text = {
+                                [vim.diagnostic.severity.ERROR] = '󰅚 ',
+                                [vim.diagnostic.severity.WARN] = '󰀪 ',
+                                [vim.diagnostic.severity.INFO] = '󰋽 ',
+                                [vim.diagnostic.severity.HINT] = '󰌶 ',
+                            },
+                        }
+                    or {},
                 virtual_text = false,
             })
 
             -- Toggle diagnostic information
             vim.keymap.set('n', '<Leader>td', function()
                 vim.diagnostic.enable(not vim.diagnostic.is_enabled())
-                vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
+                vim.notify(
+                    'Diagnostics: ' .. tostring(vim.diagnostic.is_enabled())
+                )
             end, { desc = 'LSP: Toggle Diagnostics' })
 
             -- Display floating diagnostic window
@@ -942,7 +1264,11 @@ local M = {
                         vim.diagnostic.open_float({
                             scope = 'line',
                             focusable = false,
-                            close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave' },
+                            close_events = {
+                                'CursorMoved',
+                                'CursorMovedI',
+                                'BufLeave',
+                            },
                         })
                     end
                 end,
@@ -974,17 +1300,31 @@ local M = {
         opts = {
             cmdline = {
                 enabled = true,
-                keymap = { preset = 'cmdline', ['<CR>'] = { 'accept', 'fallback' } },
+                keymap = {
+                    preset = 'cmdline',
+                    ['<CR>'] = { 'accept', 'fallback' },
+                },
                 completion = { ghost_text = { enabled = false } },
             },
             enabled = function()
                 local disabled_filetypes = { 'oil', 'gitcommit' }
-                return not vim.tbl_contains(disabled_filetypes, vim.bo.filetype) and (vim.bo.buftype ~= 'prompt' or require('cmp_dap').is_dap_buffer())
+                return not vim.tbl_contains(
+                        disabled_filetypes,
+                        vim.bo.filetype
+                    )
+                    and (
+                        vim.bo.buftype ~= 'prompt'
+                        or require('cmp_dap').is_dap_buffer()
+                    )
             end,
             completion = {
                 menu = {
                     auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
-                    draw = { components = { label = { width = { max = unit_width } } } },
+                    draw = {
+                        components = {
+                            label = { width = { max = unit_width } },
+                        },
+                    },
                 },
                 documentation = { auto_show = true, auto_show_delay_ms = 50 },
             },
@@ -1000,7 +1340,9 @@ local M = {
             sources = {
                 default = function()
                     local sources = { 'lsp', 'path', 'snippets', 'buffer' }
-                    if require('cmp_dap').is_dap_buffer() then table.insert(sources, 'dap') end
+                    if require('cmp_dap').is_dap_buffer() then
+                        table.insert(sources, 'dap')
+                    end
                     return sources
                 end,
                 per_filetype = {
@@ -1068,14 +1410,20 @@ local M = {
             lint.linters.markdownlint.args = { '--disable', 'MD013', '--' }
 
             -- Autocommand to start linting
-            local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
-            vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
-                group = lint_augroup,
-                callback = function()
-                    -- Only run in modifiable buffers
-                    if vim.opt_local.modifiable:get() then lint.try_lint() end
-                end,
-            })
+            local lint_augroup =
+                vim.api.nvim_create_augroup('lint', { clear = true })
+            vim.api.nvim_create_autocmd(
+                { 'BufEnter', 'BufWritePost', 'InsertLeave' },
+                {
+                    group = lint_augroup,
+                    callback = function()
+                        -- Only run in modifiable buffers
+                        if vim.opt_local.modifiable:get() then
+                            lint.try_lint()
+                        end
+                    end,
+                }
+            )
         end,
     },
 
@@ -1103,18 +1451,63 @@ local M = {
             -- Keymaps
             local keymaps = {
                 { 'n', '<Leader>nr', function() neotest.run.run() end, 'Run' },
-                { 'n', '<Leader>nl', function() neotest.run.run_last() end, 'Run Last' },
-                { 'n', '<Leader>nf', function() neotest.run.run(vim.fn.expand('%')) end, 'Run File' },
-                { 'n', '<Leader>na', function() neotest.run.run({ suite = true }) end, 'Run All' },
-                { 'n', '<Leader>nw', function() neotest.watch.toggle() end, 'Watch' },
-                { 'n', '<Leader>no', function() neotest.output.open({ enter = true }) end, 'Output' },
-                { 'n', '<Leader>ns', function() neotest.summary.toggle() end, 'Summary' },
-                { 'n', ']n', function() neotest.jump.next({ status = 'failed' }) end, 'Next' },
-                { 'n', '[n', function() neotest.jump.prev({ status = 'failed' }) end, 'Previous' },
+                {
+                    'n',
+                    '<Leader>nl',
+                    function() neotest.run.run_last() end,
+                    'Run Last',
+                },
+                {
+                    'n',
+                    '<Leader>nf',
+                    function() neotest.run.run(vim.fn.expand('%')) end,
+                    'Run File',
+                },
+                {
+                    'n',
+                    '<Leader>na',
+                    function() neotest.run.run({ suite = true }) end,
+                    'Run All',
+                },
+                {
+                    'n',
+                    '<Leader>nw',
+                    function() neotest.watch.toggle() end,
+                    'Watch',
+                },
+                {
+                    'n',
+                    '<Leader>no',
+                    function() neotest.output.open({ enter = true }) end,
+                    'Output',
+                },
+                {
+                    'n',
+                    '<Leader>ns',
+                    function() neotest.summary.toggle() end,
+                    'Summary',
+                },
+                {
+                    'n',
+                    ']n',
+                    function() neotest.jump.next({ status = 'failed' }) end,
+                    'Next',
+                },
+                {
+                    'n',
+                    '[n',
+                    function() neotest.jump.prev({ status = 'failed' }) end,
+                    'Previous',
+                },
             }
 
             for _, map in ipairs(keymaps) do
-                vim.keymap.set(map[1], map[2], map[3], { desc = 'Neotest ' .. map[4] })
+                vim.keymap.set(
+                    map[1],
+                    map[2],
+                    map[3],
+                    { desc = 'Neotest ' .. map[4] }
+                )
             end
 
             -- Window highlight and close window keymap
@@ -1124,7 +1517,14 @@ local M = {
             })
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = 'neotest-output',
-                callback = function() vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' }) end,
+                callback = function()
+                    vim.keymap.set(
+                        'n',
+                        'q',
+                        '<Cmd>:q<CR>',
+                        { buffer = true, desc = 'Close Window' }
+                    )
+                end,
             })
         end,
     },
@@ -1144,7 +1544,12 @@ local M = {
                     Lua_nvim = { use_on_filetypes = { 'codecompanion' } },
                 },
             })
-            vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = ' Run Code' })
+            vim.keymap.set(
+                { 'n', 'v' },
+                '<Leader>r',
+                '<Plug>SnipRun',
+                { desc = ' Run Code' }
+            )
         end,
     },
 
@@ -1181,8 +1586,23 @@ local M = {
         ---@type render.md.UserConfig
         opts = {
             sign = { enabled = false },
-            heading = { width = 'block', icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' }, right_pad = 1 },
-            code = { width = 'block', min_width = unit_width * 2, right_pad = 1 },
+            heading = {
+                width = 'block',
+                icons = {
+                    '󰉫 : ',
+                    '󰉬 : ',
+                    '󰉭 : ',
+                    '󰉮 : ',
+                    '󰉯 : ',
+                    '󰉰 : ',
+                },
+                right_pad = 1,
+            },
+            code = {
+                width = 'block',
+                min_width = unit_width * 2,
+                right_pad = 1,
+            },
         },
     },
 
@@ -1198,14 +1618,20 @@ local M = {
         build = function(plugin)
             -- Install markdown preview, use npx if available.
             if vim.fn.executable('npx') then
-                vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
+                vim.cmd(
+                    '!cd '
+                        .. plugin.dir
+                        .. ' && cd app && npx --yes yarn install'
+                )
             else
                 vim.cmd([[Lazy load markdown-preview.nvim]])
                 vim.fn['mkdp#util#install']()
             end
         end,
         init = function()
-            if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
+            if vim.fn.executable('npx') then
+                vim.g.mkdp_filetypes = { 'markdown' }
+            end
         end,
     },
 
@@ -1234,24 +1660,91 @@ local M = {
             local widgets = require('dap.ui.widgets')
 
             -- Keybindings
-            vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
-            vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
-            vim.keymap.set('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
-            vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
-            vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
+            vim.keymap.set(
+                'n',
+                '<F5>',
+                dap.continue,
+                { desc = 'Debug: Start/Continue' }
+            )
+            vim.keymap.set(
+                'n',
+                '<F1>',
+                dap.step_into,
+                { desc = 'Debug: Step Into' }
+            )
+            vim.keymap.set(
+                'n',
+                '<F2>',
+                dap.step_over,
+                { desc = 'Debug: Step Over' }
+            )
+            vim.keymap.set(
+                'n',
+                '<F3>',
+                dap.step_out,
+                { desc = 'Debug: Step Out' }
+            )
+            vim.keymap.set(
+                'n',
+                '<F4>',
+                dap.run_to_cursor,
+                { desc = 'Debug: Run to cursor' }
+            )
 
-            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = 'Debug Breakpoint Toggle ' })
-            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = 'Debug Continue Session.' })
-            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = 'Debug Terminate Session.' })
-            vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = 'Debug Restart Session.' })
-            vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = 'Debug View Toggle ' })
+            vim.keymap.set(
+                'n',
+                '<Leader>db',
+                dap.toggle_breakpoint,
+                { desc = 'Debug Breakpoint Toggle ' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dc',
+                dap.continue,
+                { desc = 'Debug Continue Session.' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dt',
+                dap.terminate,
+                { desc = 'Debug Terminate Session.' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dr',
+                dap.restart,
+                { desc = 'Debug Restart Session.' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dv',
+                dv.toggle,
+                { desc = 'Debug View Toggle ' }
+            )
 
-            vim.keymap.set('n', '<Leader>ds', function() widgets.centered_float(widgets.scopes) end, { desc = 'Debug Scope' })
-            vim.keymap.set('n', '<Leader>dk', function() widgets.hover(nil, { border = 'none' }) end, { desc = 'Debug Symbol (Keywordprog)' })
+            vim.keymap.set(
+                'n',
+                '<Leader>ds',
+                function() widgets.centered_float(widgets.scopes) end,
+                { desc = 'Debug Scope' }
+            )
+            vim.keymap.set(
+                'n',
+                '<Leader>dk',
+                function() widgets.hover(nil, { border = 'none' }) end,
+                { desc = 'Debug Symbol (Keywordprog)' }
+            )
 
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-float' },
-                callback = function(event) vim.keymap.set('n', 'q', '<C-w>q', { silent = true, buffer = event.buf }) end,
+                callback = function(event)
+                    vim.keymap.set(
+                        'n',
+                        'q',
+                        '<C-w>q',
+                        { silent = true, buffer = event.buf }
+                    )
+                end,
             })
 
             -- Installs all dependencies with mason
@@ -1293,7 +1786,15 @@ local M = {
             dap.listeners.before.event_exited['dap-view-config'] = dv.close
 
             -- Python specific config
-            local python_path = vim.fs.joinpath(vim.fn.stdpath('data'), 'mason', 'packages', 'debugpy', 'venv', 'bin', 'python')
+            local python_path = vim.fs.joinpath(
+                vim.fn.stdpath('data'),
+                'mason',
+                'packages',
+                'debugpy',
+                'venv',
+                'bin',
+                'python'
+            )
             require('dap-python').setup(python_path)
         end,
     },

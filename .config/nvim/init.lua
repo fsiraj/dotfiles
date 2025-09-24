@@ -16,7 +16,7 @@ vim.g.expandtab = true
 -- Enable relative line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.fillchars:append({ eob = " " })
+vim.opt.fillchars:append({ eob = ' ' })
 
 -- Enable mouse mode
 vim.opt.mouse = 'a'
@@ -82,22 +82,57 @@ vim.opt.foldtext = ''
 
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
-vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
+vim.keymap.set(
+    'n',
+    '<Leader>tb',
+    '<Cmd>e #<CR>',
+    { desc = 'Toggle Buffer Alternative (#)' }
+)
 vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
-vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
-vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selection' })
+vim.keymap.set(
+    'n',
+    '<Leader>fr',
+    ':%s/<C-r><C-w>/',
+    { desc = 'Find Replace Word' }
+)
+vim.keymap.set(
+    'v',
+    '<Leader>fr',
+    '"zy:%s/<C-r>z/',
+    { desc = 'Find Replace Selection' }
+)
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 -- Keybinds to make split navigation easier.
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set(
+    'n',
+    '<C-h>',
+    '<C-w><C-h>',
+    { desc = 'Move focus to the left window' }
+)
+vim.keymap.set(
+    'n',
+    '<C-l>',
+    '<C-w><C-l>',
+    { desc = 'Move focus to the right window' }
+)
+vim.keymap.set(
+    'n',
+    '<C-j>',
+    '<C-w><C-j>',
+    { desc = 'Move focus to the lower window' }
+)
+vim.keymap.set(
+    'n',
+    '<C-k>',
+    '<C-w><C-k>',
+    { desc = 'Move focus to the upper window' }
+)
 
 -- Escape insert mode in terminal easier
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
@@ -131,8 +166,8 @@ vim.api.nvim_create_autocmd('TermOpen', {
 
 vim.api.nvim_create_autocmd('VimResized', {
     desc = 'Equalize splits when nvim is resized',
-    group = vim.api.nvim_create_augroup('vim-resize', {clear = true}),
-    command = "wincmd ="
+    group = vim.api.nvim_create_augroup('vim-resize', { clear = true }),
+    command = 'wincmd =',
 })
 
 --NOTE: Plugins
@@ -149,7 +184,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
         lazyrepo,
         lazypath,
     })
-    if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
+    if vim.v.shell_error ~= 0 then
+        error('Error cloning lazy.nvim:\n' .. out)
+    end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 

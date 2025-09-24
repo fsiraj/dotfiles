@@ -40,12 +40,12 @@ curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | s
 
 ## 🛠️ What's Included
 
-> Only reputable actively maintained tools, packages, and plugins
+> Full IDE experience using popular well-maintained tools, packages, and plugins
 
 #### 💻 **Terminal & Shell**
 
 > - **Terminal:** [Ghostty](https://ghostty.org/) - Lightning fast GPU-accelerated terminal
-> - **Shell:** [ZSH](https://www.zsh.org/) with modern enhancements
+> - **Shell:** [ZSH](https://www.zsh.org/) - Fast UNIX shell with modern enhancements
 >   - **Plugin Manager:** [zinit](https://github.com/zdharma-continuum/zinit) - Turbo-charged plugin loading
 > - **Prompt:** [Oh My Posh](https://ohmyposh.dev/) - Beautiful, customizable prompt
 
@@ -55,6 +55,11 @@ curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | s
 >   - **Plugin Manager:** [Lazy](https://github.com/folke/lazy.nvim) - Modern plugin manager
 > - **Multiplexing:** [tmux](https://github.com/tmux/tmux) - Terminal workspace management
 > - **Plugin Manager:** [tpm](https://github.com/tmux-plugins/tpm) - Tmux plugin manager
+
+#### 🔧 **Languages**
+
+> - **Python:** [uv](https://github.com/astral-sh/uv) - Ultra-fast Python package installer and resolver
+> - **Rust:** [rustup](https://rustup.rs/) - The Rust toolchain installer
 
 #### 🎨 **Theming**
 
