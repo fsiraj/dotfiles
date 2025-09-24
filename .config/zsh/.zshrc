@@ -52,7 +52,7 @@ if command -v eza &>/dev/null; then
 else
     alias ls="ls"
     alias ll="ls -Al"
-    alias la = "ls -A"
+    alias la="ls -A"
 fi
 
 alias c="clear -x"
@@ -78,6 +78,7 @@ alias n="nvim"
 
 if [[ $- == *i* ]]; then
     if command -v fastfetch &>/dev/null; then
+        alias ff="fastfetch"
         fastfetch
     fi
 fi
