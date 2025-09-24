@@ -121,8 +121,8 @@ macos)
         fzf zoxide eza fd ripgrep \
         lua node \
         imagemagick \
-        neovim \
         jandedobbeleer/oh-my-posh/oh-my-posh
+    brew install --quiet --HEAD neovim
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font
     log "macOS packages installed!" "1;34" "🎉" "1"
     ;;

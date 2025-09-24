@@ -229,7 +229,7 @@ local M = {
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'SnacksDashboardOpened',
                 callback = function()
-                    vim.cmd('match MiniIconsBlue /#/')
+                    vim.cmd('match SnacksDashboardHeaderSecondary /#/')
                     vim.cmd('2match WarningMsg /⚡/')
                 end,
             })
@@ -381,13 +381,9 @@ local M = {
                     ['enter'] = function(selected, _)
                         if #selected == 0 then return end
                         local colorscheme = selected[1]:match('^[^:]+')
-                        local ok = pcall(function()
-                            vim.cmd('colorscheme ' .. colorscheme)
-                            vim.notify(
-                                'Syncing colors to ' .. colorscheme .. '...'
-                            )
-                            vim.schedule(style.sync_theme)
-                        end)
+                        local ok = pcall(
+                            function() style.sync_theme(colorscheme) end
+                        )
                         if not ok then
                             vim.notify(
                                 'Failed to load ' .. colorscheme,
@@ -584,7 +580,7 @@ local M = {
             }
             local lsp_status = {
                 'lsp_status',
-                icon = { '󱚠 ', color = 'MiniIconsGreen' },
+                icon = '󱚠 ',
                 ignore_lsp = { 'copilot' },
             }
             local showmode = {

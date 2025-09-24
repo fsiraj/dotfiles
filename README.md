@@ -58,7 +58,7 @@ curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | s
 
 #### 🔧 **Languages**
 
-> - **Python:** [uv](https://github.com/astral-sh/uv) - Ultra-fast Python package installer and resolver
+> - **Python:** [uv](https://docs.astral.sh/uv/) - Ultra-fast Python package installer and resolver
 > - **Rust:** [rustup](https://rustup.rs/) - The Rust toolchain installer
 
 #### 🎨 **Theming**
