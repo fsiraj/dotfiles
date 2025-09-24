@@ -44,6 +44,7 @@ arch)
         zsh tmux stow fastfetch \
         fzf zoxide eza fd ripgrep \
         lua nodejs \
+        imagemagick \
         ttf-jetbrains-mono-nerd
     sudo pacman -S --needed yay
     yay -S --needed neovim-git ghostty-git
@@ -62,6 +63,7 @@ ubuntu)
         zsh tmux xsel stow \
         eza fd-find ripgrep \
         lua5.4 \
+        imagemagick \
         neovim
     sudo snap install node --classic
     # Ghostty (stable)
@@ -108,6 +110,9 @@ macos)
         /bin/bash -c \
             "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
+    if ! xcode-select -p >/dev/null 2>&1; then
+        xcode-select --install 2>/dev/null || true
+    fi
     # shellcheck disable=2034
     export HOMEBREW_NO_ENV_HINTS=true
     brew install --quiet \
@@ -115,10 +120,10 @@ macos)
         zsh tmux stow fastfetch \
         fzf zoxide eza fd ripgrep \
         lua node \
+        imagemagick \
         neovim \
         jandedobbeleer/oh-my-posh/oh-my-posh
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font
-    xcode-select --install 2>/dev/null
     log "macOS packages installed!" "1;34" "🎉" "1"
     ;;
 esac
@@ -141,6 +146,7 @@ log "rustup installed!" "1;34" "🦀" "1"
 
 # Setup zsh
 log "Setting up zsh..." "1;35" "🐚"
+
 # Change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
     # shellcheck disable=SC2016
@@ -150,15 +156,14 @@ fi
 log "shell set to zsh!" "1;34" "🐚" "1"
 
 # Install zinit for zsh plugins
-XDG_DATA_HOME="$HOME/.local/share"
-ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
+ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
     mkdir -p "$(dirname "$ZINIT_HOME")"
     git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 else
     git -C "$ZINIT_HOME" pull
 fi
-    log "zinit installed!" "1;34" "🔌" "1"
+log "zinit installed!" "1;34" "🔌" "1"
 
 # Clone dotfiles to home directory
 log "Setting up dotfiles..." "1;35" "📁"
@@ -171,8 +176,8 @@ fi
 stow -d "$HOME/dotfiles" -t "$HOME/.config" .config
 log "dotfiles stowed!" "1;34" "🔗" "1"
 
-log "Setting up tmux plugins..." "1;35" "🪟"
 # Install tmux plugins
+log "Setting up tmux plugins..." "1;35" "🪟"
 TPM_HOME="$HOME/.config/tmux/plugins/tpm"
 if [ ! -d "$TPM_HOME" ]; then
     git clone https://github.com/tmux-plugins/tpm "$TPM_HOME"
@@ -181,7 +186,7 @@ else
     git -C "$TPM_HOME" pull
     "$TPM_HOME/bin/update_plugins" all
 fi
-    log "tmux plugins installed!" "1;34" "🔌" "1"
+log "tmux plugins installed!" "1;34" "🔌" "1"
 
 # Install neovim plugins and language tools
 log "Setting up neovim..." "1;35" "💤"

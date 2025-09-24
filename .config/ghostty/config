@@ -12,8 +12,9 @@ window-theme = ghostty
 window-padding-x = 32
 window-padding-y = 32,0
 window-padding-balance = true
+macos-titlebar-proxy-icon = hidden
 gtk-tabs-location = hidden
-adw-toolbar-style = flat
+gtk-toolbar-style = flat
 gtk-titlebar-hide-when-maximized = true
 
 # Keymap
