@@ -180,6 +180,9 @@ local function reload_(app, ...)
             'set',
             ...,
         })
+    elseif app == 'oh-my-posh' then
+        vim.system({ 'oh-my-posh', 'enable', 'reload' })
+        vim.system({ 'oh-my-posh', 'disable', 'reload' })
     end
 end
 
@@ -187,7 +190,17 @@ local M = {}
 
 --- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
 --- Used as a callback for fzf-lua's colorscheme picker.
-function M.sync_theme()
+function M.sync_theme(colorscheme)
+    -- Colorscheme is required
+    if colorscheme == nil then
+        vim.notify('Colorscheme not provided')
+        return
+    end
+
+    -- Updates this session, but not persistent
+    vim.cmd('colorscheme ' .. colorscheme)
+    vim.notify('Syncing colors to ' .. colorscheme .. '...')
+
     -- Palette
     local p = num_to_hex(get_palette(vim.g.colors_name))
 
@@ -215,6 +228,7 @@ function M.sync_theme()
         subtext = p.subtext,
     }
     run_sed_cmd(omp, omp_overrides)
+    reload_('oh-my-posh')
 
     -- Tmux
     local tmux = '~/.config/tmux/tmux.conf'
@@ -249,6 +263,7 @@ function M.hl_autocmd()
 
             -- Neovim highlight overrides
             local hl_overrides = {
+                -- Neovim Built-in
                 NormalFloat = { bg = p.mantle },
                 FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
                 FloatBorder = { fg = p.mantle, bg = p.mantle },
@@ -256,19 +271,23 @@ function M.hl_autocmd()
                 CursorLineNr = { fg = p.accent },
                 StatusLine = { fg = p.base, bg = p.base },
                 StatusLineNC = { fg = p.base, bg = p.base },
-                SnacksDashboardHeader = { fg = p.green },
-                SnacksDashboardFooter = { fg = p.subtext },
-                SnacksDashboardSpecial = { fg = p.accent },
+                -- Plugins
+                BlinkCmpDoc = { link = 'NormalFloat' },
                 DapBreak = { fg = p.red },
                 DapStop = { fg = p.yellow },
+                FzfLuaBorder = { link = 'FloatBorder' },
                 NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
                 NoiceConfirm = { link = 'NormalFloat' },
                 NoiceConfirmBorder = { link = 'FloatBorder' },
+                NeotreeNormal = { link = 'NormalFloat' },
+                NeoTreeNormalNC = { link = 'NeotreeNormal' },
+                SnacksDashboardHeader = { fg = p.green },
+                SnacksDashboardHeaderSecondary = { fg = p.blue },
+                SnacksDashboardFooter = { fg = p.subtext },
+                SnacksDashboardSpecial = { fg = p.accent },
                 TreesitterContext = { bg = p.mantle },
                 TreesitterContextBottom = { sp = p.accent, underline = true },
                 WhichKeyBorder = { link = 'FloatBorder' },
-                NeotreeNormal = { link = 'NormalFloat' },
-                NeoTreeNormalNC = { link = 'NeotreeNormal' },
             }
 
             -- Apply neovim highlights
