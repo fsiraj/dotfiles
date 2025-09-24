@@ -1,5 +1,7 @@
 local style = require('style')
 
+style.hl_autocmd()
+
 -- Language support
 
 local language_servers = {
@@ -39,6 +41,8 @@ local language_servers = {
     marksman = {},
     -- TOML
     taplo = {},
+    -- JSON
+    jsonls = {},
     -- Rust handled by Rustaceanvim
 }
 
@@ -51,7 +55,6 @@ local formatters_by_ft = {
 }
 
 local linters_by_ft = {
-    json = { 'jsonlint' },
     markdown = { 'markdownlint' },
 }
 
@@ -62,7 +65,6 @@ vim.list_extend(ensure_installed, {
     'ruff',
     'debugpy',
     'markdownlint',
-    'jsonlint',
     'shellcheck',
     'shfmt',
     'codelldb',
@@ -177,8 +179,7 @@ local M = {
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'SnacksDashboardOpened',
                 callback = function()
-                    vim.api.nvim_set_hl(0, 'SnacksDashboardHeaderSecondary', { fg = vim.g.palette.blue })
-                    vim.cmd('match SnacksDashboardHeaderSecondary /#/')
+                    vim.cmd('match MiniIconsBlue /#/')
                     vim.cmd('2match WarningMsg /⚡/')
                 end,
             })
@@ -391,7 +392,7 @@ local M = {
     {
         'folke/tokyonight.nvim',
         priority = 1000,
-        opts = { plugins = { auto = true } },
+        opts = { style = 'night', plugins = { auto = true } },
     },
 
     --RosePine
@@ -399,6 +400,7 @@ local M = {
         'rose-pine/neovim',
         priority = 1000,
         name = 'rose-pine',
+        opts = { variant = 'main' },
     },
 
     --Nord
@@ -430,14 +432,10 @@ local M = {
             local noice = require('noice')
 
             -- Custom components
-            local mode = {
-                function() return string.upper(vim.api.nvim_get_mode().mode) end,
-            }
-            local tabs = {
-                'tabs',
-                cond = function() return #vim.fn.gettabinfo() > 1 end,
-                show_modified_status = true,
-            }
+            local mode = { function() return string.upper(vim.api.nvim_get_mode().mode) end }
+            local branch = { 'branch', icon = ' ' }
+            local tabs = { 'tabs', cond = function() return #vim.fn.gettabinfo() > 1 end, show_modified_status = true }
+            local lsp_status = { 'lsp_status', icon = { '󱚠 ', color = 'MiniIconsGreen' }, ignore_lsp = { 'copilot' } }
             local showmode = { noice.api.status.mode.get, cond = noice.api.status.mode.has } ---@diagnostic disable-line
             local showcmd = { noice.api.status.command.get, cond = noice.api.status.command.has } ---@diagnostic disable-line
             local text = function(t)
@@ -499,8 +497,8 @@ local M = {
                 winbar = {
                     lualine_a = { mode, 'filename' },
                     lualine_b = { tabs },
-                    lualine_c = { 'branch', 'diff', 'diagnostics' },
-                    lualine_x = { showmode, showcmd, 'filetype', 'lsp_status' },
+                    lualine_c = { branch, 'diff', 'diagnostics' },
+                    lualine_x = { showmode, showcmd, 'filetype', lsp_status },
                     lualine_y = {},
                     lualine_z = {},
                 },
@@ -672,6 +670,10 @@ local M = {
             require('codecompanion').setup(opts)
             vim.keymap.set('ca', 'cc', 'CodeCompanion')
             vim.keymap.set({ 'n', 'v' }, '<Leader>cc', '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>', { desc = 'Code Companion Toggle Chat' })
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'CodeCompanionChatCreated',
+                callback = function() vim.wo.winhl = 'NormalFloat:Normal' end,
+            })
         end,
     },
 
@@ -706,6 +708,15 @@ local M = {
             floaterm.setup(opts)
             vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
             vim.keymap.set({ 't' }, '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
+            vim.api.nvim_create_autocmd('TermOpen', {
+                desc = 'Set Floaterm Normal',
+                callback = function()
+                    local state = require('floaterm.state')
+                    if state.volt_set then
+                        vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder'
+                    end
+                end,
+            })
         end,
     },
 
@@ -926,7 +937,6 @@ local M = {
 
             -- Display floating diagnostic window
             vim.api.nvim_create_autocmd({ 'CursorHold' }, {
-                pattern = '*',
                 callback = function()
                     if vim.diagnostic.is_enabled() then
                         vim.diagnostic.open_float({
@@ -1171,11 +1181,8 @@ local M = {
         ---@type render.md.UserConfig
         opts = {
             sign = { enabled = false },
-            heading = {
-                width = 'block',
-                icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' },
-                right_pad = 1,
-            },
+            heading = { width = 'block', icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' }, right_pad = 1 },
+            code = { width = 'block', min_width = unit_width * 2, right_pad = 1 },
         },
     },
 
@@ -1291,7 +1298,5 @@ local M = {
         end,
     },
 }
-
-style.hl_autocmd()
 
 return M

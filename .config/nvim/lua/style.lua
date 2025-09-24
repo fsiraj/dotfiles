@@ -29,6 +29,7 @@ local function get_palette(colorscheme)
     if string.find(colorscheme, 'tokyonight') then
         local flavor = vim.fn.split(colorscheme, '-')[2]
         local p = require('tokyonight.colors.' .. flavor)
+        if type(p) == 'function' then p = p({}) end
         return {
             name = colorscheme,
             accent = p.cyan,
@@ -150,6 +151,7 @@ local function reload_(app, ...)
         if on_arch then
             vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
         elseif on_ubuntu then
+            vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
             vim.system({ 'pkill', '-SIGUSR2', 'x-terminal-emul' })
         elseif on_mac then
             vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
@@ -244,14 +246,13 @@ function M.hl_autocmd()
                 StatusLine = { fg = p.base, bg = p.base },
                 StatusLineNC = { fg = p.base, bg = p.base },
                 SnacksDashboardHeader = { fg = p.green },
-                SnacksDashboardHeaderSecondary = { fg = p.blue },
                 SnacksDashboardFooter = { fg = p.subtext },
                 SnacksDashboardSpecial = { fg = p.accent },
                 DapBreak = { fg = p.red },
                 DapStop = { fg = p.yellow },
                 NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
                 NoiceConfirm = { link = 'NormalFloat' },
-                NoiceConfirmBorder = { link = 'FloatBorder'},
+                NoiceConfirmBorder = { link = 'FloatBorder' },
                 TreesitterContext = { bg = p.mantle },
                 TreesitterContextBottom = { sp = p.accent, underline = true },
                 WhichKeyBorder = { link = 'FloatBorder' },

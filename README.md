@@ -32,13 +32,15 @@
 
 ## 🚀 Quick Start
 
-**Supported Systems:** macOS • Ubuntu • Arch Linux
+> **Supported Systems:** macOS • Ubuntu • Arch Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | sh
 ```
 
 ## 🛠️ What's Included
+
+> Only reputable actively maintained tools, packages, and plugins
 
 #### 💻 **Terminal & Shell**
 
@@ -61,15 +63,15 @@ curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | s
 
 ## 🌈 Theme System
 
+> Works perfectly for the 4 themes (and their variants) showcased above
+
 **Synchronized theming across all applications!**
 
-Switch themes instantly using fzf-lua's colorscheme picker in Neovim, and watch as the entire development environment adapts seamlessly.
+> Switch themes instantly using fzf-lua's colorscheme picker - <kbd>\<Leader\>sc</kbd> - in Neovim, and watch as the entire development environment adapts seamlessly.
 
 **Want to add more themes?**
 
-- Define the palette in `get_palette()` with identical keys to existing palettes
-- Add a mapping to `get_hyde_theme()` if using Arch Linux
-- Add a mapping to `get_ghostty_theme()` if using Ghostty terminal
+> Add it to `style.lua` using any existing theme as a template. At a minimum, add an entry to `get_palette`. If using ghostty, ensure the theme is available (and can be found) with `get_ghostty_theme`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
 
 ---
 

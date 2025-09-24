@@ -20,6 +20,8 @@ gtk-titlebar-hide-when-maximized = true
 keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
 keybind = alt+minus=decrease_font_size:1
+# Used in neovim for splits
 keybind = ctrl+equal=unbind
-keybind = ctrl+minus=unbind
+keybind = ctrl++=unbind
+keybind = ctrl+-=unbind
 
