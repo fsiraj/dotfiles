@@ -75,3 +75,9 @@ alias venv="source .venv/bin/activate"
 alias d="deactivate"
 
 alias n="nvim"
+
+if [[ $- == *i* ]]; then
+    if command -v fastfetch &>/dev/null; then
+        fastfetch
+    fi
+fi
