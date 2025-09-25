@@ -80,6 +80,9 @@ vim.opt.foldtext = ''
 
 --NOTE: Keymaps
 
+vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
 vim.keymap.set(
@@ -160,6 +163,7 @@ vim.api.nvim_create_autocmd('TermOpen', {
         vim.bo.filetype = 'terminal'
         vim.opt.number = false
         vim.opt.relativenumber = false
+        vim.opt.cursorline = false
         vim.keymap.set('n', '<CR>', 'i', { buffer = true })
     end,
 })
