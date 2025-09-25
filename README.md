@@ -35,7 +35,7 @@
 > **Supported Systems:** macOS • Ubuntu • Arch Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh | sh
+bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh)
 ```
 
 ## 🛠️ What's Included

@@ -271,6 +271,8 @@ function M.hl_autocmd()
                 CursorLineNr = { fg = p.accent },
                 StatusLine = { fg = p.base, bg = p.base },
                 StatusLineNC = { fg = p.base, bg = p.base },
+                StatusLineTerm = { fg = p.base, bg = p.base },
+                StatusLineTermNC = { fg = p.base, bg = p.base },
                 -- Plugins
                 BlinkCmpDoc = { link = 'NormalFloat' },
                 DapBreak = { fg = p.red },
