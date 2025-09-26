@@ -1,7 +1,7 @@
 -- NOTE: Options
 
 -- Colorscheme
-vim.g.colorscheme = 'rose-pine'
+vim.g.colorscheme = 'rose-pine-main'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
