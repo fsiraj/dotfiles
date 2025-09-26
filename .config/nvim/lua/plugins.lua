@@ -266,54 +266,17 @@ local M = {
                 mappings = vim.g.have_nerd_font,
                 keys = {},
             },
+            -- stylua: ignore
             spec = {
-                {
-                    '<Leader>i',
-                    group = 'Info',
-                    icon = { icon = ' ', color = 'cyan' },
-                },
-                {
-                    '<Leader>c',
-                    group = 'Code',
-                    mode = { 'n', 'x' },
-                    icon = { icon = ' ', color = 'orange' },
-                },
-                {
-                    '<Leader>d',
-                    group = 'Debug',
-                    icon = { icon = ' ', color = 'red' },
-                },
-                {
-                    '<Leader>s',
-                    group = 'Search',
-                    icon = { icon = ' ', color = 'green' },
-                },
-                {
-                    '<Leader>S',
-                    group = 'Sessions',
-                    icon = { icon = '󰙰 ', color = 'purple' },
-                },
-                {
-                    '<Leader>f',
-                    group = 'F',
-                    icon = { icon = '󰈢 ', color = 'azure' },
-                },
-                {
-                    '<Leader>t',
-                    group = 'Toggle',
-                    icon = { icon = ' ', color = 'yellow' },
-                },
-                {
-                    '<Leader>n',
-                    group = 'Neotest',
-                    icon = { icon = ' ', color = 'azure' },
-                },
-                {
-                    '<Leader>g',
-                    group = 'Git',
-                    mode = { 'n', 'v' },
-                    icon = { cat = 'filetype', name = 'git' },
-                },
+                { '<Leader>i', group = 'Info', icon = { icon = ' ', color = 'cyan' }, },
+                { '<Leader>c', group = 'Code', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' }, },
+                { '<Leader>d', group = 'Debug', icon = { icon = ' ', color = 'red' }, },
+                { '<Leader>s', group = 'Search', icon = { icon = ' ', color = 'green' }, },
+                { '<Leader>S', group = 'Sessions', icon = { icon = '󰙰 ', color = 'purple' }, },
+                { '<Leader>f', group = 'F', icon = { icon = '󰈢 ', color = 'azure' }, },
+                { '<Leader>t', group = 'Toggle', icon = { icon = ' ', color = 'yellow' }, },
+                { '<Leader>n', group = 'Neotest', icon = { icon = ' ', color = 'azure' }, },
+                { '<Leader>g', group = 'Git', mode = { 'n', 'v' }, icon = { cat = 'filetype', name = 'git' }, },
             },
         },
     },
@@ -397,6 +360,16 @@ local M = {
             fzf.setup(opts)
             fzf.register_ui_select(opts.ui_select)
 
+            -- Custom pickers
+            fzf.magic_colorschemes = function()
+                return fzf.colorschemes({ colors = style.colorschemes })
+            end
+            fzf.plugins = function()
+                fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
+            end
+            fzf.dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
+
+            -- stylua: ignore
             local keymaps = {
                 { 'n', '<Leader>sb', fzf.builtin, 'Search Builtin' },
                 { 'n', '<Leader>sr', fzf.resume, 'Search Resume' },
@@ -406,39 +379,19 @@ local M = {
                 { 'n', '<Leader>sg', fzf.live_grep, 'Search by Grep' },
                 { 'n', '<Leader>sh', fzf.helptags, 'Search Help' },
                 { 'n', '<Leader>sH', fzf.highlights, 'Search Highlights' },
-                { 'n', '<Leader>sc', fzf.colorschemes, 'Search Colorschemes' },
+                { 'n', '<Leader>sc', fzf.magic_colorschemes, 'Search Magic Colorschemes', },
+                { 'n', '<Leader>sC', fzf.colorschemes, 'Search All Colorschemes' },
                 { 'n', '<Leader>sk', fzf.keymaps, 'Search Keymaps' },
                 { 'v', '<Leader>ss', fzf.grep_visual, 'Search Selection' },
-                {
-                    'n',
-                    '<Leader>/',
-                    fzf.lgrep_curbuf,
-                    ' [/] Fuzzy Search Current Buffer',
-                },
-                {
-                    'n',
-                    '<Leader><Leader>',
-                    fzf.buffers,
-                    ' [ ] Find Existing Buffers',
-                },
-                {
-                    'n',
-                    '<Leader>sd',
-                    function() fzf.files({ cwd = '~/dotfiles' }) end,
-                    'Search Dotfiles',
-                },
-                {
-                    'n',
-                    '<Leader>sp',
-                    function()
-                        fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
-                    end,
-                    'Search Plugins',
-                },
+                { 'n', '<Leader>/' , fzf.lgrep_curbuf, ' [/] Fuzzy Search Current Buffer', },
+                { 'n', '<Leader>sd', fzf.dotfiles, 'Search Dotfiles', },
+                { 'n', '<Leader>sp', fzf.plugins, 'Search Plugins', },
+                { 'n', '<Leader><Leader>', fzf.buffers, ' [ ] Find Existing Buffers', },
             }
             -- <Leader>ss = Search Symbol Buffer (Namu)
             -- <Leader>sS = Search Symbol Workspace (Namu)
             -- <Leader>sq = Search Quickfix (Namu)
+
             for _, map in ipairs(keymaps) do
                 vim.keymap.set(
                     map[1],
@@ -546,6 +499,27 @@ local M = {
         priority = 1000,
         lazy = false,
         name = 'nord',
+    },
+
+    --Everforest
+    {
+        'neanias/everforest-nvim',
+        priority = 1000,
+        config = function()
+            require('everforest').setup({
+                background = 'hard',
+                on_highlights = function(hl, palette)
+                    hl.Normal = { bg = palette.bg_dim }
+                end,
+            })
+        end,
+    },
+
+    --Github
+    {
+        'projekt0n/github-nvim-theme',
+        name = 'github-theme',
+        priority = 1000,
     },
 
     --TinyDeviconsAutoColors
@@ -883,42 +857,18 @@ local M = {
             terminals = {
                 { name = 'Terminal' },
             },
+            -- stylua: ignore
             mappings = {
                 sidebar = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set(
-                        'n',
-                        '<C-l>',
-                        api.switch_wins,
-                        { buffer = buf }
-                    )
-                    vim.keymap.set(
-                        'n',
-                        '<C-h>',
-                        api.switch_wins,
-                        { buffer = buf }
-                    )
-                    vim.keymap.set(
-                        'n',
-                        '<C-j>',
-                        function() api.cycle_term_bufs('next') end,
-                        { buffer = buf }
-                    )
-                    vim.keymap.set(
-                        'n',
-                        '<C-k>',
-                        function() api.cycle_term_bufs('prev') end,
-                        { buffer = buf }
-                    )
+                    vim.keymap.set( 'n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set( 'n', '<C-h>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set( 'n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
+                    vim.keymap.set( 'n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
                 end,
                 term = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set(
-                        'n',
-                        '<C-l>',
-                        api.switch_wins,
-                        { buffer = buf }
-                    )
+                    vim.keymap.set( 'n', '<C-l>', api.switch_wins, { buffer = buf })
                     vim.keymap.del('n', '<Esc>', { buffer = buf })
                 end,
             },
@@ -977,25 +927,11 @@ local M = {
                     },
                 },
             })
+            -- stylua: ignore
             local keymaps = {
-                {
-                    'n',
-                    '<leader>ss',
-                    '<Cmd>Namu symbols<CR>',
-                    'Search Symbols Buffer',
-                },
-                {
-                    'n',
-                    '<leader>sS',
-                    '<Cmd>Namu workspace<CR>',
-                    'Search Symbols Workspace',
-                },
-                {
-                    'n',
-                    '<leader>sq',
-                    '<Cmd>Namu diagnostics<CR>',
-                    'Search Quickfix',
-                },
+                { 'n', '<leader>ss', '<Cmd>Namu symbols<CR>', 'Search Symbols Buffer', },
+                { 'n', '<leader>sS', '<Cmd>Namu workspace<CR>', 'Search Symbols Workspace', },
+                { 'n', '<leader>sq', '<Cmd>Namu diagnostics<CR>', 'Search Quickfix', },
             }
 
             for _, map in ipairs(keymaps) do
@@ -1139,27 +1075,16 @@ local M = {
                             { buffer = event.buf, desc = 'LSP: ' .. desc }
                         )
                     end
+                    -- stylua: ignore start
                     map('<Leader>cd', fzf.lsp_definitions, 'Code Definition')
-                    map(
-                        '<Leader>cD',
-                        vim.lsp.buf.declaration,
-                        'Code Declaration'
-                    )
+                    map( '<Leader>cD', vim.lsp.buf.declaration, 'Code Declaration')
                     map('<Leader>cr', fzf.lsp_references, 'Code References')
-                    map(
-                        '<Leader>cv',
-                        vim.lsp.buf.rename,
-                        'Code Variable Rename'
-                    )
-                    map(
-                        '<Leader>ca',
-                        fzf.lsp_code_actions,
-                        'Code Action',
-                        { 'n', 'x' }
-                    )
+                    map( '<Leader>cv', vim.lsp.buf.rename, 'Code Variable Rename')
+                    map( '<Leader>ca', fzf.lsp_code_actions, 'Code Action', { 'n', 'x' })
                     -- <Leader>ca = Code Action (FzfLua)
                     -- <Leader>cf = Code Format (Conform)
                     -- <Leader>cc = Code Companion Chat (Codecompanion)
+                    -- stylua: ignore end
 
                     -- Highlight references on hover
                     local client =
