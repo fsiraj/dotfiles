@@ -19,7 +19,6 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.green,
             teal = p.teal,
-            sky = p.sky,
             sapphire = p.sapphire,
             blue = p.blue,
             mauve = p.mauve,
@@ -42,7 +41,6 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.teal,
             teal = p.cyan,
-            sky = p.blue1,
             sapphire = p.blue2,
             blue = p.blue,
             mauve = p.magenta,
@@ -63,14 +61,13 @@ local function get_palette(colorscheme)
             yellow = p.gold,
             green = p.leaf,
             teal = p.foam,
-            sky = p.pine,
             sapphire = p.pine,
             blue = p.pine,
             mauve = p.iris,
             pink = p.rose,
         }
     end
-    if string.find(colorscheme, 'nord') then
+    if colorscheme == 'nord' then
         local p = require('nord.named_colors')
         return {
             name = colorscheme,
@@ -84,11 +81,53 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.green,
             teal = p.teal,
-            sky = p.off_blue,
             sapphire = p.glacier,
             blue = p.blue,
             mauve = p.purple,
             pink = '#ebbcba',
+        }
+    end
+    if colorscheme == 'everforest' then
+        local p = require('everforest.colours').generate_palette(
+            { background = 'hard', colours_override = function(_) end },
+            'dark'
+        )
+        return {
+            name = colorscheme,
+            accent = p.green,
+            text = p.fg,
+            base = p.bg_dim,
+            mantle = p.bg2,
+            subtext = p.grey1,
+            red = p.red,
+            orange = p.orange,
+            yellow = p.yellow,
+            green = p.green,
+            teal = p.aqua,
+            sapphire = p.blue,
+            blue = p.blue,
+            mauve = p.purple,
+            pink = '#ebbcba',
+        }
+    end
+    if string.find(colorscheme, 'github') then
+        local p = require('github-theme.palette').load(colorscheme)
+        return {
+            name = colorscheme,
+            accent = p.accent.fg,
+            text = p.fg.default,
+            base = p.canvas.default,
+            mantle = p.canvas.inset,
+            subtext = p.fg.subtle,
+            red = p.red.base,
+            orange = p.orange,
+            yellow = p.yellow.base,
+            green = p.green.base,
+            teal = p.cyan.base,
+            sapphire = p.blue.bright,
+            blue = p.blue.base,
+            mauve = p.magenta.base,
+            pink = p.pink.base,
         }
     end
     return {
@@ -110,14 +149,23 @@ local function num_to_hex(p)
 end
 
 local function get_ghostty_theme(colorscheme)
-    local query = string.lower(colorscheme:gsub('[^%w]', ''))
-    local cmd = string.format(
-        'ghostty +list-themes --plain | fzf -f %q --exit-0 | head -n1',
-        query
-    )
-    local out = vim.fn.system(cmd)
-    local match = out:gsub('%s+$', ''):match('^(.*)%s[^%s]+$')
-    return match
+    local map = {
+        ['rose-pine-main'] = 'Rose Pine',
+        ['rose-pine-moon'] = 'Rose Pine Moon',
+        ['rose-pine-dawn'] = 'Rose Pine Dawn',
+        ['tokyonight-night'] = 'TokyoNight Night',
+        ['tokyonight-storm'] = 'TokyoNight Storm',
+        ['tokyonight-moon'] = 'TokyoNight Moon',
+        ['tokyonight-day'] = 'TokyoNight Day',
+        ['catppuccin-mocha'] = 'Catppuccin Mocha',
+        ['catppuccin-macchiato'] = 'Catppuccin Macchiato',
+        ['catppuccin-frappe'] = 'Catppuccin Frappe',
+        ['catppuccin-latte'] = 'Catppuccin Latte',
+        ['nord'] = 'Nord',
+        ['everforest'] = 'Everforest Dark   Hard',
+        ['github_dark_default'] = 'Github Dark Default',
+    }
+    return map[colorscheme]
 end
 
 local function get_hyde_theme(colorscheme)
@@ -188,6 +236,23 @@ end
 
 local M = {}
 
+M.colorschemes = {
+    'rose-pine-main',
+    'rose-pine-moon',
+    'rose-pine-dawn',
+    'tokyonight-night',
+    'tokyonight-storm',
+    'tokyonight-moon',
+    'tokyonight-day',
+    'catppuccin-mocha',
+    'catppuccin-macchiato',
+    'catppuccin-frappe',
+    'catppuccin-latte',
+    'nord',
+    'everforest',
+    'github_dark_default',
+}
+
 --- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
 --- Used as a callback for fzf-lua's colorscheme picker.
 function M.sync_theme(colorscheme)
@@ -198,11 +263,12 @@ function M.sync_theme(colorscheme)
     end
 
     -- Updates this session, but not persistent
+    vim.g.colorscheme = colorscheme
     vim.cmd('colorscheme ' .. colorscheme)
     vim.notify('Syncing colors to ' .. colorscheme .. '...')
 
     -- Palette
-    local p = num_to_hex(get_palette(vim.g.colors_name))
+    local p = num_to_hex(get_palette(colorscheme))
 
     -- Nvim
     local nvim = '~/.config/nvim/init.lua'
@@ -258,12 +324,16 @@ function M.hl_autocmd()
         pattern = '*',
         callback = function()
             -- Palette
-            local p = get_palette(vim.g.colors_name)
+            local p = get_palette(vim.g.colorscheme)
             vim.g.palette = p
+
+            -- Finetunes
+            light_ts_context = string.find(vim.g.colorscheme, 'github')
 
             -- Neovim highlight overrides
             local hl_overrides = {
                 -- Neovim Built-in
+                NormalNC = { link = 'Normal' },
                 NormalFloat = { bg = p.mantle },
                 FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
                 FloatBorder = { fg = p.mantle, bg = p.mantle },
@@ -277,6 +347,7 @@ function M.hl_autocmd()
                 BlinkCmpDoc = { link = 'NormalFloat' },
                 DapBreak = { fg = p.red },
                 DapStop = { fg = p.yellow },
+                FzfLuaNormal = { link = 'NormalFloat' },
                 FzfLuaBorder = { link = 'FloatBorder' },
                 NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
                 NoiceConfirm = { link = 'NormalFloat' },
@@ -287,7 +358,9 @@ function M.hl_autocmd()
                 SnacksDashboardHeaderSecondary = { fg = p.blue },
                 SnacksDashboardFooter = { fg = p.subtext },
                 SnacksDashboardSpecial = { fg = p.accent },
-                TreesitterContext = { bg = p.mantle },
+                TreesitterContext = {
+                    bg = light_ts_context and p.base or p.mantle,
+                },
                 TreesitterContextBottom = { sp = p.accent, underline = true },
                 WhichKeyBorder = { link = 'FloatBorder' },
             }
