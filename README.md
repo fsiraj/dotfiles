@@ -24,9 +24,23 @@
 </details>
 
 <details>
+<summary><strong>🐙 GitHub</strong> - Clean theme inspired by GitHub's interface</summary>
+
+![GitHub Theme](assets/github-dark-default.png)
+
+</details>
+
+<details>
 <summary><strong>❄️ Nord</strong> - Arctic, north-bluish color palette</summary>
 
 ![Nord Theme](assets/nord.png)
+
+</details>
+
+<details>
+<summary><strong>🌲 Everforest</strong> - Forest-inspired green theme</summary>
+
+![Everforest Theme](assets/everforest-dark-hard.png)
 
 </details>
 
@@ -68,11 +82,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 ## 🌈 Theme System
 
-> Works perfectly for the 4 themes (and their variants) showcased above
+> Works perfectly for the 6 themes (and most of their variants) showcased above
 
 **Synchronized theming across all applications!**
 
-> Switch themes instantly using fzf-lua's colorscheme picker - <kbd>\<Leader\>sc</kbd> - in Neovim, and watch as the entire development environment adapts seamlessly.
+> Switch themes instantly using the magic colorscheme picker - <kbd>\<Leader\>sc</kbd> - in Neovim, and watch as the entire development environment adapts seamlessly.
 
 **Want to add more themes?**
 
