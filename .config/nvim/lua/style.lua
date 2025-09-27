@@ -19,7 +19,6 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.green,
             teal = p.teal,
-            sapphire = p.sapphire,
             blue = p.blue,
             mauve = p.mauve,
             pink = p.pink,
@@ -41,7 +40,6 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.teal,
             teal = p.cyan,
-            sapphire = p.blue2,
             blue = p.blue,
             mauve = p.magenta,
             pink = '#ea76cb',
@@ -61,7 +59,6 @@ local function get_palette(colorscheme)
             yellow = p.gold,
             green = p.leaf,
             teal = p.foam,
-            sapphire = p.pine,
             blue = p.pine,
             mauve = p.iris,
             pink = p.rose,
@@ -77,11 +74,10 @@ local function get_palette(colorscheme)
             mantle = p.dark_gray,
             subtext = p.light_gray_bright,
             red = p.red,
-            orange = p.gold,
+            orange = p.orange,
             yellow = p.yellow,
             green = p.green,
             teal = p.teal,
-            sapphire = p.glacier,
             blue = p.blue,
             mauve = p.purple,
             pink = '#ebbcba',
@@ -104,7 +100,6 @@ local function get_palette(colorscheme)
             yellow = p.yellow,
             green = p.green,
             teal = p.aqua,
-            sapphire = p.blue,
             blue = p.blue,
             mauve = p.purple,
             pink = '#ebbcba',
@@ -117,14 +112,13 @@ local function get_palette(colorscheme)
             accent = p.accent.fg,
             text = p.fg.default,
             base = p.canvas.default,
-            mantle = p.canvas.inset,
+            mantle = p.canvas.overlay,
             subtext = p.fg.subtle,
             red = p.red.base,
             orange = p.orange,
             yellow = p.yellow.base,
             green = p.green.base,
             teal = p.cyan.base,
-            sapphire = p.blue.bright,
             blue = p.blue.base,
             mauve = p.magenta.base,
             pink = p.pink.base,
@@ -304,7 +298,7 @@ function M.sync_theme(colorscheme)
         thm_fg = p.text,
         thm_surface_0 = p.base,
         thm_surface_1 = p.subtext,
-        thm_sapphire = p.sapphire,
+        thm_blue = p.blue,
         thm_green = p.green,
         thm_red = p.red,
     }
@@ -326,9 +320,6 @@ function M.hl_autocmd()
             -- Palette
             local p = get_palette(vim.g.colorscheme)
             vim.g.palette = p
-
-            -- Finetunes
-            light_ts_context = string.find(vim.g.colorscheme, 'github')
 
             -- Neovim highlight overrides
             local hl_overrides = {
@@ -358,9 +349,7 @@ function M.hl_autocmd()
                 SnacksDashboardHeaderSecondary = { fg = p.blue },
                 SnacksDashboardFooter = { fg = p.subtext },
                 SnacksDashboardSpecial = { fg = p.accent },
-                TreesitterContext = {
-                    bg = light_ts_context and p.base or p.mantle,
-                },
+                TreesitterContext = { bg = p.base },
                 TreesitterContextBottom = { sp = p.accent, underline = true },
                 WhichKeyBorder = { link = 'FloatBorder' },
             }
@@ -371,6 +360,55 @@ function M.hl_autocmd()
             end
         end,
     })
+end
+
+--- Called by lualine from ./lualine/custom.lua on ColorScheme event
+function M.get_lualine_theme()
+    local p = vim.g.palette
+    return {
+        normal = {
+            a = { bg = p.accent, fg = p.mantle, gui = 'bold' },
+            b = { bg = p.mantle, fg = p.text },
+            c = { bg = p.base, fg = p.text },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+        insert = {
+            a = { bg = p.teal, fg = p.mantle, gui = 'bold' },
+            b = { bg = p.mantle, fg = p.text },
+            c = { bg = p.base, fg = p.text },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+        visual = {
+            a = { bg = p.mauve, fg = p.mantle, gui = 'bold' },
+            b = { bg = p.mantle, fg = p.text },
+            c = { bg = p.base, fg = p.text },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+        replace = {
+            a = { bg = p.red, fg = p.mantle, gui = 'bold' },
+            b = { bg = p.mantle, fg = p.text },
+            c = { bg = p.base, fg = p.text },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+        command = {
+            a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
+            b = { bg = p.mantle, fg = p.text },
+            c = { bg = p.base, fg = p.text },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+        inactive = {
+            a = { bg = p.mantle, fg = p.subtext, gui = 'bold' },
+            b = { bg = p.base, fg = p.text },
+            c = { bg = p.base, fg = p.subtext },
+            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+            y = { bg = p.mantle, fg = p.text },
+        },
+    }
 end
 
 return M

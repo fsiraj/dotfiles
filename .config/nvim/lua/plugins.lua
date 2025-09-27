@@ -572,10 +572,9 @@ local M = {
             -- Minimal
             local minimal = {
                 winbar = {
-                    lualine_a = { 'filetype' },
-                    lualine_x = { text(' ') },
+                    lualine_b = { 'filetype' },
                 },
-                inactive_winbar = { lualine_c = { 'filetype' } },
+                inactive_winbar = { lualine_a = { 'filetype' } },
                 filetypes = {
                     'Outline',
                     'DiffviewFiles',
@@ -589,7 +588,7 @@ local M = {
             local terminal = {
                 winbar = {
                     lualine_a = { text('Terminal') },
-                    lualine_x = { showcmd },
+                    lualine_y = { showcmd },
                 },
                 inactive_winbar = { lualine_a = { text('Terminal') } },
                 filetypes = { 'terminal' },
@@ -599,12 +598,12 @@ local M = {
             local codecompanion = {
                 winbar = {
                     lualine_a = { 'filename' },
-                    lualine_x = {},
-                    lualine_z = {
+                    lualine_c = { text(' ') },
+                    lualine_y = {
                         require(
                             'codecompanion._extensions.spinner.styles.lualine'
                         ).get_lualine_component(),
-                        function() return 'CodeCompanion' end,
+                        text('CodeCompanion'),
                     },
                 },
                 inactive_winbar = nil,
@@ -616,9 +615,9 @@ local M = {
             require('lualine').setup({
                 options = {
                     icons = vim.g.have_nerd_font,
-                    theme = 'auto',
+                    theme = 'custom',
                     section_separators = { left = '', right = '' },
-                    component_separators = { left = '󰇝', right = '󰇝' },
+                    component_separators = { left = '|', right = '|' },
                     disabled_filetypes = {
                         winbar = {
                             'dap-repl',
@@ -633,14 +632,20 @@ local M = {
                 inactive_sections = {},
                 winbar = {
                     lualine_a = { mode, 'filename' },
-                    lualine_b = { tabs },
-                    lualine_c = { branch, 'diff', 'diagnostics' },
-                    lualine_x = { showmode, showcmd, 'filetype', lsp_status },
-                    lualine_y = {},
+                    lualine_b = { tabs, branch, 'diff', 'diagnostics' },
+                    lualine_c = {},
+                    lualine_x = { text(' ') },
+                    lualine_y = {
+                        showcmd,
+                        showmode,
+                        'filetype',
+                        lsp_status,
+                    },
                     lualine_z = {},
                 },
                 inactive_winbar = {
                     lualine_a = { 'filename' },
+                    lualine_c = { text(' ') },
                 },
             })
         end,
@@ -974,6 +979,8 @@ local M = {
             'nvim-tree/nvim-web-devicons',
         },
         opts = {
+            enable_git_status = false,
+            enable_diagnostics = false,
             window = { width = unit_width },
             filesystem = {
                 filtered_items = { children_inherit_highlights = false },
@@ -1370,65 +1377,21 @@ local M = {
             })
 
             -- Keymaps
+            --stylua: ignore start
             local keymaps = {
                 { 'n', '<Leader>nr', function() neotest.run.run() end, 'Run' },
-                {
-                    'n',
-                    '<Leader>nl',
-                    function() neotest.run.run_last() end,
-                    'Run Last',
-                },
-                {
-                    'n',
-                    '<Leader>nf',
-                    function() neotest.run.run(vim.fn.expand('%')) end,
-                    'Run File',
-                },
-                {
-                    'n',
-                    '<Leader>na',
-                    function() neotest.run.run({ suite = true }) end,
-                    'Run All',
-                },
-                {
-                    'n',
-                    '<Leader>nw',
-                    function() neotest.watch.toggle() end,
-                    'Watch',
-                },
-                {
-                    'n',
-                    '<Leader>no',
-                    function() neotest.output.open({ enter = true }) end,
-                    'Output',
-                },
-                {
-                    'n',
-                    '<Leader>ns',
-                    function() neotest.summary.toggle() end,
-                    'Summary',
-                },
-                {
-                    'n',
-                    ']n',
-                    function() neotest.jump.next({ status = 'failed' }) end,
-                    'Next',
-                },
-                {
-                    'n',
-                    '[n',
-                    function() neotest.jump.prev({ status = 'failed' }) end,
-                    'Previous',
-                },
+                { 'n', '<Leader>nl', function() neotest.run.run_last() end, 'Run Last', },
+                { 'n', '<Leader>nf', function() neotest.run.run(vim.fn.expand('%')) end, 'Run File', },
+                { 'n', '<Leader>na', function() neotest.run.run({ suite = true }) end, 'Run All', },
+                { 'n', '<Leader>nw', function() neotest.watch.toggle() end, 'Watch', },
+                { 'n', '<Leader>no', function() neotest.output.open({ enter = true }) end, 'Output', },
+                { 'n', '<Leader>ns', function() neotest.summary.toggle() end, 'Summary', },
+                { 'n', ']n', function() neotest.jump.next({ status = 'failed' }) end, 'Next', },
+                { 'n', '[n', function() neotest.jump.prev({ status = 'failed' }) end, 'Previous', },
             }
 
             for _, map in ipairs(keymaps) do
-                vim.keymap.set(
-                    map[1],
-                    map[2],
-                    map[3],
-                    { desc = 'Neotest ' .. map[4] }
-                )
+                vim.keymap.set( map[1], map[2], map[3], { desc = 'Neotest ' .. map[4] })
             end
 
             -- Window highlight and close window keymap
@@ -1439,14 +1402,10 @@ local M = {
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = 'neotest-output',
                 callback = function()
-                    vim.keymap.set(
-                        'n',
-                        'q',
-                        '<Cmd>:q<CR>',
-                        { buffer = true, desc = 'Close Window' }
-                    )
+                    vim.keymap.set( 'n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' })
                 end,
             })
+            --stylua: ignore end
         end,
     },
 
@@ -1537,13 +1496,9 @@ local M = {
         },
         ft = { 'markdown' },
         build = function(plugin)
-            -- Install markdown preview, use npx if available.
             if vim.fn.executable('npx') then
-                vim.cmd(
-                    '!cd '
-                        .. plugin.dir
-                        .. ' && cd app && npx --yes yarn install'
-                )
+                --stylua: ignore
+                vim.cmd( '!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
             else
                 vim.cmd([[Lazy load markdown-preview.nvim]])
                 vim.fn['mkdp#util#install']()
@@ -1581,77 +1536,26 @@ local M = {
             local widgets = require('dap.ui.widgets')
 
             -- Keybindings
-            vim.keymap.set(
-                'n',
-                '<F5>',
-                dap.continue,
-                { desc = 'Debug: Start/Continue' }
-            )
-            vim.keymap.set(
-                'n',
-                '<F1>',
-                dap.step_into,
-                { desc = 'Debug: Step Into' }
-            )
-            vim.keymap.set(
-                'n',
-                '<F2>',
-                dap.step_over,
-                { desc = 'Debug: Step Over' }
-            )
-            vim.keymap.set(
-                'n',
-                '<F3>',
-                dap.step_out,
-                { desc = 'Debug: Step Out' }
-            )
-            vim.keymap.set(
-                'n',
-                '<F4>',
-                dap.run_to_cursor,
-                { desc = 'Debug: Run to cursor' }
-            )
+            -- stylua: ignore start
+            vim.keymap.set( 'n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
+            vim.keymap.set( 'n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
+            vim.keymap.set( 'n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
+            vim.keymap.set( 'n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
+            vim.keymap.set( 'n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
+
+            vim.keymap.set( 'n', '<Leader>db', dap.toggle_breakpoint, { desc = 'Debug Breakpoint Toggle ' })
+            vim.keymap.set( 'n', '<Leader>dc', dap.continue, { desc = 'Debug Continue Session.' })
+            vim.keymap.set( 'n', '<Leader>dt', dap.terminate, { desc = 'Debug Terminate Session.' })
+            vim.keymap.set( 'n', '<Leader>dr', dap.restart, { desc = 'Debug Restart Session.' })
+            vim.keymap.set( 'n', '<Leader>dv', dv.toggle, { desc = 'Debug View Toggle ' })
 
             vim.keymap.set(
-                'n',
-                '<Leader>db',
-                dap.toggle_breakpoint,
-                { desc = 'Debug Breakpoint Toggle ' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dc',
-                dap.continue,
-                { desc = 'Debug Continue Session.' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dt',
-                dap.terminate,
-                { desc = 'Debug Terminate Session.' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dr',
-                dap.restart,
-                { desc = 'Debug Restart Session.' }
-            )
-            vim.keymap.set(
-                'n',
-                '<Leader>dv',
-                dv.toggle,
-                { desc = 'Debug View Toggle ' }
-            )
-
-            vim.keymap.set(
-                'n',
-                '<Leader>ds',
+                'n', '<Leader>ds',
                 function() widgets.centered_float(widgets.scopes) end,
                 { desc = 'Debug Scope' }
             )
             vim.keymap.set(
-                'n',
-                '<Leader>dk',
+                'n', '<Leader>dk',
                 function() widgets.hover(nil, { border = 'none' }) end,
                 { desc = 'Debug Symbol (Keywordprog)' }
             )
@@ -1659,14 +1563,10 @@ local M = {
             vim.api.nvim_create_autocmd('FileType', {
                 pattern = { 'dap-float' },
                 callback = function(event)
-                    vim.keymap.set(
-                        'n',
-                        'q',
-                        '<C-w>q',
-                        { silent = true, buffer = event.buf }
-                    )
+                    vim.keymap.set( 'n', 'q', '<C-w>q', { silent = true, buffer = event.buf })
                 end,
             })
+            -- stylua: ignore end
 
             -- Installs all dependencies with mason
             require('mason-nvim-dap').setup({
