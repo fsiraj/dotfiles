@@ -175,12 +175,8 @@ end
 
 local function sed_expr(var, val, file)
     if string.find(file, 'tmux') then
-        return string.format(
-            [[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]],
-            var,
-            var,
-            val
-        )
+        --stylua: ignore
+        return string.format( [[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val) 
     elseif string.find(file, 'ghostty') then
         return string.format([[ -e "s|^%s = .*|%s = %s|"]], var, var, val)
     else
@@ -345,6 +341,7 @@ function M.hl_autocmd()
                 NoiceConfirmBorder = { link = 'FloatBorder' },
                 NeotreeNormal = { link = 'NormalFloat' },
                 NeoTreeNormalNC = { link = 'NeotreeNormal' },
+                NeoTreeCursorLine = { link = 'NeotreeNormal' },
                 SnacksDashboardHeader = { fg = p.green },
                 SnacksDashboardHeaderSecondary = { fg = p.blue },
                 SnacksDashboardFooter = { fg = p.subtext },
@@ -373,40 +370,23 @@ function M.get_lualine_theme()
             x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
             y = { bg = p.mantle, fg = p.text },
         },
+        -- Missing sections default to normal mode settings
         insert = {
             a = { bg = p.teal, fg = p.mantle, gui = 'bold' },
-            b = { bg = p.mantle, fg = p.text },
-            c = { bg = p.base, fg = p.text },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
-            y = { bg = p.mantle, fg = p.text },
         },
         visual = {
             a = { bg = p.mauve, fg = p.mantle, gui = 'bold' },
-            b = { bg = p.mantle, fg = p.text },
-            c = { bg = p.base, fg = p.text },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
-            y = { bg = p.mantle, fg = p.text },
         },
         replace = {
             a = { bg = p.red, fg = p.mantle, gui = 'bold' },
-            b = { bg = p.mantle, fg = p.text },
-            c = { bg = p.base, fg = p.text },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
-            y = { bg = p.mantle, fg = p.text },
         },
         command = {
             a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
-            b = { bg = p.mantle, fg = p.text },
-            c = { bg = p.base, fg = p.text },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
-            y = { bg = p.mantle, fg = p.text },
         },
         inactive = {
             a = { bg = p.mantle, fg = p.subtext, gui = 'bold' },
             b = { bg = p.base, fg = p.text },
             c = { bg = p.base, fg = p.subtext },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
-            y = { bg = p.mantle, fg = p.text },
         },
     }
 end

@@ -16,7 +16,7 @@ vim.g.expandtab = true
 -- Enable relative line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.fillchars:append({ eob = ' ' })
+vim.opt.fillchars:append({ eob = ' ', fold = ' ' })
 
 -- Enable mouse mode
 vim.opt.mouse = 'a'
@@ -76,7 +76,6 @@ vim.opt.cmdheight = 0
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.opt.foldlevel = 99
-vim.opt.foldlevelstart = 99
 vim.opt.foldtext = ''
 
 --NOTE: Keymaps
