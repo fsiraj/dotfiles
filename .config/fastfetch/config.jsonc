@@ -12,13 +12,13 @@
         "break",
         {
             "type": "os",
-            "key": "{icon} OS",
+            "key": "󰧑 OS",
             "keyColor": "yellow",
             "format": "{2}"
         },
         {
             "type": "os",
-            "key": "├󰧑",
+            "key": "├{icon}",
             "keyColor": "yellow"
         },
         {
