@@ -68,7 +68,8 @@ ubuntu)
     sudo snap install node --classic
     # Ghostty (stable)
     if ! command -v ghostty >/dev/null 2>&1; then
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+        /bin/bash -c \
+            "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
     fi
     # ohmyposh
     if ! command -v oh-my-posh >/dev/null 2>&1; then
@@ -90,13 +91,15 @@ ubuntu)
     # fastfetch - Ubuntu doesn't package it...
     if ! command -v fastfetch >/dev/null 2>&1; then
         ARCH=$(uname -m | sed 's/x86_64/amd64/')
-        curl -fsSL -o "fastfetch-linux-${ARCH}.deb" "https://github.com/fastfetch-cli/fastfetch/releases/download/2.52.0/fastfetch-linux-${ARCH}.deb"
+        curl -fsSL -o "fastfetch-linux-${ARCH}.deb" \
+            "https://github.com/fastfetch-cli/fastfetch/releases/download/2.52.0/fastfetch-linux-${ARCH}.deb"
         sudo apt install -qq "./fastfetch-linux-${ARCH}.deb"
         rm "fastfetch-linux-${ARCH}.deb"
     fi
     # Ubuntu doesn't package the nerd fonts...
     if ! fc-list | grep -qi "JetBrainsMono Nerd Font"; then
-        curl -fsSL -o JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+        curl -fsSL -o JetBrainsMono.zip \
+            https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
         mkdir -p "$HOME/.local/share/fonts"
         unzip -o JetBrainsMono.zip -d "$HOME/.local/share/fonts/JetBrainsMono"
         fc-cache -fv

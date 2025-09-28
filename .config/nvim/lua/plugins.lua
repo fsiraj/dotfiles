@@ -255,9 +255,9 @@ local M = {
             },
         },
         opts = {
-            preset = 'modern',
+            preset = 'helix',
             delay = 500,
-            win = { width = { max = unit_width * 3 } },
+            win = { title_pos = 'center' },
             triggers = {
                 { '<auto>', mode = 'nixsotc' },
                 { 's', mode = { 'n', 'v' } },
@@ -411,22 +411,15 @@ local M = {
         main = 'nvim-treesitter.configs',
         opts = {
             auto_install = true,
-            highlight = {
-                enable = true,
-            },
+            highlight = { enable = true },
             indent = { enable = true },
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = false,
-                    node_incremental = 'grn',
-                    scope_incremental = 'grc',
-                    node_decremental = 'grm',
-                },
-            },
+            incremental_selection = { enable = true },
         },
     },
-    { 'nvim-treesitter/nvim-treesitter-textobjects', event = 'VeryLazy' },
+    {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        event = 'VeryLazy',
+    },
     {
         'nvim-treesitter/nvim-treesitter-context',
         event = 'VeryLazy',
@@ -451,10 +444,16 @@ local M = {
     },
 
     --Autopairs
-    { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
+    {
+        'windwp/nvim-autopairs',
+        event = 'InsertEnter',
+    },
 
     --VimSleuth
-    { 'tpope/vim-sleuth' },
+    {
+        'tpope/vim-sleuth',
+        lazy = false,
+    },
 
     -- NOTE: Styling
 
@@ -590,7 +589,10 @@ local M = {
                     lualine_a = { text('Terminal') },
                     lualine_y = { showcmd },
                 },
-                inactive_winbar = { lualine_a = { text('Terminal') } },
+                inactive_winbar = {
+                    lualine_a = { text('Terminal') },
+                    lualine_c = { text(' ') },
+                },
                 filetypes = { 'terminal' },
             }
 
@@ -1452,7 +1454,10 @@ local M = {
     },
 
     --LuvitMeta
-    { 'Bilal2453/luvit-meta', lazy = true },
+    {
+        'Bilal2453/luvit-meta',
+        lazy = true,
+    },
 
     --RenderMarkdown
     {
