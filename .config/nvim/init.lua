@@ -22,7 +22,7 @@ vim.opt.fillchars:append({ eob = ' ', fold = ' ' })
 vim.opt.mouse = 'a'
 
 -- Lualine using winbar as status line
-vim.opt.laststatus = 0
+vim.opt.laststatus = 3
 vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.
@@ -93,6 +93,7 @@ vim.keymap.set(
 )
 vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
+vim.keymap.set('n', '<C-_>', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
 vim.keymap.set(

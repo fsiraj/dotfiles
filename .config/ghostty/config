@@ -25,4 +25,5 @@ keybind = alt+minus=decrease_font_size:1
 keybind = ctrl+equal=unbind
 keybind = ctrl++=unbind
 keybind = ctrl+-=unbind
+keybind = ctrl+minus=unbind
 
