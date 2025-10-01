@@ -74,6 +74,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 > - **Python:** [uv](https://docs.astral.sh/uv/) - Ultra-fast Python package installer and resolver
 > - **Rust:** [rustup](https://rustup.rs/) - The Rust toolchain installer
+> - **JavaScript:** [nodejs](https://nodejs.org/en) - An unfortunate dependency
 
 #### 🎨 **Theming**
 
