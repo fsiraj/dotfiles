@@ -1,1 +1,1 @@
-return require('style').get_lualine_theme()
+return require('autostyle').get_lualine_theme()

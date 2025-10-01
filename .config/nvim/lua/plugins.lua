@@ -1,6 +1,6 @@
-local style = require('style')
+local autostyle = require('autostyle')
 
-style.hl_autocmd()
+autostyle.hl_autocmd()
 
 -- Language support
 
@@ -43,6 +43,8 @@ local language_servers = {
     taplo = {},
     -- JSON
     jsonls = {},
+    -- YAML
+    yamlls = {},
     -- Rust handled by Rustaceanvim
 }
 
@@ -77,7 +79,7 @@ local unit_width = 40
 local neovim_logo = [[
         @@@           @@        
       @@@@@@          @@@@      
-     @@@@@@@@@        @@@@@@    
+    @@@@@@@@@@        @@@@@@    
   ##@@@@@@@@@@@       @@@@@@@@  
   ###@@@@@@@@@@@      @@@@@@@@  
   ####@@@@@@@@@@@     @@@@@@@@  
@@ -174,34 +176,28 @@ local M = {
             -- Session management
             local sessions = require('mini.sessions')
             sessions.setup()
+            -- stylua: ignore start
             vim.keymap.set(
-                'n',
-                '<Leader>Sw',
-                function()
-                    sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
-                end,
+                'n', '<Leader>Sw',
+                function() sessions.write(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end,
                 { desc = 'Session Write' }
             )
             vim.keymap.set(
-                'n',
-                '<Leader>Sr',
+                'n', '<Leader>Sr',
                 function() sessions.read(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end,
                 { desc = 'Session Restore' }
             )
             vim.keymap.set(
-                'n',
-                '<Leader>Sd',
-                function()
-                    sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t'))
-                end,
+                'n', '<Leader>Sd',
+                function() sessions.delete(vim.fn.fnamemodify(vim.uv.cwd(), ':t')) end,
                 { desc = 'Session Delete' }
             )
             vim.keymap.set(
-                'n',
-                '<Leader>Ss',
+                'n', '<Leader>Ss',
                 sessions.select,
                 { desc = 'Session Select' }
             )
+            -- stylua: ignore end
         end,
     },
 
@@ -345,7 +341,7 @@ local M = {
                         if #selected == 0 then return end
                         local colorscheme = selected[1]:match('^[^:]+')
                         local ok = pcall(
-                            function() style.sync_theme(colorscheme) end
+                            function() autostyle.sync_theme(colorscheme) end
                         )
                         if not ok then
                             vim.notify(
@@ -362,7 +358,7 @@ local M = {
 
             -- Custom pickers
             fzf.magic_colorschemes = function()
-                return fzf.colorschemes({ colors = style.colorschemes })
+                return fzf.colorschemes({ colors = autostyle.colorschemes })
             end
             fzf.plugins = function()
                 fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' })
@@ -526,7 +522,9 @@ local M = {
         'rachartier/tiny-devicons-auto-colors.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
         event = 'VeryLazy',
-        config = function() require('tiny-devicons-auto-colors').setup() end,
+        config = function()
+            require('tiny-devicons-auto-colors').setup({ autoreload = true })
+        end,
     },
 
     --Lualine
@@ -580,6 +578,8 @@ local M = {
                     'dap-view-term',
                     'neotest-summary',
                     'neo-tree',
+                    'checkhealth',
+                    'noice'
                 },
             }
 
@@ -636,14 +636,12 @@ local M = {
                     lualine_a = { mode, 'filename' },
                     lualine_b = { tabs, branch, 'diff', 'diagnostics' },
                     lualine_c = {},
-                    lualine_x = { text(' ') },
                     lualine_y = {
                         showcmd,
                         showmode,
                         'filetype',
-                        lsp_status,
                     },
-                    lualine_z = {},
+                    lualine_z = { lsp_status },
                 },
                 inactive_winbar = {
                     lualine_a = { 'filename' },
@@ -1379,7 +1377,7 @@ local M = {
             })
 
             -- Keymaps
-            --stylua: ignore start
+            -- stylua: ignore start
             local keymaps = {
                 { 'n', '<Leader>nr', function() neotest.run.run() end, 'Run' },
                 { 'n', '<Leader>nl', function() neotest.run.run_last() end, 'Run Last', },
@@ -1407,7 +1405,7 @@ local M = {
                     vim.keymap.set( 'n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' })
                 end,
             })
-            --stylua: ignore end
+            -- stylua: ignore end
         end,
     },
 
@@ -1419,7 +1417,7 @@ local M = {
         event = 'VeryLazy',
         config = function()
             require('sniprun').setup({
-                display = { 'Terminal' },
+                display = { 'Classic' },
                 selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
                 repl_enable = { 'Python3_fifo' },
                 interpreter_options = {
@@ -1502,7 +1500,7 @@ local M = {
         ft = { 'markdown' },
         build = function(plugin)
             if vim.fn.executable('npx') then
-                --stylua: ignore
+                -- stylua: ignore
                 vim.cmd( '!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
             else
                 vim.cmd([[Lazy load markdown-preview.nvim]])

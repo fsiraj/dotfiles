@@ -135,11 +135,11 @@ local function get_palette(colorscheme)
     }
 end
 
-local function num_to_hex(p)
-    for k, v in pairs(p) do
-        if type(v) == 'number' then p[k] = string.format('#%06x', v) end
+local function num_to_hex(palette)
+    for k, v in pairs(palette) do
+        if type(v) == 'number' then palette[k] = string.format('#%06x', v) end
     end
-    return p
+    return palette
 end
 
 local function get_ghostty_theme(colorscheme)
@@ -176,7 +176,7 @@ end
 local function sed_expr(var, val, file)
     if string.find(file, 'tmux') then
         --stylua: ignore
-        return string.format( [[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val) 
+        return string.format( [[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val)
     elseif string.find(file, 'ghostty') then
         return string.format([[ -e "s|^%s = .*|%s = %s|"]], var, var, val)
     else
@@ -195,7 +195,7 @@ local function run_sed_cmd(path, overrides)
     vim.fn.system(cmd)
 end
 
-local function reload_(app, ...)
+local function reload_(app)
     if app == 'ghostty' then
         if on_arch then
             vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
@@ -216,11 +216,30 @@ local function reload_(app, ...)
             'hydectl',
             'theme',
             'set',
-            ...,
+            vim.g.__hyde_theme,
         })
     elseif app == 'oh-my-posh' then
         vim.system({ 'oh-my-posh', 'enable', 'reload' })
         vim.system({ 'oh-my-posh', 'disable', 'reload' })
+    elseif app == 'nvim' then
+        local servers = vim.fn.glob(
+            vim.fn.fnamemodify(vim.fn.stdpath('run'), ':h') .. '/**/nvim.*',
+            true,
+            true
+        )
+        for _, addr in ipairs(servers) do
+            if addr ~= vim.v.servername then
+                vim.system({
+                    'nvim',
+                    '--server',
+                    addr,
+                    '--remote-send',
+                    "<Cmd>lua require('autostyle').set_theme('"
+                        .. vim.g.colorscheme
+                        .. "')<CR>",
+                })
+            end
+        end
     end
 end
 
@@ -243,6 +262,12 @@ M.colorschemes = {
     'github_dark_default',
 }
 
+-- Sets the theme for this neovim instance
+function M.set_theme(colorscheme)
+    vim.g.colorscheme = colorscheme
+    vim.cmd('colorscheme ' .. colorscheme)
+end
+
 --- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
 --- Used as a callback for fzf-lua's colorscheme picker.
 function M.sync_theme(colorscheme)
@@ -252,13 +277,18 @@ function M.sync_theme(colorscheme)
         return
     end
 
+    if not vim.tbl_contains(M.colorschemes, colorscheme) then
+        vim.notify('Colorscheme not supported')
+        return
+    end
+
     -- Updates this session, but not persistent
-    vim.g.colorscheme = colorscheme
-    vim.cmd('colorscheme ' .. colorscheme)
-    vim.notify('Syncing colors to ' .. colorscheme .. '...')
+    M.set_theme(colorscheme)
+    reload_('nvim') -- reloads *other* neovim instances (if any)
 
     -- Palette
     local p = num_to_hex(get_palette(colorscheme))
+    vim.notify('Syncing colors to ' .. colorscheme .. '...')
 
     -- Nvim
     local nvim = '~/.config/nvim/init.lua'
@@ -304,14 +334,16 @@ function M.sync_theme(colorscheme)
     -- HyDE
     if vim.fn.executable('hydectl') == 1 then
         local hyde_theme = get_hyde_theme(p.name)
-        if hyde_theme then reload_('hyde', hyde_theme) end
+        if hyde_theme then
+            vim.g.__hyde_theme = hyde_theme
+            reload_('hyde')
+        end
     end
 end
 
 --- Sets up an autocmd to override neovim highlights based on the current colorscheme.
 function M.hl_autocmd()
     vim.api.nvim_create_autocmd('ColorScheme', {
-        pattern = '*',
         callback = function()
             -- Palette
             local p = get_palette(vim.g.colorscheme)
@@ -320,12 +352,12 @@ function M.hl_autocmd()
             -- Neovim highlight overrides
             local hl_overrides = {
                 -- Neovim Built-in
-                NormalNC = { link = 'Normal' },
-                NormalFloat = { bg = p.mantle },
+                CursorLineNr = { fg = p.accent },
                 FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
                 FloatBorder = { fg = p.mantle, bg = p.mantle },
+                NormalFloat = { bg = p.mantle },
+                NormalNC = { link = 'Normal' },
                 Pmenu = { link = 'NormalFloat' },
-                CursorLineNr = { fg = p.accent },
                 StatusLine = { fg = p.base, bg = p.base },
                 StatusLineNC = { fg = p.base, bg = p.base },
                 StatusLineTerm = { fg = p.base, bg = p.base },
@@ -367,7 +399,6 @@ function M.get_lualine_theme()
             a = { bg = p.accent, fg = p.mantle, gui = 'bold' },
             b = { bg = p.mantle, fg = p.text },
             c = { bg = p.base, fg = p.text },
-            x = { bg = p.blue, fg = p.mantle, gui = 'bold' },
             y = { bg = p.mantle, fg = p.text },
         },
         -- Missing sections default to normal mode settings

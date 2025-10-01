@@ -43,7 +43,7 @@ arch)
         git unzip \
         zsh tmux stow fastfetch \
         fzf zoxide eza fd ripgrep \
-        lua nodejs \
+        nodejs \
         imagemagick \
         ttf-jetbrains-mono-nerd
     sudo pacman -S --needed yay
@@ -62,7 +62,6 @@ ubuntu)
         git unzip curl \
         zsh tmux xsel stow \
         eza fd-find ripgrep \
-        lua5.4 \
         imagemagick \
         neovim
     sudo snap install node --classic
@@ -122,7 +121,7 @@ macos)
         git make unzip gnu-sed \
         zsh tmux stow fastfetch \
         fzf zoxide eza fd ripgrep \
-        lua node \
+        node \
         imagemagick \
         jandedobbeleer/oh-my-posh/oh-my-posh
     brew install --quiet --HEAD neovim
@@ -146,6 +145,10 @@ else
     rustup update
 fi
 log "rustup installed!" "1;34" "🦀" "1"
+
+if command -v node >/dev/null 2>&1; then
+    log "node installed " "1;34" "😔" "1"
+fi
 
 # Setup zsh
 log "Setting up zsh..." "1;35" "🐚"

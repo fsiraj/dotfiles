@@ -76,6 +76,15 @@ alias d="deactivate"
 
 alias n="nvim"
 
+theme() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: theme <theme-name>"
+        return 1
+    fi
+    local theme="$1"
+    nvim --headless "+lua require('autostyle').sync_theme('$theme')" +qa
+}
+
 if [[ $- == *i* ]]; then
     if command -v fastfetch &>/dev/null; then
         alias ff="fastfetch"
