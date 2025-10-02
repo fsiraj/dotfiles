@@ -87,11 +87,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 **Synchronized theming across all applications!**
 
-> Switch themes instantly using the magic colorscheme picker - <kbd>\<Leader\>sc</kbd> - in Neovim, and watch as the entire development environment adapts seamlessly.
+> Switch themes instantly using the shell command `theme` or Neovim colorscheme picker <kbd>\<space\>sc</kbd> and watch as the entire development environment adapts seamlessly.
 
 **Want to add more themes?**
 
-> Add it to `style.lua` using any existing theme as a template. At a minimum, add an entry to `get_palette`. If using ghostty, ensure the theme is available (and can be found) with `get_ghostty_theme`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
+> Add it to `autostyle.lua` using any existing theme as a template. At a minimum, add an entry to `colorschemes` and `get_palette`. If using ghostty, ensure the theme is available and add an entry to `get_ghostty_theme`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
 
 ---
 

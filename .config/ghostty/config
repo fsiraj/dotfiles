@@ -17,6 +17,9 @@ gtk-tabs-location = hidden
 gtk-toolbar-style = flat
 gtk-titlebar-hide-when-maximized = true
 
+# Other
+app-notifications = config-reload,no-clipboard-copy
+
 # Keymap
 keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
