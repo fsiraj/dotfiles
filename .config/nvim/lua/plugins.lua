@@ -1,5 +1,6 @@
 local autostyle = require('autostyle')
 
+-- Applies hihglight overrides on ColorScheme event
 autostyle.hl_autocmd()
 
 -- Language support

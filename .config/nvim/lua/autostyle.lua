@@ -243,6 +243,11 @@ local function reload_(app)
     end
 end
 
+local function tee(message)
+    vim.notify(message)
+    io.write(message)
+end
+
 local M = {}
 
 M.colorschemes = {
@@ -272,13 +277,13 @@ end
 --- Used as a callback for fzf-lua's colorscheme picker.
 function M.sync_theme(colorscheme)
     -- Colorscheme is required
-    if colorscheme == nil then
-        vim.notify('Colorscheme not provided')
+    if colorscheme == nil or colorscheme == '' then
+        tee('Colorscheme not provided.')
         return
     end
 
     if not vim.tbl_contains(M.colorschemes, colorscheme) then
-        vim.notify('Colorscheme not supported')
+        tee('Colorscheme not supported.')
         return
     end
 
@@ -288,7 +293,7 @@ function M.sync_theme(colorscheme)
 
     -- Palette
     local p = num_to_hex(get_palette(colorscheme))
-    vim.notify('Syncing colors to ' .. colorscheme .. '...')
+    tee('Syncing colors to ' .. colorscheme .. '...')
 
     -- Nvim
     local nvim = '~/.config/nvim/init.lua'
@@ -299,6 +304,7 @@ function M.sync_theme(colorscheme)
         local ghostty = '~/.config/ghostty/config'
         local ghostty_theme = get_ghostty_theme(p.name)
         if ghostty_theme then
+            vim.g.__ghostty_theme = ghostty_theme
             run_sed_cmd(ghostty, { theme = ghostty_theme })
             reload_('ghostty')
         end
