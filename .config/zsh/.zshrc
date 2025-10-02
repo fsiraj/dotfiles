@@ -77,12 +77,12 @@ alias d="deactivate"
 alias n="nvim"
 
 theme() {
-    if [[ -z "$1" ]]; then
-        echo "Usage: theme <theme-name>"
-        return 1
-    fi
-    local theme="$1"
-    nvim --headless "+lua require('autostyle').sync_theme('$theme')" +qa
+    local theme="${1:-$(
+        nvim --headless "+=require('autostyle').colorschemes" +qa 2>&1 |
+            grep -o '"[^"]*"' | sed 's/"//g' |
+            fzf --reverse --height=16 --prompt "Select colorscheme: "
+    )}"
+    nvim --headless "+lua require('autostyle').sync_theme('$theme')" +qa 2>/dev/null
 }
 
 if [[ $- == *i* ]]; then
