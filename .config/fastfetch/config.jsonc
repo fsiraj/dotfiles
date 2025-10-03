@@ -81,13 +81,8 @@
         },
         {
             "type": "physicalmemory",
-            "key": "├",
+            "key": "└",
             "keyColor": "green"
         },
-        {
-            "type": "display",
-            "key": "└󰍹",
-            "keyColor": "green"
-        }
     ]
 }

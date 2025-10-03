@@ -5,52 +5,55 @@
 <details open>
 <summary><strong>🌹 Rosé Pine</strong> - All natural pine, faux fur and a bit of soho vibes</summary>
 
-![Rose Pine Theme](assets/rosepine-main.png)
+<img alt="Screenshot 2025-10-04 at 10 38 39 PM" src="https://github.com/user-attachments/assets/254e50cb-8325-49d7-9887-071cee2ed21d" />
 
 </details>
 
 <details>
 <summary><strong>🌙 Tokyo Night</strong> - Dark theme inspired by Tokyo's neon lights</summary>
 
-![Tokyo Night Theme](assets/tokyonight-night.png)
+<img alt="Screenshot 2025-10-04 at 10 37 59 PM" src="https://github.com/user-attachments/assets/ea1eaa4e-a700-4b2f-baf8-63c291b8f734" />
 
 </details>
 
 <details>
 <summary><strong>☕ Catppuccin Mocha</strong> - Soothing pastel theme</summary>
 
-![Catppuccin Mocha Theme](assets/catppuccin-mocha.png)
+<img alt="Screenshot 2025-10-04 at 10 37 23 PM" src="https://github.com/user-attachments/assets/539f284c-b4fd-44ef-8a81-f84985e2a430" />
 
 </details>
 
 <details>
 <summary><strong>🐙 GitHub</strong> - Clean theme inspired by GitHub's interface</summary>
 
-![GitHub Theme](assets/github-dark-default.png)
+<img alt="Screenshot 2025-10-04 at 10 39 22 PM" src="https://github.com/user-attachments/assets/f17437a6-174a-43eb-b1c2-05ec314826c1" />
 
 </details>
 
 <details>
 <summary><strong>❄️ Nord</strong> - Arctic, north-bluish color palette</summary>
 
-![Nord Theme](assets/nord.png)
+<img alt="Screenshot 2025-10-04 at 10 39 49 PM" src="https://github.com/user-attachments/assets/43213fe7-ce2d-4173-9c31-25a86198cf7c" />
 
 </details>
 
 <details>
 <summary><strong>🌲 Everforest</strong> - Forest-inspired green theme</summary>
 
-![Everforest Theme](assets/everforest-dark-hard.png)
+<img alt="Screenshot 2025-10-04 at 10 40 22 PM" src="https://github.com/user-attachments/assets/6b0f4db9-1432-45c2-89c3-2fcc876cc729" />
 
 </details>
 
 ## 🚀 Quick Start
 
-> **Supported Systems:** macOS • Ubuntu • Arch Linux
+> [!IMPORTANT]
+> Run the command below only if you've read and fully understood the script.
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh)
 ```
+
+> **Supported Systems:** macOS • Ubuntu • Arch Linux
 
 ## 🛠️ What's Included
 
