@@ -42,6 +42,7 @@ setopt hist_find_no_dups
 # Load shell integrations
 eval "$(zoxide init --cmd cd zsh)"
 source <(fzf --zsh)
+bindkey -r '^[c'
 
 # Define aliases
 if command -v eza &>/dev/null; then
@@ -58,6 +59,7 @@ fi
 alias c="clear -x"
 alias cd..="cd .."
 alias reload="source ~/.config/zsh/.zshrc"
+alias update="bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh)"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
