@@ -155,9 +155,11 @@ log "Setting up zsh..." "1;35" "🐚"
 
 # Change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
+    chsh -s "$(which zsh)"
+fi
+if ! grep -q 'export ZDOTDIR=' "$HOME/.zshenv"; then
     # shellcheck disable=SC2016
     echo 'export ZDOTDIR="$HOME/.config/zsh"' >>"$HOME/.zshenv"
-    chsh -s "$(which zsh)"
 fi
 log "shell set to zsh!" "1;34" "🐚" "1"
 
