@@ -42,6 +42,7 @@ setopt hist_find_no_dups
 # Load shell integrations
 eval "$(zoxide init --cmd cd zsh)"
 source <(fzf --zsh)
+bindkey -r '^[c'
 
 # Define aliases
 if command -v eza &>/dev/null; then
