@@ -94,7 +94,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 **Want to add more themes?**
 
-> Add it to `autostyle.lua` using any existing theme as a template. At a minimum, add an entry to `colorschemes` and `get_palette`. If using ghostty, ensure the theme is available and add an entry to `get_ghostty_theme`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
+> Add it to `autostyle.lua` using any existing theme as a template. At a minimum, add an entry to `M.colorschemes` and `get_palette`. If using ghostty, add an entry to `.config/ghostty/themes` with the same name as the corresponding Neovim theme. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
 
 ---
 
