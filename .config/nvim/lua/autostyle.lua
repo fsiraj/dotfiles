@@ -1,3 +1,22 @@
+local M = {}
+
+M.colorschemes = {
+    'rose-pine-main',
+    'rose-pine-moon',
+    'rose-pine-dawn',
+    'tokyonight-night',
+    'tokyonight-storm',
+    'tokyonight-moon',
+    'tokyonight-day',
+    'catppuccin-mocha',
+    'catppuccin-macchiato',
+    'catppuccin-frappe',
+    'catppuccin-latte',
+    'nord',
+    'everforest',
+    'github_dark_default',
+}
+
 --- We're either on arch, ubuntu, or macos
 local on_ubuntu = vim.fn.executable('apt') == 1
 local on_arch = vim.fn.executable('pacman') == 1
@@ -142,24 +161,17 @@ local function num_to_hex(palette)
     return palette
 end
 
+local function tee(message)
+    vim.notify(message)
+    io.write(message)
+end
+
 local function get_ghostty_theme(colorscheme)
-    local map = {
-        ['rose-pine-main'] = 'Rose Pine',
-        ['rose-pine-moon'] = 'Rose Pine Moon',
-        ['rose-pine-dawn'] = 'Rose Pine Dawn',
-        ['tokyonight-night'] = 'TokyoNight Night',
-        ['tokyonight-storm'] = 'TokyoNight Storm',
-        ['tokyonight-moon'] = 'TokyoNight Moon',
-        ['tokyonight-day'] = 'TokyoNight Day',
-        ['catppuccin-mocha'] = 'Catppuccin Mocha',
-        ['catppuccin-macchiato'] = 'Catppuccin Macchiato',
-        ['catppuccin-frappe'] = 'Catppuccin Frappe',
-        ['catppuccin-latte'] = 'Catppuccin Latte',
-        ['nord'] = 'Nord',
-        ['everforest'] = 'Everforest Dark   Hard',
-        ['github_dark_default'] = 'Github Dark Default',
-    }
-    return map[colorscheme]
+    if not vim.tbl_contains(M.colorschemes, colorscheme) then
+        tee('Ghostty theme not found for ' .. colorscheme)
+        return nil
+    end
+    return colorscheme
 end
 
 local function get_hyde_theme(colorscheme)
@@ -170,6 +182,7 @@ local function get_hyde_theme(colorscheme)
     end
     if string.find(colorscheme, 'rose') then return 'Rosé Pine' end
     if string.find(colorscheme, 'nord') then return 'Nordic Blue' end
+    tee('HyDE theme not found for ' .. colorscheme)
     return nil
 end
 
@@ -242,30 +255,6 @@ local function reload_(app)
         end
     end
 end
-
-local function tee(message)
-    vim.notify(message)
-    io.write(message)
-end
-
-local M = {}
-
-M.colorschemes = {
-    'rose-pine-main',
-    'rose-pine-moon',
-    'rose-pine-dawn',
-    'tokyonight-night',
-    'tokyonight-storm',
-    'tokyonight-moon',
-    'tokyonight-day',
-    'catppuccin-mocha',
-    'catppuccin-macchiato',
-    'catppuccin-frappe',
-    'catppuccin-latte',
-    'nord',
-    'everforest',
-    'github_dark_default',
-}
 
 -- Sets the theme for this neovim instance
 function M.set_theme(colorscheme)

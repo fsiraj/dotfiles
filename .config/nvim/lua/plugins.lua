@@ -71,6 +71,7 @@ vim.list_extend(ensure_installed, {
     'shellcheck',
     'shfmt',
     'codelldb',
+    'rust-analyzer',
 })
 
 -- To make UIs multiples of consistent width
@@ -444,6 +445,7 @@ local M = {
     {
         'windwp/nvim-autopairs',
         event = 'InsertEnter',
+        config = true
     },
 
     --VimSleuth
