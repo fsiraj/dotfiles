@@ -1,4 +1,8 @@
+<div align="center">
+
 # ✨ Minimal, Fast, Beautiful
+
+</div>
 
 > A carefully crafted development environment that just works (most of the time)
 

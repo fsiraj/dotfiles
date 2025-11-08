@@ -97,6 +97,7 @@ install_macos_packages() {
         jandedobbeleer/oh-my-posh/oh-my-posh
     brew install --quiet --HEAD neovim
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font
+
     log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
@@ -117,6 +118,7 @@ install_arch_packages() {
     if ! installed oh-my-posh; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
+
     log "arch packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
@@ -173,6 +175,7 @@ install_ubuntu_packages() {
         fc-cache -fv
         rm JetBrainsMono.zip
     fi
+
     log "ubuntu packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
@@ -198,11 +201,13 @@ setup_language_tools() {
     install_or_update "uv" \
         "curl -LsSf https://astral.sh/uv/install.sh | sh" \
         "uv self update"
+
     log "uv installed!" "$COLOR_SUCCESS" "🐍"
 
     install_or_update "rustup" \
         "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" \
         "rustup update"
+
     log "rustup installed!" "$COLOR_SUCCESS" "🦀"
 
     # installed by package managers
@@ -223,26 +228,31 @@ setup_shell() {
         # shellcheck disable=SC2016
         echo 'export ZDOTDIR="$HOME/.config/zsh"' >>"$HOME/.zshenv"
     fi
+
     log "shell set to zsh!" "$COLOR_SUCCESS" "🐚"
 
     # Install zinit for zsh plugins
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
+
     log "zinit installed!" "$COLOR_SUCCESS" "🔌"
 }
 
 # Setup dotfiles
 setup_dotfiles() {
     log "Setting up dotfiles..." "$COLOR_STEP" "📁"
+
     clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
     stow -d "$HOME/dotfiles" -t "$HOME/.config" .config
+
     log "dotfiles stowed!" "$COLOR_SUCCESS" "🔗"
 }
 
 # Setup tmux plugins
 setup_tmux_plugins() {
     log "Setting up tmux plugins..." "$COLOR_STEP" "🪟"
+
     TPM_HOME="$HOME/.config/tmux/plugins/tpm"
     clone_or_pull "https://github.com/tmux-plugins/tpm" "$TPM_HOME"
 
@@ -252,14 +262,17 @@ setup_tmux_plugins() {
     else
         "$TPM_HOME/bin/update_plugins" all
     fi
+
     log "tmux plugins installed!" "$COLOR_SUCCESS" "🔌"
 }
 
 # Setup neovim plugins
 setup_neovim_plugins() {
     log "Setting up neovim..." "$COLOR_STEP" "💤"
+
     nvim --headless "+Lazy! sync --quiet" +qa
     nvim --headless "+MasonToolsUpdateSync" +qa
+
     echo "" && log "neovim plugins and language tools installed!" "$COLOR_SUCCESS" "🔌"
 }
 

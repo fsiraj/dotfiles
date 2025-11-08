@@ -20,6 +20,7 @@ local language_servers = {
             },
         },
     },
+    ruff = {},
     -- Lua
     lua_ls = {
         settings = {
@@ -62,10 +63,9 @@ local linters_by_ft = {
 }
 
 -- Add tools here for Mason to install
-local ensure_installed = vim.tbl_keys(language_servers or {})
+local ensure_installed = vim.tbl_keys(language_servers)
 vim.list_extend(ensure_installed, {
     'stylua',
-    'ruff',
     'debugpy',
     'markdownlint',
     'shellcheck',
@@ -73,6 +73,61 @@ vim.list_extend(ensure_installed, {
     'codelldb',
     'rust-analyzer',
 })
+
+-- Highlight symbol references on hover
+local function lsp_highlight_symbols(event)
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if
+        client
+        and client:supports_method(
+            vim.lsp.protocol.Methods.textDocument_documentHighlight,
+            event.buf
+        )
+    then
+        local highlight_augroup =
+            vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
+        vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+            buffer = event.buf,
+            group = highlight_augroup,
+            callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+            buffer = event.buf,
+            group = highlight_augroup,
+            callback = vim.lsp.buf.clear_references,
+        })
+        vim.api.nvim_create_autocmd('LspDetach', {
+            group = vim.api.nvim_create_augroup('lsp-detach', { clear = true }),
+            callback = function(event2)
+                vim.lsp.buf.clear_references()
+                vim.api.nvim_clear_autocmds({
+                    group = 'lsp-highlight',
+                    buffer = event2.buf,
+                })
+            end,
+        })
+    end
+end
+
+-- If LSP supports inlay hints, enable them
+local function lsp_inlay_hints(event)
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if
+        client
+        and client:supports_method(
+            vim.lsp.protocol.Methods.textDocument_inlayHint,
+            event.buf
+        )
+    then
+        vim.keymap.set('n', '<Leader>ti', function()
+            local is_enabled = vim.lsp.inlay_hint.is_enabled({
+                bufnr = event.buf,
+            })
+            vim.lsp.inlay_hint.enable(not is_enabled)
+            vim.notify('Inlay Hints: ' .. tostring(not is_enabled))
+        end, { buffer = event.buf, desc = 'LSP: Toggle Inlay Hints' })
+    end
+end
 
 -- To make UIs multiples of consistent width
 local unit_width = 40
@@ -109,16 +164,6 @@ local M = {
         config = function()
             -- Enhanced jump motions
             require('mini.jump').setup()
-            require('mini.jump2d').setup({
-                view = { n_steps_ahead = 1 },
-                mappings = { start_jumping = '' },
-            })
-            vim.keymap.set(
-                'n',
-                '<BS>',
-                '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.single_character)<CR>',
-                { desc = 'Jump 2D' }
-            )
 
             -- Better Around/Inside textobjects
             local ai = require('mini.ai')
@@ -229,6 +274,11 @@ local M = {
                 callback = function()
                     vim.cmd('match SnacksDashboardHeaderSecondary /#/')
                     vim.cmd('2match WarningMsg /⚡/')
+                    -- stylua: ignore
+                    vim.keymap.set(
+                        'n', 'r', vim.g.mapleader .. 'Sr',
+                        { buffer = true, remap = true, desc = 'Session Restore' }
+                    )
                 end,
             })
             vim.api.nvim_create_autocmd('User', {
@@ -391,12 +441,8 @@ local M = {
             -- <Leader>sq = Search Quickfix (Namu)
 
             for _, map in ipairs(keymaps) do
-                vim.keymap.set(
-                    map[1],
-                    map[2],
-                    map[3],
-                    { desc = 'FzfLua: ' .. map[4] }
-                )
+                -- stylua: ignore
+                vim.keymap.set(map[1], map[2], map[3], { desc = 'FzfLua: ' .. map[4] })
             end
         end,
     },
@@ -445,7 +491,7 @@ local M = {
     {
         'windwp/nvim-autopairs',
         event = 'InsertEnter',
-        config = true
+        config = true,
     },
 
     --VimSleuth
@@ -582,7 +628,7 @@ local M = {
                     'neotest-summary',
                     'neo-tree',
                     'checkhealth',
-                    'noice'
+                    'noice',
                 },
             }
 
@@ -700,6 +746,20 @@ local M = {
                     position = { row = '50%' },
                 },
             },
+            routes = {
+                {
+                    filter = {
+                        event = 'msg_show',
+                        kind = { 'shell_out', 'shell_err' },
+                    },
+                    view = 'notify',
+                    opts = {
+                        level = 'info',
+                        skip = false,
+                        replace = false,
+                    },
+                },
+            },
         },
         config = function(_, opts)
             require('noice').setup(opts)
@@ -709,6 +769,50 @@ local M = {
                 '<Cmd>NoiceAll<CR>',
                 { desc = 'Messages' }
             )
+        end,
+    },
+
+    -- TinyGlimmer
+    {
+        'rachartier/tiny-glimmer.nvim',
+        event = 'VeryLazy',
+        priority = 10,
+        config = function()
+            require('tiny-glimmer').setup({
+                overwrite = {
+                    yank = {
+                        enabled = true,
+                        default_animation = {
+                            name = 'fade',
+                            settings = { from_color = vim.g.palette.accent },
+                        },
+                    },
+                    paste = {
+                        enabled = true,
+                        default_animation = {
+                            name = 'fade',
+                            settings = { from_color = vim.g.palette.green },
+                        },
+                    },
+                    undo = {
+                        enabled = true,
+                        default_animation = {
+                            name = 'fade',
+                            settings = { from_color = vim.g.palette.green },
+                        },
+                    },
+                    redo = {
+                        enabled = true,
+                        default_animation = {
+                            name = 'fade',
+                            settings = { from_color = vim.g.palette.green },
+                        },
+                    },
+                },
+                animations = {
+                    fade = { min_duration = 1000, max_duration = 1000 },
+                },
+            })
         end,
     },
 
@@ -748,7 +852,7 @@ local M = {
         'zbirenbaum/copilot.lua',
         cmd = 'Copilot',
         build = ':Copilot auth',
-        event = 'InsertEnter',
+        event = 'VeryLazy',
         opts = {
             suggestion = {
                 enabled = true,
@@ -801,19 +905,10 @@ local M = {
                         return require('codecompanion.adapters').extend(
                             'gemini_cli',
                             {
+                                -- stylua: ignore
                                 commands = {
-                                    flash = {
-                                        'gemini',
-                                        '--experimental-acp',
-                                        '-m',
-                                        'gemini-2.5-flash',
-                                    },
-                                    pro = {
-                                        'gemini',
-                                        '--experimental-acp',
-                                        '-m',
-                                        'gemini-2.5-pro',
-                                    },
+                                    flash = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-flash' },
+                                    pro = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-pro' },
                                 },
                                 defaults = { auth_method = 'oauth-personal' },
                             }
@@ -869,14 +964,15 @@ local M = {
             mappings = {
                 sidebar = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set( 'n', '<C-l>', api.switch_wins, { buffer = buf })
-                    vim.keymap.set( 'n', '<C-h>', api.switch_wins, { buffer = buf })
-                    vim.keymap.set( 'n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
-                    vim.keymap.set( 'n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
+                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set('n', '<C-h>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
+                    vim.keymap.set('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
+                    pcall(function() vim.keymap.del('n', '<Esc>', { buffer = buf }) end)
                 end,
                 term = function(buf)
                     local api = require('floaterm.api')
-                    vim.keymap.set( 'n', '<C-l>', api.switch_wins, { buffer = buf })
+                    vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
                     vim.keymap.del('n', '<Esc>', { buffer = buf })
                 end,
             },
@@ -1028,6 +1124,12 @@ local M = {
         },
     },
 
+    {
+        'kawre/neotab.nvim',
+        event = 'VeryLazy',
+        config = true,
+    },
+
     -- NOTE: Language Tools
 
     -- Mason
@@ -1062,110 +1164,37 @@ local M = {
             'ibhagwan/fzf-lua',
         },
         config = function()
-            vim.keymap.set(
-                'n',
-                '<Leader>is',
-                '<Cmd>LspInfo<CR>',
-                { desc = 'LSP' }
-            )
+            -- stylua: ignore start
+            vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'LSP' })
+
             vim.api.nvim_create_autocmd('LspAttach', {
-                group = vim.api.nvim_create_augroup(
-                    'lsp-attach',
-                    { clear = true }
-                ),
+                group = vim.api.nvim_create_augroup( 'lsp-attach', { clear = true }),
                 callback = function(event)
                     -- Keymaps
                     local fzf = require('fzf-lua')
                     local map = function(keys, func, desc, mode)
-                        mode = mode or 'n'
                         vim.keymap.set(
-                            mode,
-                            keys,
-                            func,
+                            mode or 'n', keys, func,
                             { buffer = event.buf, desc = 'LSP: ' .. desc }
                         )
                     end
-                    -- stylua: ignore start
                     map('<Leader>cd', fzf.lsp_definitions, 'Code Definition')
                     map( '<Leader>cD', vim.lsp.buf.declaration, 'Code Declaration')
                     map('<Leader>cr', fzf.lsp_references, 'Code References')
                     map( '<Leader>cv', vim.lsp.buf.rename, 'Code Variable Rename')
                     map( '<Leader>ca', fzf.lsp_code_actions, 'Code Action', { 'n', 'x' })
-                    -- <Leader>ca = Code Action (FzfLua)
                     -- <Leader>cf = Code Format (Conform)
                     -- <Leader>cc = Code Companion Chat (Codecompanion)
-                    -- stylua: ignore end
 
-                    -- Highlight references on hover
-                    local client =
-                        vim.lsp.get_client_by_id(event.data.client_id)
-                    if
-                        client
-                        and client:supports_method(
-                            vim.lsp.protocol.Methods.textDocument_documentHighlight,
-                            event.buf
-                        )
-                    then
-                        local highlight_augroup = vim.api.nvim_create_augroup(
-                            'lsp-highlight',
-                            { clear = false }
-                        )
-                        vim.api.nvim_create_autocmd(
-                            { 'CursorHold', 'CursorHoldI' },
-                            {
-                                buffer = event.buf,
-                                group = highlight_augroup,
-                                callback = vim.lsp.buf.document_highlight,
-                            }
-                        )
-                        vim.api.nvim_create_autocmd(
-                            { 'CursorMoved', 'CursorMovedI' },
-                            {
-                                buffer = event.buf,
-                                group = highlight_augroup,
-                                callback = vim.lsp.buf.clear_references,
-                            }
-                        )
-                        vim.api.nvim_create_autocmd('LspDetach', {
-                            group = vim.api.nvim_create_augroup(
-                                'lsp-detach',
-                                { clear = true }
-                            ),
-                            callback = function(event2)
-                                vim.lsp.buf.clear_references()
-                                vim.api.nvim_clear_autocmds({
-                                    group = 'lsp-highlight',
-                                    buffer = event2.buf,
-                                })
-                            end,
-                        })
-                    end
-
-                    -- If LSP supports inlay hints, enable them
-                    if
-                        client
-                        and client:supports_method(
-                            vim.lsp.protocol.Methods.textDocument_inlayHint,
-                            event.buf
-                        )
-                    then
-                        map('<Leader>ti', function()
-                            local is_enabled = vim.lsp.inlay_hint.is_enabled({
-                                bufnr = event.buf,
-                            })
-                            vim.lsp.inlay_hint.enable(not is_enabled)
-                            vim.notify(
-                                'Inlay Hints: ' .. tostring(not is_enabled)
-                            )
-                        end, 'Toggle Inlay Hints')
-                    end
+                    lsp_highlight_symbols(event)
+                    lsp_inlay_hints(event)
                 end,
             })
+            -- stylua: ignore end
 
-            -- Diagnostic Config
             vim.diagnostic.config({
                 severity_sort = true,
-                float = { border = 'rounded', source = 'if_many' },
+                float = { border = 'none', source = true },
                 underline = { severity = vim.diagnostic.severity.ERROR },
                 signs = vim.g.have_nerd_font
                         and {
@@ -1270,9 +1299,11 @@ local M = {
             },
             sources = {
                 default = function()
-                    local sources = { 'lsp', 'path', 'snippets', 'buffer' }
+                    local sources = { 'lsp', 'path', 'snippets' }
                     if require('cmp_dap').is_dap_buffer() then
                         table.insert(sources, 'dap')
+                    else
+                        table.insert(sources, 'buffer')
                     end
                     return sources
                 end,
@@ -1474,14 +1505,8 @@ local M = {
             sign = { enabled = false },
             heading = {
                 width = 'block',
-                icons = {
-                    '󰉫 : ',
-                    '󰉬 : ',
-                    '󰉭 : ',
-                    '󰉮 : ',
-                    '󰉯 : ',
-                    '󰉰 : ',
-                },
+                -- stylua: ignore
+                icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' },
                 right_pad = 1,
             },
             code = {
