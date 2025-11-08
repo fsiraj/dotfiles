@@ -15,6 +15,7 @@ M.colorschemes = {
     'nord',
     'everforest',
     'github_dark_default',
+    'github_light_default',
 }
 
 --- We're either on arch, ubuntu, or macos
@@ -208,6 +209,23 @@ local function run_sed_cmd(path, overrides)
     vim.fn.system(cmd)
 end
 
+local function reload_nvim_plugins()
+    local vim_notify = vim.notify
+    vim.notify = function() end ---@diagnostic disable-line
+
+    -- Plugins that work with Lazy's reload feature
+    local plugins_to_reload = { 'tiny-glimmer.nvim' }
+    for _, plugin in ipairs(plugins_to_reload) do
+        vim.cmd('Lazy reload ' .. plugin)
+    end
+
+    -- Floaterm
+    package.loaded['volt.highlights'] = nil
+    require('volt.highlights')
+
+    vim.notify = vim_notify
+end
+
 local function reload_(app)
     if app == 'ghostty' then
         if on_arch then
@@ -260,6 +278,7 @@ end
 function M.set_theme(colorscheme)
     vim.g.colorscheme = colorscheme
     vim.cmd('colorscheme ' .. colorscheme)
+    reload_nvim_plugins()
 end
 
 --- Syncs the theme across neovim, oh-my-posh, tmux, and ghostty.
