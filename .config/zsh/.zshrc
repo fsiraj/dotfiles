@@ -21,7 +21,7 @@ zinit cdreplay -q
 
 # Configure completion behavior
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-bindkey "^[[Z" autosuggest-accept                                      # shift + tab
+bindkey "^L" autosuggest-accept                                        # ctrl + l
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'        # case insensitive matching
 zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'                # show color for matches
 zstyle ':completion:*' menu no                                         # disable defualt in favour of fzf-tab

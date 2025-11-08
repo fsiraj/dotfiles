@@ -44,7 +44,7 @@
         },
         {
             "type": "lm",
-            "key": "├󰧨",
+            "key": "├󰍂",
             "keyColor": "blue"
         },
         {
@@ -75,13 +75,13 @@
             "keyColor": "green"
         },
         {
-            "type": "gpu",
-            "key": "├󰍛",
+            "type": "physicalmemory",
+            "key": "├",
             "keyColor": "green"
         },
         {
-            "type": "physicalmemory",
-            "key": "└",
+            "type": "gpu",
+            "key": "└󰍛",
             "keyColor": "green"
         },
     ]
