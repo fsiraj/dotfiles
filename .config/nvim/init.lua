@@ -78,32 +78,47 @@ vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.opt.foldlevel = 99
 vim.opt.foldtext = ''
 
+-- Diagnostics
+vim.diagnostic.config({
+    severity_sort = true,
+    float = { border = 'none', source = true },
+    underline = { severity = vim.diagnostic.severity.ERROR },
+    signs = vim.g.have_nerd_font and {
+        text = {
+            [vim.diagnostic.severity.ERROR] = '󰅚 ',
+            [vim.diagnostic.severity.WARN] = '󰀪 ',
+            [vim.diagnostic.severity.INFO] = '󰋽 ',
+            [vim.diagnostic.severity.HINT] = '󰌶 ',
+        },
+    } or {},
+    virtual_text = false,
+})
+
 --NOTE: Keymaps
 
--- stylua: ignore start
 -- Navigate wrapped lines as multiple lines
-vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
 
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
-vim.keymap.set( 'n', '<Leader>tb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
+vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
 vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 vim.keymap.set('n', '<C-_>', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
-vim.keymap.set( 'n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
-vim.keymap.set( 'v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selection' })
+vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
+vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selection' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 -- Keybinds to make split navigation easier.
-vim.keymap.set( 'n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set( 'n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set( 'n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set( 'n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- Escape insert mode in terminal easier
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
@@ -115,13 +130,18 @@ end, { silent = true, expr = true })
 vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
     if not require('noice.lsp').scroll(-4) then return '10k' end
 end, { silent = true, expr = true })
--- stylua: ignore end
+
+-- Toggle diagnostic information
+vim.keymap.set('n', '<Leader>td', function()
+    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+    vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
+end, { desc = 'LSP: Toggle Diagnostics' })
 
 --NOTE: Autocommands
 
 vim.api.nvim_create_autocmd('TermOpen', {
     desc = 'Set buffer local options for terminals',
-    group = vim.api.nvim_create_augroup('terminal-options', { clear = true }),
+    group = vim.api.nvim_create_augroup('terminal', { clear = true }),
     callback = function()
         vim.bo.filetype = 'terminal'
         vim.opt.number = false
@@ -135,6 +155,24 @@ vim.api.nvim_create_autocmd('VimResized', {
     desc = 'Equalize splits when nvim is resized',
     group = vim.api.nvim_create_augroup('vim-resize', { clear = true }),
     command = 'wincmd =',
+})
+
+vim.api.nvim_create_autocmd({ 'CursorHold' }, {
+    desc = 'Display floating diagnostic window',
+    group = vim.api.nvim_create_augroup('diagnostics', { clear = true }),
+    callback = function()
+        if vim.diagnostic.is_enabled() then
+            vim.diagnostic.open_float({
+                scope = 'line',
+                focusable = false,
+                close_events = {
+                    'CursorMoved',
+                    'CursorMovedI',
+                    'BufLeave',
+                },
+            })
+        end
+    end,
 })
 
 --NOTE: Plugins
@@ -151,9 +189,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
         lazyrepo,
         lazypath,
     })
-    if vim.v.shell_error ~= 0 then
-        error('Error cloning lazy.nvim:\n' .. out)
-    end
+    if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
