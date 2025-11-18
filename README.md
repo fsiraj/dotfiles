@@ -59,6 +59,19 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 > **Supported Systems:** macOS • Ubuntu • Arch Linux
 
+<details>
+<summary>Slow (and Safe) Start</summary>
+
+> The install script detects your OS, installs a lot of things, and sets up the dotfiles. Download the script and take a look at the `main()` function. The script is modularized so you can comment out any step you don't want. For example `setup_language_tools` installs tooling for Rust and Python. If you don't care about these, you should comment this function call out. 
+>
+> Similarly, `install_packages` will install a lot of packages, many of which aren't required, and can be commented out. For example, it installs `node` which is needed by many Neovim plugins and LSPs, but without it you still get a very usable IDE experience. As another example, it installs `ghostty` but if you don't want to switch your terminal emulator or if you're working in a remote ssh environment, you should comment it out.
+>
+> You can go a step further and omit the script altogether and use it only as a reference while you manually execute the commands relevant to you. The script is not at all complicated and only exists for convenience as it's quite difficult to track all requirements and dependencies.
+>
+> ⚠️ The script does not backup any existing configs you may have. Please take a look at the contents of `.config/` in this repo to see which applications may conflict. If you have existing configs for any of those applications, back them up with a different name. For example, if you have a Neovim config already, run `mv ~/.config/nvim ~/.config/nvim.bak`.
+
+</details>
+
 ## 🛠️ What's Included
 
 > Full IDE experience using popular well-maintained tools, packages, and plugins
@@ -98,7 +111,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 **Want to add more themes?**
 
-> Add it to `autostyle.lua` using any existing theme as a template. At a minimum, add an entry to `M.colorschemes` and `get_palette`. If using ghostty, add an entry to `.config/ghostty/themes` with the same name as the corresponding Neovim theme. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
+> Add it to `autostyle.lua` using any existing theme as a template. Add an entry to `M.colorschemes` and `get_palette`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
 
 ---
 
