@@ -4,11 +4,11 @@
 OS=""
 
 # Color codes for logging
-COLOR_INFO="1;36"    # Cyan
-COLOR_STEP="1;35"    # Magenta
-COLOR_SUCCESS="1;34" # Blue
+COLOR_INFO="1;36"     # Cyan
+COLOR_STEP="1;35"     # Magenta
+COLOR_SUCCESS="1;34"  # Blue
 COLOR_COMPLETE="1;32" # Green
-COLOR_ERROR="1;31"   # Red
+COLOR_ERROR="1;31"    # Red
 
 # Colored logging function
 log() {
