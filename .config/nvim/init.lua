@@ -1,12 +1,11 @@
 -- NOTE: Options
 
 -- Colorscheme
-vim.g.colorscheme = 'rose-pine-main'
+vim.g.colorscheme = 'github_dark_default'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ','
-vim.g.have_nerd_font = true
 
 -- Tabs and spaces
 vim.g.tabstop = 4
@@ -83,14 +82,14 @@ vim.diagnostic.config({
     severity_sort = true,
     float = { border = 'none', source = true },
     underline = { severity = vim.diagnostic.severity.ERROR },
-    signs = vim.g.have_nerd_font and {
+    signs = {
         text = {
             [vim.diagnostic.severity.ERROR] = '󰅚 ',
             [vim.diagnostic.severity.WARN] = '󰀪 ',
             [vim.diagnostic.severity.INFO] = '󰋽 ',
             [vim.diagnostic.severity.HINT] = '󰌶 ',
         },
-    } or {},
+    },
     virtual_text = false,
 })
 
@@ -157,23 +156,25 @@ vim.api.nvim_create_autocmd('VimResized', {
     command = 'wincmd =',
 })
 
+local function open_diagnostic_float(focus)
+    if vim.diagnostic.is_enabled() then
+        vim.diagnostic.open_float({
+            scope = 'cursor',
+            focusable = true,
+            focus = focus,
+        })
+    end
+end
+
 vim.api.nvim_create_autocmd({ 'CursorHold' }, {
     desc = 'Display floating diagnostic window',
     group = vim.api.nvim_create_augroup('diagnostics', { clear = true }),
-    callback = function()
-        if vim.diagnostic.is_enabled() then
-            vim.diagnostic.open_float({
-                scope = 'line',
-                focusable = false,
-                close_events = {
-                    'CursorMoved',
-                    'CursorMovedI',
-                    'BufLeave',
-                },
-            })
-        end
-    end,
+    callback = function() open_diagnostic_float(false) end,
 })
+
+vim.keymap.set('n', '<Leader>cq', function()
+    open_diagnostic_float(true)
+end, { desc = 'Focus diagnostic float' })
 
 --NOTE: Plugins
 

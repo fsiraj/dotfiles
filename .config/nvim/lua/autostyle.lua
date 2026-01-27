@@ -403,7 +403,7 @@ end
 
 local function reload_nvim_plugins()
     local vim_notify = vim.notify
-    vim.notify = function() end ---@diagnostic disable-line
+    vim.notify = function(_) end ---@diagnostic disable-line
 
     -- Plugins that work with Lazy's reload feature
     local plugins_to_reload = { 'tiny-glimmer.nvim' }
@@ -442,8 +442,8 @@ function M.sync_theme(colorscheme)
 
     -- Palette
     local p = num_to_hex(get_palette(colorscheme))
-    tee('Syncing colors to ' .. colorscheme .. '...', 'info')
     if not validate_palette(p) then return end
+    tee('Syncing colors to ' .. colorscheme .. '...', 'info')
 
     -- Updates this session, but not persistent
     M.set_theme(colorscheme)
