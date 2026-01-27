@@ -7,9 +7,9 @@
 > A carefully crafted development environment that just works (most of the time)
 
 <details open>
-<summary><strong>🌹 Rosé Pine</strong> - All natural pine, faux fur and a bit of soho vibes</summary>
+<summary><strong>🐙 GitHub</strong> - Clean theme inspired by GitHub's interface</summary>
 
-<img alt="Screenshot 2025-10-04 at 10 38 39 PM" src="https://github.com/user-attachments/assets/254e50cb-8325-49d7-9887-071cee2ed21d" />
+<img alt="Screenshot 2025-10-04 at 10 39 22 PM" src="https://github.com/user-attachments/assets/f17437a6-174a-43eb-b1c2-05ec314826c1" />
 
 </details>
 
@@ -28,9 +28,9 @@
 </details>
 
 <details>
-<summary><strong>🐙 GitHub</strong> - Clean theme inspired by GitHub's interface</summary>
+<summary><strong>🌹 Rosé Pine</strong> - All natural pine, faux fur and a bit of soho vibes</summary>
 
-<img alt="Screenshot 2025-10-04 at 10 39 22 PM" src="https://github.com/user-attachments/assets/f17437a6-174a-43eb-b1c2-05ec314826c1" />
+<img alt="Screenshot 2025-10-04 at 10 38 39 PM" src="https://github.com/user-attachments/assets/254e50cb-8325-49d7-9887-071cee2ed21d" />
 
 </details>
 
@@ -62,7 +62,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 <details>
 <summary>Slow (and Safe) Start</summary>
 
-> The install script detects your OS, installs a lot of things, and sets up the dotfiles. Download the script and take a look at the `main()` function. The script is modularized so you can comment out any step you don't want. For example `setup_language_tools` installs tooling for Rust and Python. If you don't care about these, you should comment this function call out. 
+> The install script detects your OS, installs a lot of things, and sets up the dotfiles. Download the script and take a look at the `main()` function. The script is modularized so you can comment out any step you don't want. For example `setup_language_tools` installs tooling for Rust and Python. If you don't care about these, you should comment this function call out.
 >
 > Similarly, `install_packages` will install a lot of packages, many of which aren't required, and can be commented out. For example, it installs `node` which is needed by many Neovim plugins and LSPs, but without it you still get a very usable IDE experience. As another example, it installs `ghostty` but if you don't want to switch your terminal emulator or if you're working in a remote ssh environment, you should comment it out.
 >
@@ -99,7 +99,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 #### 🎨 **Theming**
 
 > - **Font:** [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/JetBrainsMono) - Perfect for coding
-> - **Default Theme:** [Rosé Pine](https://rosepinetheme.com/) - All natural pine, faux fur and a bit of soho vibes
+> - **Default Theme:** GitHub - Clean theme inspired by GitHub's interface
 
 ## 🌈 Theme System
 

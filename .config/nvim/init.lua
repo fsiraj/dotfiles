@@ -1,7 +1,7 @@
 -- NOTE: Options
 
 -- Colorscheme
-vim.g.colorscheme = 'rose-pine-main'
+vim.g.colorscheme = 'github_dark_default'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
