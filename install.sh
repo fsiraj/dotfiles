@@ -94,9 +94,10 @@ install_macos_packages() {
         fzf zoxide eza fd ripgrep \
         node \
         imagemagick \
-        jandedobbeleer/oh-my-posh/oh-my-posh
-    brew install --quiet --HEAD neovim
-    brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font
+        jandedobbeleer/oh-my-posh/oh-my-posh \
+        2>/dev/null
+    brew install --quiet --HEAD neovim 2>/dev/null
+    brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
 
     log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
 }

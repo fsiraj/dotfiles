@@ -2,13 +2,14 @@ version = 3
 final_space = true
 
 
+# WARNING: Managed by `autostyle.lua`
 # Colors
 [palette]
-teal = '#9ccfd8'
-green = '#95b1ac'
-mauve = '#c4a7e7'
-pink = '#ebbcba'
-subtext = '#908caa'
+teal = '#76e3ea'
+green = '#3fb950'
+mauve = '#bc8cff'
+pink = '#f778ba'
+subtext = '#6e7681'
 
 
 # Prompt - 'Zero-th' Line
