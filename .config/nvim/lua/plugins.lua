@@ -77,7 +77,7 @@ vim.list_extend(ensure_installed, {
 -- Highlight symbol references on hover
 local function lsp_highlight_symbols(event)
     local client = vim.lsp.get_client_by_id(event.data.client_id)
-    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+    if client and client:supports_method('textDocument/documentHighlight', event.buf) then
         local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
             buffer = event.buf,
@@ -105,7 +105,7 @@ end
 -- If LSP supports inlay hints, enable them
 local function lsp_inlay_hints(event)
     local client = vim.lsp.get_client_by_id(event.data.client_id)
-    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+    if client and client:supports_method('textDocument/inlayHint', event.buf) then
         vim.keymap.set('n', '<Leader>ti', function()
             local is_enabled = vim.lsp.inlay_hint.is_enabled({
                 bufnr = event.buf,
@@ -226,6 +226,7 @@ local M = {
             image = { enabled = true },
             bigfile = { enabled = true },
             git = { enabled = true },
+            gitbrowse = { enabled = true },
             dashboard = {
                 enabled = true,
                 sections = { { section = 'header' }, { section = 'startup' } },
@@ -235,6 +236,7 @@ local M = {
         config = function(_, opts)
             require('snacks').setup(opts)
             vim.keymap.set('n', '<Leader>gb', Snacks.git.blame_line, { desc = 'Blame' })
+            vim.keymap.set({ 'n', 'v' }, '<Leader>gB', Snacks.gitbrowse.open, { desc = 'Browser' })
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'SnacksDashboardOpened',
                 callback = function()
@@ -353,7 +355,6 @@ local M = {
             }
 
             fzf.setup(opts)
-            fzf.register_ui_select(opts.ui_select)
 
             -- Custom pickers
             local magic_colorschemes = function() return fzf.colorschemes({ colors = autostyle.colorschemes }) end
@@ -536,6 +537,14 @@ local M = {
                 icon = '󱚠 ',
                 ignore_lsp = { 'copilot' },
             }
+            local dap_status = {
+                function() return require('dap').status() end,
+                icon = { ' ', color = { fg = vim.g.palette.red } },
+                cond = function()
+                    if not package.loaded.dap then return false end
+                    return require('dap').session() ~= nil
+                end,
+            }
             local showmode = {
                 noice.api.status.mode.get, ---@diagnostic disable-line
                 cond = noice.api.status.mode.has, ---@diagnostic disable-line
@@ -615,7 +624,7 @@ local M = {
                 winbar = {
                     lualine_a = { mode, 'filename' },
                     lualine_b = { tabs, branch, 'diff', 'diagnostics' },
-                    lualine_c = {},
+                    lualine_c = { dap_status },
                     lualine_y = {
                         showcmd,
                         showmode,
@@ -856,7 +865,7 @@ local M = {
             local floaterm = require('floaterm')
             floaterm.setup(opts)
             vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
-            vim.keymap.set({ 't' }, '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
+            vim.keymap.set('t', '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
             vim.api.nvim_create_autocmd('TermOpen', {
                 desc = 'Set Floaterm Normal',
                 callback = function()
@@ -1016,7 +1025,7 @@ local M = {
             'ibhagwan/fzf-lua',
         },
         config = function()
-            vim.keymap.set('n', '<Leader>is', '<Cmd>LspInfo<CR>', { desc = 'LSP' })
+            vim.keymap.set('n', '<Leader>is', '<Cmd>che vim.lsp<CR>', { desc = 'LSP' })
 
             vim.api.nvim_create_autocmd('LspAttach', {
                 group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
@@ -1267,7 +1276,7 @@ local M = {
         ft = 'lua',
         opts = {
             library = {
-                { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+                { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
             },
         },
     },
@@ -1330,7 +1339,7 @@ local M = {
         'mfussenegger/nvim-dap',
         event = 'VeryLazy',
         dependencies = {
-            -- UI
+            -- UI/UX
             {
                 'igorlfs/nvim-dap-view',
                 opts = {
@@ -1338,6 +1347,7 @@ local M = {
                     windows = { terminal = { position = 'right' } },
                 },
             },
+            'Weissle/persistent-breakpoints.nvim',
             -- Installs dependencies
             'williamboman/mason.nvim',
             'jay-babu/mason-nvim-dap.nvim',
@@ -1348,6 +1358,12 @@ local M = {
             local dap = require('dap')
             local dv = require('dap-view')
             local widgets = require('dap.ui.widgets')
+            local pb = require('persistent-breakpoints.api')
+
+            -- Persist breakpoints across sessions
+            require('persistent-breakpoints').setup({
+                load_breakpoints_event = { 'BufReadPost' },
+            })
 
             -- Keybindings
             vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
@@ -1356,11 +1372,15 @@ local M = {
             vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
             vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to cursor' })
 
-            vim.keymap.set('n', '<Leader>db', dap.toggle_breakpoint, { desc = 'Debug Breakpoint Toggle ' })
-            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = 'Debug Continue Session.' })
-            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = 'Debug Terminate Session.' })
-            vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = 'Debug Restart Session.' })
-            vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = 'Debug View Toggle ' })
+            vim.keymap.set('n', '<Leader>db', pb.toggle_breakpoint, { desc = 'Toggle Breakpoint' })
+            vim.keymap.set('n', '<Leader>dB', pb.set_conditional_breakpoint, { desc = 'Set Conditional Breakpoint' })
+            vim.keymap.set('n', '<Leader>dl', pb.set_log_point, { desc = 'Set Log Point' })
+            vim.keymap.set('n', '<Leader>dd', pb.clear_all_breakpoints, { desc = 'Delete Breakpoints' })
+
+            vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = 'Continue Session.' })
+            vim.keymap.set('n', '<Leader>dt', dap.terminate, { desc = 'Terminate Session.' })
+            vim.keymap.set('n', '<Leader>dr', dap.restart, { desc = 'Restart Session.' })
+            vim.keymap.set('n', '<Leader>dv', dv.toggle, { desc = 'View Toggle ' })
 
             vim.keymap.set(
                 'n',

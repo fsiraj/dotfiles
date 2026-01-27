@@ -46,7 +46,7 @@ bindkey -r '^[c'
 
 # Define aliases
 if command -v eza &>/dev/null; then
-    alias ls="eza --git-ignore --group-directories-first --color=auto --icons=auto"
+    alias ls="eza --group-directories-first --color=auto --icons=auto"
     alias ll="ls -l"
     alias la="ls -a"
     alias lt="ls -T"
@@ -77,6 +77,14 @@ alias venv="source .venv/bin/activate"
 alias d="deactivate"
 
 alias n="nvim"
+
+copilot() {
+    nvim +"lua require('codecompanion').chat({ window_opts = { layout = 'buffer'}})"
+}
+
+neogit() {
+    nvim +"lua require('neogit').open({ kind = 'replace' })"
+}
 
 theme() {
     local theme="${1:-$(
