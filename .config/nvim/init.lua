@@ -79,18 +79,18 @@ vim.opt.foldtext = ''
 
 -- Diagnostics
 vim.diagnostic.config({
-    severity_sort = true,
-    float = { border = 'none', source = true },
-    underline = { severity = vim.diagnostic.severity.ERROR },
-    signs = {
-        text = {
-            [vim.diagnostic.severity.ERROR] = '󰅚 ',
-            [vim.diagnostic.severity.WARN] = '󰀪 ',
-            [vim.diagnostic.severity.INFO] = '󰋽 ',
-            [vim.diagnostic.severity.HINT] = '󰌶 ',
-        },
-    },
-    virtual_text = false,
+   severity_sort = true,
+   float = { border = 'none', source = true },
+   underline = true,
+   signs = {
+      text = {
+         [vim.diagnostic.severity.ERROR] = '󰅚 ',
+         [vim.diagnostic.severity.WARN] = '󰀪 ',
+         [vim.diagnostic.severity.INFO] = '󰋽 ',
+         [vim.diagnostic.severity.HINT] = '󰌶 ',
+      },
+   },
+   virtual_text = false,
 })
 
 --NOTE: Keymaps
@@ -124,79 +124,77 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
 
 -- Keymaps to scroll lsp hover and signature
 vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
-    if not require('noice.lsp').scroll(4) then return '10j' end
+   if not require('noice.lsp').scroll(4) then return '10j' end
 end, { silent = true, expr = true })
 vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
-    if not require('noice.lsp').scroll(-4) then return '10k' end
+   if not require('noice.lsp').scroll(-4) then return '10k' end
 end, { silent = true, expr = true })
 
 -- Toggle diagnostic information
 vim.keymap.set('n', '<Leader>td', function()
-    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
-    vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
+   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+   vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
 end, { desc = 'LSP: Toggle Diagnostics' })
 
 --NOTE: Autocommands
 
 vim.api.nvim_create_autocmd('TermOpen', {
-    desc = 'Set buffer local options for terminals',
-    group = vim.api.nvim_create_augroup('terminal', { clear = true }),
-    callback = function()
-        vim.bo.filetype = 'terminal'
-        vim.opt.number = false
-        vim.opt.relativenumber = false
-        vim.opt.cursorline = false
-        vim.keymap.set('n', '<CR>', 'i', { buffer = true })
-    end,
+   desc = 'Set buffer local options for terminals',
+   group = vim.api.nvim_create_augroup('terminal', { clear = true }),
+   callback = function()
+      vim.bo.filetype = 'terminal'
+      vim.opt.number = false
+      vim.opt.relativenumber = false
+      vim.opt.cursorline = false
+      vim.keymap.set('n', '<CR>', 'i', { buffer = true })
+   end,
 })
 
 vim.api.nvim_create_autocmd('VimResized', {
-    desc = 'Equalize splits when nvim is resized',
-    group = vim.api.nvim_create_augroup('vim-resize', { clear = true }),
-    command = 'wincmd =',
+   desc = 'Equalize splits when nvim is resized',
+   group = vim.api.nvim_create_augroup('vim-resize', { clear = true }),
+   command = 'wincmd =',
 })
 
 local function open_diagnostic_float(focus)
-    if vim.diagnostic.is_enabled() then
-        vim.diagnostic.open_float({
-            scope = 'cursor',
-            focusable = true,
-            focus = focus,
-        })
-    end
+   if vim.diagnostic.is_enabled() then
+      vim.diagnostic.open_float({
+         scope = 'cursor',
+         focusable = true,
+         focus = focus,
+      })
+   end
 end
 
 vim.api.nvim_create_autocmd({ 'CursorHold' }, {
-    desc = 'Display floating diagnostic window',
-    group = vim.api.nvim_create_augroup('diagnostics', { clear = true }),
-    callback = function() open_diagnostic_float(false) end,
+   desc = 'Display floating diagnostic window',
+   group = vim.api.nvim_create_augroup('diagnostics', { clear = true }),
+   callback = function() open_diagnostic_float(false) end,
 })
 
-vim.keymap.set('n', '<Leader>cq', function()
-    open_diagnostic_float(true)
-end, { desc = 'Focus diagnostic float' })
+vim.keymap.set('n', '<Leader>cq', function() open_diagnostic_float(true) end, { desc = 'Focus diagnostic float' })
 
 --NOTE: Plugins
 
 -- Bootstrap lazy
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-    local out = vim.fn.system({
-        'git',
-        'clone',
-        '--filter=blob:none',
-        '--branch=stable',
-        lazyrepo,
-        lazypath,
-    })
-    if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
+   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+   local out = vim.fn.system({
+      'git',
+      'clone',
+      '--filter=blob:none',
+      '--branch=stable',
+      lazyrepo,
+      lazypath,
+   })
+   if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 -- Load plugins
 require('lazy').setup('plugins', {
-    defaults = { version = nil },
+   defaults = { version = nil },
 })
 vim.keymap.set('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = 'Lazy' })
 vim.cmd.colorscheme(vim.g.colorscheme)
