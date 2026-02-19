@@ -54,7 +54,7 @@
         },
         {
             "type": "command",
-            "text": "nvim --version | head -c 16",
+            "text": "nvim --version | head -n 1 | sed 's/.*/\\L&/'",
             "key": "├",
             "keyColor": "blue"
         },
@@ -70,13 +70,13 @@
             "keyColor": "green"
         },
         {
-            "type": "cpu",
-            "key": "├󰻠",
+            "type": "physicalmemory",
+            "key": "├",
             "keyColor": "green"
         },
         {
-            "type": "physicalmemory",
-            "key": "├",
+            "type": "cpu",
+            "key": "├󰻠",
             "keyColor": "green"
         },
         {
