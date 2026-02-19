@@ -44,11 +44,21 @@ selection-foreground = #e6edf3
 # Other
 app-notifications = config-reload,no-clipboard-copy
 
-# Keymap
+# Keymaps
+
+# Splits (Panes)
+keybind = ctrl+shift+minus=new_split:down
+keybind = ctrl+shift+backslash=new_split:right
+keybind = ctrl+shift+h=goto_split:left
+keybind = ctrl+shift+j=goto_split:down
+keybind = ctrl+shift+k=goto_split:up
+keybind = ctrl+shift+l=goto_split:right
+keybind = ctrl+shift+x=close_surface
+keybind = ctrl+shift+equal=equalize_splits
+# Resolves conflicts with other things
 keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
 keybind = alt+minus=decrease_font_size:1
-# Used in neovim for splits
 keybind = ctrl+equal=unbind
 keybind = ctrl++=unbind
 keybind = ctrl+-=unbind

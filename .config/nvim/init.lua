@@ -81,7 +81,7 @@ vim.opt.foldtext = ''
 vim.diagnostic.config({
     severity_sort = true,
     float = { border = 'none', source = true },
-    underline = { severity = vim.diagnostic.severity.ERROR },
+    underline = true,
     signs = {
         text = {
             [vim.diagnostic.severity.ERROR] = '󰅚 ',

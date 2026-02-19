@@ -1,3 +1,6 @@
+---@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-doc-name
+
 local autostyle = require('autostyle')
 
 -- Applies hihglight overrides on ColorScheme event
@@ -746,25 +749,18 @@ local M = {
         },
         dependencies = {
             'nvim-lua/plenary.nvim',
-            'sindrets/diffview.nvim',
+            'esmuellert/codediff.nvim',
             'ibhagwan/fzf-lua',
         },
         config = true,
     },
 
-    --Diffview
+    --CodeDiff
     {
-        'sindrets/diffview.nvim',
-        keys = {
-            { '<Leader>gD', '<Cmd>DiffviewOpen<CR>', desc = 'Open Diffview' },
-        },
-        opts = {
-            enhanced_diff_hl = true,
-            keymaps = {
-                view = { ['q'] = '<Cmd>DiffviewClose<CR>' },
-                file_panel = { ['q'] = '<Cmd>DiffviewClose<CR>' },
-            },
-        },
+        'esmuellert/codediff.nvim',
+        dependencies = { 'MunifTanjim/nui.nvim' },
+        event = 'VeryLazy',
+        config = true,
     },
 
     --Copilot
@@ -996,6 +992,14 @@ local M = {
         config = true,
     },
 
+    {
+        'aikhe/wrapped.nvim',
+        dependencies = { 'nvzone/volt' },
+        keys = { { '<leader>iw', '<Cmd>NvimWrapped<CR>', desc = 'NvimWrapped' } },
+        cmd = { 'NvimWrapped' },
+        opts = {},
+    },
+
     -- NOTE: Language Tools
 
     -- Mason
@@ -1139,6 +1143,7 @@ local M = {
             {
                 '<Leader>cf',
                 function()
+                    if vim.bo.filetype == 'toml' then return end
                     require('conform').format({
                         async = true,
                         lsp_format = 'fallback',
@@ -1162,7 +1167,16 @@ local M = {
         },
         config = function(_, opts)
             require('conform').setup(opts)
-            -- Toggle format on save
+            local disabled_filetypes = { 'toml' }
+
+            vim.keymap.set({ 'n', 'v' }, '<Leader>cf', function()
+                if vim.tbl_contains(disabled_filetypes, vim.bo.filetype) then return end
+                require('conform').format({
+                    async = true,
+                    lsp_format = 'fallback',
+                })
+            end, { desc = 'Code Format Buffer/Selection' })
+
             vim.keymap.set('n', '<Leader>tf', function()
                 vim.g.format_on_save = not vim.g.format_on_save
                 vim.notify('Format On Save: ' .. tostring(vim.g.format_on_save))

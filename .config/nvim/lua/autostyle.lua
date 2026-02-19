@@ -263,6 +263,7 @@ local function generate_omp_theme(p)
         green = p.green,
         mauve = p.mauve,
         pink = p.pink,
+        red = p.red,
         subtext = p.subtext,
     }
 end
@@ -403,7 +404,7 @@ end
 
 local function reload_nvim_plugins()
     local vim_notify = vim.notify
-    vim.notify = function(_) end ---@diagnostic disable-line
+    vim.notify = function(...) end ---@diagnostic disable-line
 
     -- Plugins that work with Lazy's reload feature
     local plugins_to_reload = { 'tiny-glimmer.nvim' }
