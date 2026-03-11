@@ -111,7 +111,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 **Want to add more themes?**
 
-> Add it to `autostyle.lua` using any existing theme as a template. Add an entry to `M.colorschemes` and `get_palette`. If using Arch with HyDE, ensure the theme is available and add an entry to `get_hyde_theme`.
+> Add it to `style.lua` using any existing theme as a template. Add an entry to `M.colorschemes`, `M.colorscheme_plugins`, and `get_palette`.
 
 ---
 

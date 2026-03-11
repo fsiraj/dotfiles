@@ -16,7 +16,7 @@ gtk-tabs-location = hidden
 gtk-toolbar-style = flat
 gtk-titlebar-hide-when-maximized = true
 
-# WARNING: Managed by `autostyle.lua`
+# WARNING: Managed by `style.lua`
 # Colors
 palette = 0 = #6e7681
 palette = 1 = #ff7b72

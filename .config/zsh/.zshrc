@@ -59,7 +59,7 @@ fi
 alias c="clear -x"
 alias cd..="cd .."
 alias reload="source ~/.config/zsh/.zshrc"
-alias update="bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh)"
+alias update="bash ~/dotfiles/install.sh"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
@@ -88,11 +88,11 @@ neogit() {
 
 theme() {
     local theme="${1:-$(
-        nvim --headless "+=require('autostyle').colorschemes" +qa 2>&1 |
+        nvim --headless "+=require('style').colorschemes" +qa 2>&1 |
             grep -o '"[^"]*"' | sed 's/"//g' |
             fzf --reverse --height=16 --prompt "Select colorscheme: "
     )}"
-    nvim --headless "+lua require('autostyle').sync_theme('$theme')" +qa 2>/dev/null
+    nvim --headless "+lua require('style').sync_theme('$theme')" +qa 2>/dev/null
 }
 
 if [[ $- == *i* ]]; then
@@ -100,4 +100,9 @@ if [[ $- == *i* ]]; then
         alias ff="fastfetch"
         fastfetch
     fi
+fi
+
+# Source local shell customizations if present
+if [ -f "$HOME/.zshrc.local" ]; then
+    source "$HOME/.zshrc.local"
 fi

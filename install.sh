@@ -95,8 +95,8 @@ install_macos_packages() {
         node \
         imagemagick \
         jandedobbeleer/oh-my-posh/oh-my-posh \
+        neovim \
         2>/dev/null
-    brew install --quiet --HEAD neovim 2>/dev/null
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
 
     log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
@@ -127,6 +127,8 @@ install_arch_packages() {
 install_ubuntu_packages() {
     log "Installing packages for ubuntu..." "$COLOR_STEP" "📦"
 
+    XDG_BIN_HOME="$HOME/.local/bin"
+
     sudo add-apt-repository ppa:neovim-ppa/unstable -y >/dev/null 2>&1
     sudo apt update -qq
     sudo apt install -qq \
@@ -134,10 +136,18 @@ install_ubuntu_packages() {
         git unzip curl \
         zsh tmux xsel stow \
         eza fd-find ripgrep \
-        imagemagick \
-        neovim
-    sudo snap install node --classic
-    # Ghostty (stable)
+        imagemagick
+    # node
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | PROFILE="$HOME/.zshrc.local" bash
+    #shellcheck disable=SC1091
+    source "$HOME/.config/nvm/nvm.sh" 
+    nvm install --lts
+    # neovim
+    ARCH=$(uname -m | sed 's/aarch64/arm64/')
+    curl -L "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-$ARCH.tar.gz" | tar xz -C "$XDG_BIN_HOME"
+    rm -rf "$XDG_BIN_HOME/.nvim" && mv "$XDG_BIN_HOME"/nvim-linux-* "$XDG_BIN_HOME/.nvim"
+    ln -sf "$XDG_BIN_HOME/.nvim/bin/nvim" "$XDG_BIN_HOME/nvim"
+    # ghostty (stable)
     if ! installed ghostty; then
         /bin/bash -c \
             "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
@@ -147,7 +157,6 @@ install_ubuntu_packages() {
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
     # fzf - Ubuntu's package is outdated, install from source...
-    XDG_BIN_HOME="$HOME/.local/bin"
     FZF_ROOT="$XDG_BIN_HOME/.fzf"
     if [ ! -d "$FZF_ROOT" ]; then
         git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_ROOT"
@@ -215,6 +224,9 @@ setup_language_tools() {
     if installed node; then
         log "node installed " "$COLOR_SUCCESS" "😔"
     fi
+
+    cargo install --locked tree-sitter-cli
+    log "tree-sitter-cli installed!" "$COLOR_SUCCESS" "🌲"
 }
 
 # Setup zsh shell
