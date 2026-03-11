@@ -1,5 +1,29 @@
 local M = {}
 
+--- Dashboard Header
+M.neovim_logo = [[
+        @@@           @@        
+      @@@@@@          @@@@      
+    @@@@@@@@@@        @@@@@@    
+  ##@@@@@@@@@@@       @@@@@@@@  
+  ###@@@@@@@@@@@      @@@@@@@@  
+  ####@@@@@@@@@@@     @@@@@@@@  
+  ######@@@@@@@@@@@   @@@@@@@@  
+  #######@@@@@@@@@@@  @@@@@@@@  
+  ########  @@@@@@@@@ @@@@@@@@  
+  ########   @@@@@@@@@@@@@@@@@  
+  ########    @@@@@@@@@@@@@@@@  
+  ########      @@@@@@@@@@@@@@  
+  ########       @@@@@@@@@@@@@  
+   #######        @@@@@@@@@@@   
+     #####         @@@@@@@@     
+       ###          @@@@@       
+        ##            @@        
+]]
+
+--- To make UIs multiples of consistent width
+M.unit_width = 40
+
 --- All supported colorschemes
 M.colorschemes = {
    'rose-pine-main',
@@ -503,10 +527,64 @@ function M.setup_hl_autocmd()
    })
 end
 
---- Called by lualine from ./lualine/custom.lua on ColorScheme event
+--- Plugin tweaks
+
 function M.get_lualine_theme()
-   local p = vim.g.palette
-   return generate_lualine_theme(p)
+   return generate_lualine_theme(vim.g.palette)
+end
+
+function M.colorize_snacks_dashboard()
+   vim.api.nvim_create_autocmd('User', {
+      pattern = 'SnacksDashboardOpened',
+      callback = function()
+         vim.cmd('match SnacksDashboardHeaderSecondary /#/')
+         vim.cmd('2match WarningMsg /⚡/')
+         vim.keymap.set('n', 'r', vim.g.mapleader .. 'Sr', { buffer = true, remap = true, desc = 'Session Restore' })
+      end,
+   })
+   vim.api.nvim_create_autocmd('User', {
+      pattern = 'SnacksDashboardClosed',
+      callback = function()
+         vim.cmd('match none')
+         vim.cmd('2match none')
+      end,
+   })
+end
+
+function M.tiny_glimmer_animation(color)
+   return {
+      enabled = true,
+      default_animation = {
+         name = 'fade',
+         settings = { from_color = color or vim.g.palette.green },
+      },
+   }
+end
+
+function M.set_buffer_normal_autocmds()
+   -- codecompanion
+   vim.api.nvim_create_autocmd('User', {
+      pattern = 'CodeCompanionChatCreated',
+      callback = function() vim.wo.winhl = 'NormalFloat:Normal' end,
+   })
+   -- floaterm
+   vim.api.nvim_create_autocmd('TermOpen', {
+      desc = 'Set Floaterm Normal',
+      callback = function()
+         local state = require('floaterm.state')
+         if state.volt_set then vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder' end
+      end,
+   })
+   -- dap-view
+   vim.api.nvim_create_autocmd('FileType', {
+      pattern = { 'dap-view', 'dap-repl' },
+      callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
+   })
+   -- neotest
+   vim.api.nvim_create_autocmd('FileType', {
+      pattern = 'neotest-summary',
+      callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
+   })
 end
 
 return M

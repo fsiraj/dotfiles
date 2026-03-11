@@ -1,7 +1,8 @@
-local autostyle = require('autostyle')
+local style = require('style')
 
 -- Applies highlight overrides on ColorScheme event
-autostyle.setup_hl_autocmd()
+style.setup_hl_autocmd()
+style.set_buffer_normal_autocmds()
 
 -- Language support
 
@@ -116,30 +117,6 @@ local function lsp_inlay_hints(event)
    end
 end
 
--- To make UIs multiples of consistent width
-local unit_width = 40
-
--- Dashboard header
-local neovim_logo = [[
-        @@@           @@        
-      @@@@@@          @@@@      
-    @@@@@@@@@@        @@@@@@    
-  ##@@@@@@@@@@@       @@@@@@@@  
-  ###@@@@@@@@@@@      @@@@@@@@  
-  ####@@@@@@@@@@@     @@@@@@@@  
-  ######@@@@@@@@@@@   @@@@@@@@  
-  #######@@@@@@@@@@@  @@@@@@@@  
-  ########  @@@@@@@@@ @@@@@@@@  
-  ########   @@@@@@@@@@@@@@@@@  
-  ########    @@@@@@@@@@@@@@@@  
-  ########      @@@@@@@@@@@@@@  
-  ########       @@@@@@@@@@@@@  
-   #######        @@@@@@@@@@@   
-     #####         @@@@@@@@     
-       ###          @@@@@       
-        ##            @@        
-]]
-
 -- Plugin config
 local M = {
    -- NOTE: Essentials
@@ -243,7 +220,7 @@ local M = {
          dashboard = {
             enabled = true,
             sections = { { section = 'header' }, { section = 'startup' } },
-            preset = { header = neovim_logo },
+            preset = { header = style.neovim_logo },
          },
       },
       config = function(_, opts)
@@ -251,26 +228,7 @@ local M = {
          snacks.setup(opts)
          vim.keymap.set('n', '<Leader>gb', snacks.git.blame_line, { desc = 'Blame' })
          vim.keymap.set({ 'n', 'v' }, '<Leader>gB', snacks.gitbrowse.open, { desc = 'Browser' })
-         vim.api.nvim_create_autocmd('User', {
-            pattern = 'SnacksDashboardOpened',
-            callback = function()
-               vim.cmd('match SnacksDashboardHeaderSecondary /#/')
-               vim.cmd('2match WarningMsg /⚡/')
-               vim.keymap.set(
-                  'n',
-                  'r',
-                  vim.g.mapleader .. 'Sr',
-                  { buffer = true, remap = true, desc = 'Session Restore' }
-               )
-            end,
-         })
-         vim.api.nvim_create_autocmd('User', {
-            pattern = 'SnacksDashboardClosed',
-            callback = function()
-               vim.cmd('match none')
-               vim.cmd('2match none')
-            end,
-         })
+         style.colorize_snacks_dashboard()
       end,
    },
 
@@ -316,7 +274,7 @@ local M = {
       opts = {
          defaults = { formatter = 'path.filename_first' },
          winopts = {
-            width = math.min(unit_width * 4, math.floor(0.8 * vim.o.columns)),
+            width = math.min(style.unit_width * 4, math.floor(0.8 * vim.o.columns)),
             height = 0.8,
             row = 0.5,
          },
@@ -332,7 +290,7 @@ local M = {
          grep = { hidden = true },
          buffers = {
             previewer = false,
-            winopts = { height = 16, width = unit_width * 2 },
+            winopts = { height = 16, width = style.unit_width * 2 },
          },
          ui_select = function(fzf_opts, items)
             return vim.tbl_deep_extend('force', fzf_opts, {
@@ -340,7 +298,7 @@ local M = {
                winopts = {
                   title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                   title_pos = 'center',
-                  width = unit_width * 2,
+                  width = style.unit_width * 2,
                   height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
                },
             })
@@ -355,7 +313,7 @@ local M = {
                ['enter'] = function(selected, _)
                   if #selected == 0 then return end
                   local colorscheme = selected[1]:match('^[^:]+')
-                  local ok = pcall(function() autostyle.sync_theme(colorscheme) end)
+                  local ok = pcall(function() style.sync_theme(colorscheme) end)
                   if not ok then vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR) end
                end,
             },
@@ -364,7 +322,7 @@ local M = {
          fzf.setup(opts)
 
          -- Custom pickers
-         local magic_colorschemes = function() return fzf.colorschemes({ colors = autostyle.colorschemes }) end
+         local magic_colorschemes = function() return fzf.colorschemes({ colors = style.colorschemes }) end
          local plugins = function() fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end
          local dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
 
@@ -526,9 +484,6 @@ local M = {
          'folke/noice.nvim',
       },
       config = function()
-         -- Has several useful components
-         local noice = require('noice')
-
          -- Custom components
          local mode = {
             function() return string.upper(vim.api.nvim_get_mode().mode) end,
@@ -552,6 +507,7 @@ local M = {
                return require('dap').session() ~= nil
             end,
          }
+         local noice = require('noice')
          local showmode = {
             noice.api.status.mode.get, ---@diagnostic disable-line
             cond = noice.api.status.mode.has, ---@diagnostic disable-line
@@ -672,12 +628,12 @@ local M = {
          views = {
             mini = {
                timeout = 5000,
-               size = { max_width = unit_width * 2 },
+               size = { max_width = style.unit_width * 2 },
             },
             cmdline_popup = {
                size = {
-                  min_width = unit_width,
-                  max_width = unit_width * 2,
+                  min_width = style.unit_width,
+                  max_width = style.unit_width * 2,
                },
                border = { style = 'none', padding = { 1, 2 } },
                filter_options = {},
@@ -723,21 +679,12 @@ local M = {
       event = 'VeryLazy',
       priority = 10,
       config = function()
-         local function custom_animation(color)
-            return {
-               enabled = true,
-               default_animation = {
-                  name = 'fade',
-                  settings = { from_color = color or vim.g.palette.green },
-               },
-            }
-         end
          require('tiny-glimmer').setup({
             overwrite = {
-               yank = custom_animation(vim.g.palette.accent),
-               paste = custom_animation(),
-               undo = custom_animation(),
-               redo = custom_animation(),
+               yank = style.tiny_glimmer_animation(vim.g.palette.accent),
+               paste = style.tiny_glimmer_animation(),
+               undo = style.tiny_glimmer_animation(),
+               redo = style.tiny_glimmer_animation(),
             },
             animations = {
                fade = { min_duration = 1000, max_duration = 1000 },
@@ -780,21 +727,11 @@ local M = {
          suggestion = {
             enabled = true,
             auto_trigger = false,
-            keymap = { accept = '<S-Tab>', accept_word = '<C-l>' },
+            keymap = { accept = '<S-Tab>', accept_word = '<C-l>', toggle_auto_trigger = '<M-l>' },
          },
          panel = { enabled = false },
          server = { type = 'binary' },
       },
-      config = function(_, opts)
-         require('copilot').setup(opts)
-         vim.keymap.set('n', '<Leader>tc', function()
-            require('copilot.suggestion').toggle_auto_trigger()
-            vim.notify('Copilot Auto-suggestions: ' .. tostring(vim.b.copilot_suggestion_auto_trigger))
-         end, {
-            desc = 'Toggle Copilot Suggestions',
-            silent = true,
-         })
-      end,
    },
 
    --Codecompanion
@@ -825,10 +762,6 @@ local M = {
             '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>',
             { desc = 'Code Companion Toggle Chat' }
          )
-         vim.api.nvim_create_autocmd('User', {
-            pattern = 'CodeCompanionChatCreated',
-            callback = function() vim.wo.winhl = 'NormalFloat:Normal' end,
-         })
       end,
    },
 
@@ -862,15 +795,13 @@ local M = {
       config = function(_, opts)
          local floaterm = require('floaterm')
          floaterm.setup(opts)
-         vim.keymap.set({ 'n', 't' }, '<Bslash>', floaterm.toggle, { desc = 'Toggle Floaterm' })
+         vim.keymap.set({ 'n', 't' }, '<Bslash>', function()
+            local width = style.unit_width * 4
+            local pct = math.floor(width / vim.o.columns * 100)
+            require('floaterm.state').config.size.w = math.min(pct, 95)
+            floaterm.toggle()
+         end, { desc = 'Toggle Floaterm' })
          vim.keymap.set('t', '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
-         vim.api.nvim_create_autocmd('TermOpen', {
-            desc = 'Set Floaterm Normal',
-            callback = function()
-               local state = require('floaterm.state')
-               if state.volt_set then vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder' end
-            end,
-         })
       end,
    },
 
@@ -920,7 +851,7 @@ local M = {
       },
       opts = {
          outline_window = {
-            split_command = unit_width .. 'vsplit',
+            split_command = style.unit_width .. 'vsplit',
             winhl = 'Normal:NormalFloat',
          },
          outline_items = { show_symbol_details = true },
@@ -943,7 +874,7 @@ local M = {
       opts = {
          enable_git_status = false,
          enable_diagnostics = false,
-         window = { width = unit_width },
+         window = { width = style.unit_width },
          filesystem = {
             filtered_items = { children_inherit_highlights = false },
          },
@@ -1011,13 +942,11 @@ local M = {
          'WhoIsSethDaniel/mason-tool-installer.nvim',
       },
       config = function()
-         -- Mason installs external tools
          require('mason').setup()
-         vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
-
          require('mason-tool-installer').setup({
             ensure_installed = ensure_installed,
          })
+         vim.keymap.set('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
       end,
    },
 
@@ -1098,7 +1027,7 @@ local M = {
          completion = {
             menu = {
                auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
-               draw = { components = { label = { width = { max = unit_width } } } },
+               draw = { components = { label = { width = { max = style.unit_width } } } },
             },
             documentation = { auto_show = true, auto_show_delay_ms = 50 },
          },
@@ -1200,7 +1129,7 @@ local M = {
             adapters = {
                require('neotest-python')({}),
             },
-            summary = { open = unit_width .. 'vsplit' },
+            summary = { open = style.unit_width .. 'vsplit' },
             output = { open_on_run = false },
          })
 
@@ -1222,10 +1151,6 @@ local M = {
          end
 
          -- Window highlight and close window keymap
-         vim.api.nvim_create_autocmd('FileType', {
-            pattern = 'neotest-summary',
-            callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
-         })
          vim.api.nvim_create_autocmd('FileType', {
             pattern = 'neotest-output',
             callback = function() vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' }) end,
@@ -1263,11 +1188,9 @@ local M = {
    {
       'folke/lazydev.nvim',
       ft = 'lua',
-      opts = {
-         library = {
-            { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-         },
-      },
+      opts = { library = {
+         { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+      } },
    },
 
    --LuvitMeta
@@ -1296,13 +1219,13 @@ local M = {
          },
          code = {
             width = 'block',
-            min_width = unit_width * 2,
+            min_width = style.unit_width * 2,
             right_pad = 1,
          },
       },
    },
 
-   --MarkdwonPreview
+   --MarkdownPreview
    {
       'iamcco/markdown-preview.nvim',
       cmd = {
@@ -1397,10 +1320,6 @@ local M = {
          })
 
          -- Dap View setup
-         vim.api.nvim_create_autocmd('FileType', {
-            pattern = { 'dap-view', 'dap-repl' },
-            callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
-         })
          dap.defaults.fallback.switchbuf = 'usevisible,useopen,uselast'
 
          -- Change breakpoint icons
