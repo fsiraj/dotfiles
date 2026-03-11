@@ -3,7 +3,7 @@ version = 3
 final_space = true
 
 
-# WARNING: Managed by `autostyle.lua`
+# WARNING: Managed by `style.lua`
 # Colors
 [palette]
 teal = '#76e3ea'
@@ -116,5 +116,5 @@ newline = true
 
 # Transient Prompt
 [transient_prompt]
-template = "<p:subtext>󱞽 {{ .Segments.Executiontime.FormattedMs }}{{ .Segments.Status.Text }}</>\n󱞫 "
-foreground = 'p:mauve'
+template = "󱞽 {{ .Segments.Executiontime.FormattedMs }}{{ .Segments.Status.Text }}\n󱞫 "
+foreground = 'p:subtext'

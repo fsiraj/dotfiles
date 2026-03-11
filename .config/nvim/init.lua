@@ -44,7 +44,6 @@ vim.opt.signcolumn = 'yes'
 vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
--- Displays which-key popup sooner
 vim.opt.timeoutlen = 300
 
 -- Configure how new splits should be opened
@@ -70,6 +69,9 @@ vim.opt.showtabline = 0
 
 -- Disable defualt cmdline
 vim.opt.cmdheight = 0
+
+-- Show dialogue instead of error
+vim.opt.confirm = true
 
 -- Use treesitter for folding
 vim.opt.foldmethod = 'expr'
