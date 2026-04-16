@@ -44,7 +44,7 @@
         },
         {
             "type": "command",
-            "text": "nvim --version | head -n 1 | sed 's/.*/\\L&/'",
+            "text": "nvim --version | head -n 1 | tr '[:upper:]' '[:lower:]'",
             "key": "├",
             "keyColor": "blue"
         },
@@ -60,9 +60,10 @@
             "keyColor": "green"
         },
         {
-            "type": "physicalmemory",
+            "type": "memory",
             "key": "├",
-            "keyColor": "green"
+            "keyColor": "green",
+            "format": "{total} RAM"
         },
         {
             "type": "cpu",

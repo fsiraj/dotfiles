@@ -3,6 +3,15 @@
 # Global variable for OS detection
 OS=""
 
+# XDG directories
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_BIN_HOME="$HOME/.local/bin"
+
+# Install URLs
+BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
+
 # Color codes for logging
 COLOR_INFO="1;36"     # Cyan
 COLOR_STEP="1;35"     # Magenta
@@ -81,25 +90,51 @@ install_macos_packages() {
 
     if ! installed brew; then
         /bin/bash -c \
-            "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            "$(curl -fsSL "$BREW_INSTALL_URL")"
     fi
     if ! xcode-select -p >/dev/null 2>&1; then
         xcode-select --install 2>/dev/null || true
     fi
     # shellcheck disable=2034
-    export HOMEBREW_NO_ENV_HINTS=true
     brew install --quiet \
-        git make unzip gnu-sed \
-        zsh tmux stow fastfetch \
-        fzf zoxide eza fd ripgrep \
-        node \
-        imagemagick \
+        git make unzip gnu-sed zsh tmux stow \
+        fzf zoxide eza fd ripgrep bat fastfetch \
+        node imagemagick \
         jandedobbeleer/oh-my-posh/oh-my-posh \
         neovim \
         2>/dev/null
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
 
     log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
+}
+
+# Install packages for Ubuntu
+install_ubuntu_packages() {
+    log "Installing packages for ubuntu..." "$COLOR_STEP" "📦"
+
+    sudo apt update -qq
+    sudo apt install -qq build-essential git unzip curl zsh tmux xsel stow
+
+    if ! installed brew; then
+        /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
+        printf "%s\n" "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)\"" >>"$HOME/.zshrc.local"
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+    fi
+
+    brew install --quiet \
+        fzf zoxide eza fd ripgrep bat fastfetch \
+        node imagemagick \
+        jandedobbeleer/oh-my-posh/oh-my-posh \
+        neovim \
+        2>/dev/null
+    brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
+
+    # ghostty (stable)
+    if ! installed ghostty; then
+        /bin/bash -c \
+            "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
+    fi
+    log "ubuntu packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
 # Install packages for Arch Linux
@@ -121,72 +156,6 @@ install_arch_packages() {
     fi
 
     log "arch packages installed!" "$COLOR_SUCCESS" "🎉"
-}
-
-# Install packages for Ubuntu
-install_ubuntu_packages() {
-    log "Installing packages for ubuntu..." "$COLOR_STEP" "📦"
-
-    XDG_BIN_HOME="$HOME/.local/bin"
-
-    sudo add-apt-repository ppa:neovim-ppa/unstable -y >/dev/null 2>&1
-    sudo apt update -qq
-    sudo apt install -qq \
-        build-essential \
-        git unzip curl \
-        zsh tmux xsel stow \
-        eza fd-find ripgrep \
-        imagemagick
-    # node
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | PROFILE="$HOME/.zshrc.local" bash
-    #shellcheck disable=SC1091
-    source "$HOME/.config/nvm/nvm.sh" 
-    nvm install --lts
-    # neovim
-    ARCH=$(uname -m | sed 's/aarch64/arm64/')
-    curl -L "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-$ARCH.tar.gz" | tar xz -C "$XDG_BIN_HOME"
-    rm -rf "$XDG_BIN_HOME/.nvim" && mv "$XDG_BIN_HOME"/nvim-linux-* "$XDG_BIN_HOME/.nvim"
-    ln -sf "$XDG_BIN_HOME/.nvim/bin/nvim" "$XDG_BIN_HOME/nvim"
-    # ghostty (stable)
-    if ! installed ghostty; then
-        /bin/bash -c \
-            "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
-    fi
-    # ohmyposh
-    if ! installed oh-my-posh; then
-        curl -s https://ohmyposh.dev/install.sh | bash -s
-    fi
-    # fzf - Ubuntu's package is outdated, install from source...
-    FZF_ROOT="$XDG_BIN_HOME/.fzf"
-    if [ ! -d "$FZF_ROOT" ]; then
-        git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_ROOT"
-        "$FZF_ROOT"/install --bin && cp "$FZF_ROOT/bin/fzf" "$XDG_BIN_HOME"
-    fi
-    # zoxide - Ubuntu's package has extra steps, this is easier...
-    if ! installed zoxide; then
-        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    fi
-    # fd - Ubuntu's is called fdfind...
-    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
-    # fastfetch - Ubuntu doesn't package it...
-    if ! installed fastfetch; then
-        ARCH=$(uname -m | sed 's/x86_64/amd64/')
-        curl -fsSL -o "fastfetch-linux-${ARCH}.deb" \
-            "https://github.com/fastfetch-cli/fastfetch/releases/download/2.52.0/fastfetch-linux-${ARCH}.deb"
-        sudo apt install -qq "./fastfetch-linux-${ARCH}.deb"
-        rm "fastfetch-linux-${ARCH}.deb"
-    fi
-    # Ubuntu doesn't package the nerd fonts...
-    if ! fc-list | grep -qi "JetBrainsMono Nerd Font"; then
-        curl -fsSL -o JetBrainsMono.zip \
-            https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
-        mkdir -p "$HOME/.local/share/fonts"
-        unzip -o JetBrainsMono.zip -d "$HOME/.local/share/fonts/JetBrainsMono"
-        fc-cache -fv
-        rm JetBrainsMono.zip
-    fi
-
-    log "ubuntu packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
 # Install packages based on OS
@@ -248,6 +217,9 @@ setup_shell() {
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
+    # shellcheck disable=SC1091
+    source "$ZINIT_HOME/zinit.zsh"
+    zinit update
 
     log "zinit installed!" "$COLOR_SUCCESS" "🔌"
 }
@@ -283,7 +255,7 @@ setup_tmux_plugins() {
 setup_neovim_plugins() {
     log "Setting up neovim..." "$COLOR_STEP" "💤"
 
-    nvim --headless "+Lazy! sync --quiet" +qa
+    nvim --headless "+Lazy! sync" +qa
     nvim --headless "+MasonToolsUpdateSync" +qa
 
     echo "" && log "neovim plugins and language tools installed!" "$COLOR_SUCCESS" "🔌"
