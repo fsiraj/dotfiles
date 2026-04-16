@@ -26,6 +26,8 @@ M.unit_width = 40
 
 --- All supported colorschemes
 M.colorschemes = {
+   'github_dark_default',
+   'github_light_default',
    'rose-pine-main',
    'rose-pine-moon',
    'rose-pine-dawn',
@@ -39,8 +41,6 @@ M.colorschemes = {
    'catppuccin-latte',
    'nord',
    'everforest',
-   'github_dark_default',
-   'github_light_default',
 }
 
 M.colorscheme_plugins = {
@@ -242,6 +242,7 @@ local function get_palette(colorscheme)
    end
    if colorscheme == 'everforest' then
       local p = require('everforest.colours').generate_palette(
+         ---@diagnostic disable-next-line: missing-fields
          { background = 'hard', colours_override = function(_) end },
          'dark'
       )
@@ -330,9 +331,9 @@ local function generate_tmux_theme(p)
       thm_accent = p.accent,
       thm_mantle = p.mantle,
       thm_fg = p.text,
+      thm_bg = p.mantle,
       thm_surface_0 = p.base,
       thm_surface_1 = p.subtext,
-      thm_red = p.red,
       thm_orange = p.orange,
       thm_mauve = p.mauve,
       thm_blue = p.blue,
@@ -355,8 +356,8 @@ local function generate_nvim_overrides(p)
    return {
       -- Neovim Built-in
       CursorLineNr = { fg = p.accent },
-      FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
       FloatBorder = { fg = p.mantle, bg = p.mantle },
+      FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
       NormalFloat = { bg = p.mantle },
       NormalNC = { link = 'Normal' },
       Pmenu = { link = 'NormalFloat' },
@@ -368,17 +369,20 @@ local function generate_nvim_overrides(p)
       BlinkCmpDoc = { link = 'NormalFloat' },
       DapBreak = { fg = p.red },
       DapStop = { fg = p.yellow },
-      FzfLuaNormal = { link = 'NormalFloat' },
       FzfLuaBorder = { link = 'FloatBorder' },
+      FzfLuaNormal = { link = 'NormalFloat' },
+      NeoTreeCursorLine = { link = 'NeotreeNormal' },
+      NeoTreeNormalNC = { link = 'NeotreeNormal' },
+      NeotreeNormal = { link = 'NormalFloat' },
       NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
       NoiceConfirm = { link = 'NormalFloat' },
       NoiceConfirmBorder = { link = 'FloatBorder' },
-      NeotreeNormal = { link = 'NormalFloat' },
-      NeoTreeNormalNC = { link = 'NeotreeNormal' },
-      NeoTreeCursorLine = { link = 'NeotreeNormal' },
+      SidekickDiffAdd = { link = 'DiffAdd' },
+      SidekickDiffContext = { bg = p.base },
+      SidekickSign = { fg = p.teal },
+      SnacksDashboardFooter = { fg = p.subtext },
       SnacksDashboardHeader = { fg = p.green },
       SnacksDashboardHeaderSecondary = { fg = p.blue },
-      SnacksDashboardFooter = { fg = p.subtext },
       SnacksDashboardSpecial = { fg = p.accent },
       TreesitterContext = { bg = p.base },
       TreesitterContextBottom = { sp = p.accent, underline = true },
@@ -409,8 +413,8 @@ local function generate_lualine_theme(p)
       },
       inactive = {
          a = { bg = p.mantle, fg = p.subtext, gui = 'bold' },
-         b = { bg = p.base, fg = p.text },
-         c = { bg = p.base, fg = p.subtext },
+         b = { bg = p.mantle, fg = p.text },
+         c = { bg = p.mantle, fg = p.subtext },
       },
    }
 end
@@ -426,15 +430,30 @@ local function get_hyde_theme(colorscheme)
    return nil
 end
 
+local function get_opencode_theme(colorscheme)
+   if string.find(colorscheme, 'github') then return 'github' end
+   if string.find(colorscheme, 'rose-pine') then return 'rosepine' end
+   if string.find(colorscheme, 'nord') then return 'nord' end
+   if string.find(colorscheme, 'everforest') then return 'everforest' end
+   if string.find(colorscheme, 'tokyonight') then return 'tokyonight' end
+   if string.find(colorscheme, 'catppuccin') then return 'catppuccin' end
+   tee('OpenCode theme not found for ' .. colorscheme)
+   return nil
+end
+
 --- Functions that wrap sed to overwrite config files for all the apps
 
 local function sed_expr(var, val, filepath)
+   -- Example: set -g @key "value" (tmux)
    if string.find(filepath, 'tmux') then
       return string.format([[ -e "s|^set -g @%s \".*\"|set -g @%s \"%s\"|"]], var, var, val)
-   elseif string.find(filepath, 'ghostty') then
-      return string.format([[ -e "s|^%s = .*|%s = %s|"]], var, var, val)
-   else -- nvim or oh-my-posh
-      return string.format([[ -e "s|^%s = '.*'|%s = '%s'|"]], var, var, val)
+   -- Example: ␣␣␣␣"key": "value" (opencode tui.jsonc)
+   elseif string.find(filepath, 'jsonc') then
+      return string.format([[ -e "s|^    \"%s\": \".*\"|    \"%s\": \"%s\"|"]], var, var, val)
+   -- Examples: key = value (ghostty), key = 'value' (nvim/oh-my-posh)
+   else
+      local quote = string.find(filepath, 'ghostty') and '' or "'"
+      return string.format([[ -e "s|^%s = .*|%s = %s%s%s|"]], var, var, quote, val, quote)
    end
 end
 
@@ -445,7 +464,7 @@ local function run_sed_cmd(path, overrides)
       table.insert(exprs, sed_expr(var, val, path))
    end
    local exprs_string = table.concat(exprs, ' \\\n      ')
-   local cmd = string.format('%s -i%s \\\n%s', sed, exprs_string, path)
+   local cmd = string.format('%s -i --follow-symlinks%s \\\n%s', sed, exprs_string, path)
    vim.fn.system(cmd)
 end
 
@@ -490,7 +509,7 @@ local function reload_nvim_plugins()
    vim.notify = function(...) end ---@diagnostic disable-line
 
    -- Plugins that work with Lazy's reload feature
-   local plugins_to_reload = { 'tiny-glimmer.nvim' }
+   local plugins_to_reload = { 'fzf-lua', 'tiny-glimmer.nvim' }
    for _, plugin in ipairs(plugins_to_reload) do
       vim.cmd('Lazy reload ' .. plugin)
    end
@@ -562,6 +581,13 @@ function M.sync_theme(colorscheme)
       reload_tmux()
    end
 
+   -- OpenCode
+   local opencode_theme = get_opencode_theme(p.name)
+   if opencode_theme then
+      local opencode = '~/.config/opencode/tui.jsonc'
+      run_sed_cmd(opencode, { theme = opencode_theme })
+   end
+
    -- HyDE
    if vim.fn.executable('hydectl') == 1 then
       local hyde_theme = get_hyde_theme(p.name)
@@ -577,7 +603,7 @@ function M.setup_hl_autocmd()
    vim.api.nvim_create_autocmd('ColorScheme', {
       callback = function()
          local p = get_palette(vim.g.colorscheme)
-         vim.g.palette = p
+         vim.g.palette = vim.deepcopy(p)
          local hl_overrides = generate_nvim_overrides(p)
          for hl, col in pairs(hl_overrides) do
             vim.api.nvim_set_hl(0, hl, col)
@@ -619,28 +645,40 @@ function M.tiny_glimmer_animation(color)
 end
 
 function M.set_buffer_normal_autocmds()
-   -- codecompanion
-   vim.api.nvim_create_autocmd('User', {
-      pattern = 'CodeCompanionChatCreated',
-      callback = function() vim.wo.winhl = 'NormalFloat:Normal' end,
-   })
-   -- floaterm
-   vim.api.nvim_create_autocmd('TermOpen', {
-      desc = 'Set Floaterm Normal',
-      callback = function()
-         local state = require('floaterm.state')
-         if state.volt_set then vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder' end
+   -- sidekick
+   vim.api.nvim_create_autocmd('BufWinEnter', {
+      callback = function(args)
+         if vim.bo[args.buf].filetype ~= 'sidekick_terminal' then return end
+         local win = vim.fn.bufwinid(args.buf)
+         if win ~= -1 then
+            vim.wo[win].winhl =
+               'Normal:SidekickChat,NormalNC:SidekickChat,EndOfBuffer:SidekickChat,SignColumn:SidekickChat'
+         end
       end,
    })
+
    -- dap-view
    vim.api.nvim_create_autocmd('FileType', {
       pattern = { 'dap-view', 'dap-repl' },
       callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
    })
+
    -- neotest
    vim.api.nvim_create_autocmd('FileType', {
       pattern = 'neotest-summary',
       callback = function() vim.wo.winhl = 'Normal:NormalFloat' end,
+   })
+
+   -- floaterm
+   vim.api.nvim_create_autocmd('TermOpen', {
+      desc = 'Set Floaterm Normal',
+      callback = function(args)
+         local bo = vim.bo[args.buf]
+         if bo.filetype == 'Floaterm' then
+            local state = require('floaterm.state')
+            if state.volt_set then vim.wo[state.win].winhl = 'Normal:exdarkbg,floatBorder:exdarkborder' end
+         end
+      end,
    })
 end
 

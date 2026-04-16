@@ -248,6 +248,7 @@ setup_shell() {
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
+    zinit update
 
     log "zinit installed!" "$COLOR_SUCCESS" "🔌"
 }

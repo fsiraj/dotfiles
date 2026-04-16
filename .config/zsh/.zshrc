@@ -1,50 +1,62 @@
-OS=$(uname -s)
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_BIN_HOME="$HOME/.local/bin"
 export PATH="$XDG_BIN_HOME:$PATH"
+export EDITOR="nvim"
+fpath=(~/.zfunc $fpath)
 
 # Load prompt
 eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/config.omp.toml)"
 
-# Load plugins
+# History
+HISTSIZE=10000
+HISTFILE=~/.config/zsh/.zsh_history
+SAVEHIST=$HISTSIZE
+setopt appendhistory hist_find_no_dups hist_ignore_all_dups hist_ignore_space sharehistory
+
+# Pre-compinit
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
-zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
-zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
 
-# Load completions
-autoload -U compinit && compinit
+# compinit (most expensive operation)
+autoload -Uz compinit
+zcompdump=${ZDOTDIR:-$HOME}/.zcompdump
+if [[ $OSTYPE == darwin* ]]; then
+    zcompdump_mtime=$(stat -f %m "$zcompdump" 2>/dev/null || print 0)
+else
+    zcompdump_mtime=$(stat -c %Y -- "$zcompdump" 2>/dev/null || print 0)
+fi
+(($(date +%s) - zcompdump_mtime > 86400)) && compinit || compinit -C
 zinit cdreplay -q
+
+# Post-compinit
+zinit light Aloxaf/fzf-tab
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-syntax-highlighting
 
 # Configure completion behavior
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-bindkey "^[[Z" autosuggest-accept                                      # shift + tab
-zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'        # case insensitive matching
-zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'                # show color for matches
-zstyle ':completion:*' menu no                                         # disable defualt in favour of fzf-tab
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -a $realpath' # preview for zoxide
-
-# Configure history
-HISTSIZE=5000
-HISTFILE=~/.config/zsh/.zsh_history
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
+bindkey "^[[Z" autosuggest-accept                               # shift + tab
+zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' # case insensitive matching
+zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'         # show color for matches
+zstyle ':completion:*' menu no                                  # disable defualt in favour of fzf-tab
+zstyle ':fzf-tab:complete:*' fzf-preview '
+if [[ -d $realpath ]]; then
+  eza -a --color=always $realpath
+elif [[ -f $realpath ]]; then
+  bat --theme base16 --color=always --style=plain $realpath
+else
+  printf "%s\n" "$word"
+fi
+' # tab completion preview
 
 # Load shell integrations
 eval "$(zoxide init --cmd cd zsh)"
 source <(fzf --zsh)
 bindkey -r '^[c'
 
-# Define aliases
+# Custom aliases
 if command -v eza &>/dev/null; then
     alias ls="eza --group-directories-first --color=auto --icons=auto"
     alias ll="ls -l"
@@ -58,11 +70,12 @@ fi
 
 alias c="clear -x"
 alias cd..="cd .."
-alias reload="source ~/.config/zsh/.zshrc"
+alias reload="exec zsh"
 alias update="bash ~/dotfiles/install.sh"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
+alias gca="git commit --amend"
 alias gs="git status -sb"
 alias gl="git log --oneline -n 10"
 alias gb="git branch"
@@ -78,10 +91,7 @@ alias d="deactivate"
 
 alias n="nvim"
 
-copilot() {
-    nvim +"lua require('codecompanion').chat({ window_opts = { layout = 'buffer'}})"
-}
-
+# Custom functions
 neogit() {
     nvim +"lua require('neogit').open({ kind = 'replace' })"
 }
@@ -95,6 +105,7 @@ theme() {
     nvim --headless "+lua require('style').sync_theme('$theme')" +qa 2>/dev/null
 }
 
+# fastfetch
 if [[ $- == *i* ]]; then
     if command -v fastfetch &>/dev/null; then
         alias ff="fastfetch"

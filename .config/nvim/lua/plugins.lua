@@ -124,7 +124,7 @@ local M = {
    --Mini
    {
       'echasnovski/mini.nvim',
-      event = 'VeryLazy',
+      lazy = false,
       dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
       config = function()
          -- Enhanced jump motions
@@ -154,7 +154,7 @@ local M = {
          vim.keymap.set('ca', 'bd', 'lua MiniBufremove.delete()')
          vim.keymap.set('ca', 'bw', 'lua MiniBufremove.wipeout()')
 
-         -- Git tools, used for inline diffs (and codecompanion)
+         -- Git tools, used for inline diffs
          local diff = require('mini.diff')
          diff.setup({
             mappings = { apply = '<Leader>gs', reset = '<Leader>gr' },
@@ -165,20 +165,30 @@ local M = {
 
          -- Session management
          local sessions = require('mini.sessions')
-         local close_filetypes = { 'codecompanion', 'Outline', 'neo-tree' }
+
+         vim.opt.sessionoptions:append('globals')
+         vim.opt.sessionoptions:remove('terminal')
+
+         local function postread()
+            if vim.g.SidekickTool == nil or vim.g.SidekickTool == '' then return end
+            require('sidekick.cli').show({ name = vim.g.SidekickTool, focus = false, filter = { cwd = true } })
+         end
+
+         local function prewrite()
+            local term = require('sidekick.cli.terminal').sessions()[1]
+            vim.g.SidekickTool = term and term.tool.name or ''
+            require('sidekick.cli').close()
+            require('neo-tree.command').execute({ action = 'close' })
+            require('outline').close()
+            vim.cmd('helpclose')
+         end
+
          sessions.setup({
+            autowrite = false,
             force = { delete = true },
             hooks = {
-               pre = {
-                  write = function()
-                     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-                        local filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-                        if vim.tbl_contains(close_filetypes, filetype) then
-                           vim.api.nvim_buf_delete(bufnr, { force = true })
-                        end
-                     end
-                  end,
-               },
+               pre = { write = prewrite },
+               post = { read = postread },
             },
          })
 
@@ -209,8 +219,10 @@ local M = {
          vim.keymap.set('n', '<Leader>SR', function()
             local _, session_name = find_session()
             sessions.write(session_name)
-            sessions.restart()
-         end, { desc = 'Session Restart' })
+            require('noice').disable()
+            local cmd = string.format([[require("mini.sessions").read(%q)]], session_name)
+            vim.cmd('restart lua ' .. cmd)
+         end, { desc = 'Session Restart', nowait = true })
 
          vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = 'Session Select' })
       end,
@@ -219,23 +231,22 @@ local M = {
    --Snacks
    {
       'folke/snacks.nvim',
-      opts = {
-         image = { enabled = true },
-         bigfile = { enabled = true },
-         git = { enabled = true },
-         gitbrowse = { enabled = true },
-         dashboard = {
-            enabled = true,
-            sections = {
-               { section = 'header' },
-               { section = 'startup' },
-            },
-            preset = { header = style.neovim_logo },
-         },
-      },
-      config = function(_, opts)
+      config = function()
          local snacks = require('snacks')
-         snacks.setup(opts)
+         snacks.setup({
+            image = { enabled = true },
+            bigfile = { enabled = true },
+            git = { enabled = true },
+            gitbrowse = { enabled = true },
+            dashboard = {
+               enabled = true,
+               sections = {
+                  { section = 'header' },
+                  { section = 'startup' },
+               },
+               preset = { header = style.neovim_logo },
+            },
+         })
          vim.keymap.set('n', '<Leader>gb', snacks.git.blame_line, { desc = 'Blame' })
          vim.keymap.set({ 'n', 'v' }, '<Leader>gB', snacks.gitbrowse.open, { desc = 'Browser' })
          style.colorize_snacks_dashboard()
@@ -258,7 +269,7 @@ local M = {
          delay = 500,
          win = { title_pos = 'center' },
          triggers = {
-            { '<auto>', mode = 'nixsotc' },
+            { '<auto>', mode = 'nixsoc' },
             { 's', mode = { 'n', 'v' } },
          },
          icons = { mappings = true, keys = {} },
@@ -281,55 +292,59 @@ local M = {
       'ibhagwan/fzf-lua',
       event = 'VeryLazy',
       dependencies = { 'nvim-tree/nvim-web-devicons' },
-      opts = {
-         defaults = { formatter = 'path.filename_first' },
-         winopts = {
-            width = math.min(style.unit_width * 4, math.floor(0.8 * vim.o.columns)),
-            height = 0.8,
-            row = 0.5,
-         },
-         hls = { title = 'FloatTitle' },
-         keymap = {
-            builtin = { true, ['<C-u>'] = 'preview-up', ['<C-d>'] = 'preview-down' },
-         },
-         files = {
-            hidden = true,
-            follow = true,
-            fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
-         },
-         grep = { hidden = true },
-         buffers = {
-            previewer = false,
-            winopts = { height = 16, width = style.unit_width * 2 },
-         },
-         ui_select = function(fzf_opts, items)
-            return vim.tbl_deep_extend('force', fzf_opts, {
-               prompt = ' ',
-               winopts = {
-                  title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
-                  title_pos = 'center',
-                  width = style.unit_width * 2,
-                  height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
-               },
-            })
-         end,
-      },
-      config = function(_, opts)
+      config = function()
          local fzf = require('fzf-lua')
          local actions = require('fzf-lua.actions')
-         opts.helptags = { actions = { ['enter'] = actions.help_vert } }
-         opts.colorschemes = {
-            actions = {
-               ['enter'] = function(selected, _)
-                  if #selected == 0 then return end
-                  local colorscheme = selected[1]:match('^[^:]+')
-                  local ok = pcall(function() style.sync_theme(colorscheme) end)
-                  if not ok then vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR) end
-               end,
-            },
-         }
 
-         fzf.setup(opts)
+         fzf.setup({
+            defaults = { formatter = 'path.filename_first' },
+            winopts = {
+               width = math.min(style.unit_width * 4, math.floor(0.8 * vim.o.columns)),
+               height = 0.8,
+               row = 0.5,
+            },
+            hls = { title = 'FloatTitle' },
+            keymap = {
+               builtin = {
+                  true,
+                  ['<C-u>'] = 'preview-up',
+                  ['<C-d>'] = 'preview-down',
+                  ['<C-h>'] = 'toggle-help',
+               },
+            },
+            files = {
+               hidden = true,
+               follow = true,
+               fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
+            },
+            helptags = { actions = { ['enter'] = actions.help_vert } },
+            colorschemes = {
+               actions = {
+                  ['enter'] = function(selected, _)
+                     if #selected == 0 then return end
+                     local colorscheme = selected[1]:match('^[^:]+')
+                     local ok = pcall(function() style.sync_theme(colorscheme) end)
+                     if not ok then vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR) end
+                  end,
+               },
+            },
+            grep = { hidden = true },
+            buffers = {
+               previewer = false,
+               winopts = { height = 16, width = style.unit_width * 2 },
+            },
+            ui_select = function(fzf_opts, items)
+               return vim.tbl_deep_extend('force', fzf_opts, {
+                  prompt = ' ',
+                  winopts = {
+                     title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
+                     title_pos = 'center',
+                     width = style.unit_width * 2,
+                     height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
+                  },
+               })
+            end,
+         })
 
          -- Custom pickers
          local magic_colorschemes = function() return fzf.colorschemes({ colors = style.colorschemes }) end
@@ -372,16 +387,19 @@ local M = {
       config = function()
          local treesitter = require('nvim-treesitter')
          local supported = vim.list_extend(treesitter.get_available(1), treesitter.get_available(2))
-         local installed = treesitter.get_installed()
          vim.api.nvim_create_autocmd('FileType', {
             callback = function(args)
                local lang = vim.bo[args.buf].filetype
                if vim.tbl_contains(supported, lang) then
-                  if not vim.tbl_contains(installed, lang) then treesitter.install(lang):wait(30000) end
-                  vim.treesitter.start()
+                  local installed = treesitter.get_installed()
+                  if not vim.tbl_contains(installed, lang) then
+                     treesitter.install(lang)
+                     return
+                  end
+                  vim.treesitter.start(args.buf, lang)
                   vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
                   vim.wo.foldmethod = 'expr'
-                  vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                  vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
                end
             end,
          })
@@ -459,7 +477,6 @@ local M = {
          local lsp_status = {
             'lsp_status',
             icon = '󱚠 ',
-            ignore_lsp = { 'copilot' },
          }
          local dap_status = {
             function() return require('dap').status() end,
@@ -481,6 +498,9 @@ local M = {
          local text = function(t)
             return function() return t end
          end
+         local copilot_icon = ' '
+
+         -- Custom extensions
 
          -- Minimal
          local minimal = {
@@ -511,20 +531,32 @@ local M = {
             filetypes = { 'terminal' },
          }
 
-         -- Codecompanion
-         local codecompanion = {
+         -- Sidekick
+         local sidekick_cli_name = function()
+            local win = vim.api.nvim_get_current_win()
+            local buf = vim.api.nvim_win_get_buf(win)
+            local cli = vim.b[buf].sidekick_cli or vim.w[win].sidekick_cli
+            return cli.name:gsub('^%l', string.upper)
+         end
+
+         local sidekick_padding = function()
+            local name = sidekick_cli_name()
+            local pad = vim.api.nvim_win_get_width(0)
+               - vim.fn.strdisplaywidth(name)
+               - vim.fn.strdisplaywidth(copilot_icon)
+               - 6
+            return (' '):rep(pad)
+         end
+
+         local sidekick = {
             winbar = {
-               lualine_a = { 'filename' },
-               lualine_c = { text(' ') },
-               lualine_y = {
-                  require('codecompanion._extensions.spinner.styles.lualine').get_lualine_component(),
-                  text('CodeCompanion'),
-               },
+               lualine_a = { sidekick_cli_name },
+               lualine_y = { sidekick_padding },
+               lualine_z = { text(copilot_icon) },
             },
-            inactive_winbar = nil,
-            filetypes = { 'codecompanion' },
+            filetypes = { 'sidekick_terminal' },
          }
-         codecompanion.inactive_winbar = vim.deepcopy(codecompanion.winbar)
+         sidekick.inactive_winbar = vim.deepcopy(sidekick.winbar)
 
          -- Lualine config
          require('lualine').setup({
@@ -542,7 +574,7 @@ local M = {
                   },
                },
             },
-            extensions = { minimal, terminal, codecompanion },
+            extensions = { minimal, terminal, sidekick },
             sections = {},
             inactive_sections = {},
             winbar = {
@@ -569,64 +601,86 @@ local M = {
       'folke/noice.nvim',
       event = 'VeryLazy',
       dependencies = { 'MunifTanjim/nui.nvim' },
-      opts = {
-         cmdline = { enabled = true, format = {} },
-         messages = { enabled = true },
-         notify = { enabled = true },
-         popupmenu = { enabled = false },
-         lsp = {
-            progress = { enabled = false },
-            hover = { enabled = true },
-            signature = { enabled = true },
-            override = {
-               ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
-               ['vim.lsp.util.stylize_markdown'] = true,
-            },
-         },
-         views = {
-            mini = {
-               timeout = 5000,
-               size = { max_width = style.unit_width * 2 },
-            },
-            cmdline_popup = {
-               size = {
-                  min_width = style.unit_width,
-                  max_width = style.unit_width * 2,
-               },
-               border = { style = 'none', padding = { 1, 2 } },
-               filter_options = {},
-               win_options = {
-                  winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
-                  wrap = true,
+      config = function()
+         require('noice').setup({
+            cmdline = { enabled = true, format = {} },
+            messages = { enabled = true },
+            notify = { enabled = true },
+            popupmenu = { enabled = false },
+            lsp = {
+               progress = { enabled = false },
+               hover = { enabled = true },
+               signature = { enabled = true },
+               override = {
+                  ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+                  ['vim.lsp.util.stylize_markdown'] = true,
                },
             },
-            cmdline_input = {
-               border = { style = 'solid', padding = { 0, 2 } },
-            },
-            confirm = {
-               position = { row = '50%' },
-            },
-         },
-         routes = {
-            {
-               filter = {
-                  event = 'msg_show',
-                  kind = { 'shell_out', 'shell_err' },
+            views = {
+               mini = {
+                  timeout = 5000,
+                  size = { max_width = style.unit_width * 2 },
+                  reverse = false,
+                  position = { row = 1, col = '100%' },
+                  win_options = {
+                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+                     winblend = 0,
+                  },
                },
-               view = 'notify',
-               opts = {
-                  level = 'info',
-                  skip = false,
-                  replace = false,
+               cmdline_popup = {
+                  size = {
+                     min_width = style.unit_width,
+                     max_width = style.unit_width * 2,
+                  },
+                  border = { style = 'none', padding = { 1, 2 } },
+                  filter_options = {},
+                  win_options = {
+                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+                     wrap = true,
+                  },
+               },
+               cmdline_input = {
+                  border = { style = 'solid', padding = { 0, 2 } },
+               },
+               confirm = {
+                  position = { row = '50%' },
                },
             },
-         },
-      },
-      config = function(_, opts)
-         require('noice').setup(opts)
+            routes = {
+               {
+                  filter = {
+                     event = 'msg_show',
+                     kind = { 'shell_out', 'shell_err' },
+                  },
+                  view = 'notify',
+                  opts = {
+                     level = 'info',
+                     skip = false,
+                     replace = false,
+                  },
+               },
+            },
+         })
+
+         vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
+            if not require('noice.lsp').scroll(4) then return '10j' end
+         end, { silent = true, expr = true })
+         vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
+            if not require('noice.lsp').scroll(-4) then return '10k' end
+         end, { silent = true, expr = true })
+
          vim.keymap.set('n', '<Leader>ii', function()
             vim.cmd('NoiceAll')
-            vim.defer_fn(function() vim.cmd('normal! G') end, 50)
+            vim.schedule(function()
+               for _, win in ipairs(vim.api.nvim_list_wins()) do
+                  local buf = vim.api.nvim_win_get_buf(win)
+                  if vim.bo[buf].filetype == 'noice' then
+                     vim.api.nvim_set_current_win(win)
+                     vim.api.nvim_win_call(win, function() vim.cmd('normal! Gzb') end)
+                     break
+                  end
+               end
+            end)
          end, { desc = 'Messages' })
       end,
    },
@@ -709,49 +763,70 @@ local M = {
             panel = { enabled = false },
             server = { type = 'binary' },
          })
-         vim.g._copilot_enabled = false
+         vim.g.__copilot_enabled = false
          vim.keymap.set('n', '<Leader>tc', function()
-            if vim.g._copilot_enabled then
+            if vim.g.__copilot_enabled then
                vim.cmd('Copilot disable')
                vim.notify('Copilot Disabled')
-               vim.g._copilot_enabled = false
+               vim.g.__copilot_enabled = false
             else
                vim.cmd('Copilot enable')
                vim.notify('Copilot Enabled')
-               vim.g._copilot_enabled = true
+               vim.g.__copilot_enabled = true
             end
          end, { desc = 'Toggle Copilot' })
       end,
    },
 
-   --Codecompanion
+   --Sidekick
    {
-      'olimorris/codecompanion.nvim',
+      'folke/sidekick.nvim',
       event = 'VeryLazy',
-      dependencies = {
-         'nvim-lua/plenary.nvim',
-         'ravitemer/codecompanion-history.nvim',
-         'lalitmee/codecompanion-spinners.nvim',
-      },
-      opts = {
-         display = {
-            chat = { auto_scroll = false },
-         },
-         extensions = {
-            history = { opts = { expiration_days = 30, title_generation_opts = { refresh_every_n_prompts = 5 } } },
-            spinner = { opts = { style = 'lualine' } },
-         },
-         ignore_warnings = true,
-      },
-      config = function(_, opts)
-         require('codecompanion').setup(opts)
-         vim.keymap.set('ca', 'cc', 'CodeCompanion')
-         vim.keymap.set(
-            { 'n', 'v' },
-            '<Leader>cc',
-            '<Cmd>CodeCompanionChat Toggle<CR><Cmd>wincmd =<CR>',
-            { desc = 'Code Companion Toggle Chat' }
-         )
+      config = function()
+         local sidekick = require('sidekick')
+         sidekick.setup({
+            cli = {
+               picker = 'fzf-lua',
+               mux = { enabled = true, backend = 'tmux' },
+               win = {
+                  split = { width = 0 },
+                  keys = { prompt = false, nav_left = false, nav_down = false, nav_up = false, nav_right = false },
+                  wo = { winfixwidth = false },
+               },
+            },
+         })
+
+         local cli = require('sidekick.cli')
+         local keymaps = {
+            {
+               'n',
+               '<leader>aa',
+               function() cli.toggle({ focus = true, filter = { cwd = true } }) end,
+               'Sidekick Toggle CLI',
+            },
+            { { 'n', 'x' }, '<leader>ap', function() cli.prompt() end, 'Sidekick Select Prompt' },
+            { 'n', '<leader>ad', function() cli.close() end, 'Detach a CLI Session' },
+            { { 'n', 'x' }, '<leader>at', function() cli.send({ msg = '{this}' }) end, 'Send This' },
+            { 'n', '<leader>af', function() cli.send({ msg = '{file}' }) end, 'Send File' },
+            { 'n', '<leader>as', function() cli.select({ filter = { installed = true } }) end, 'Select CLI' },
+            { 'x', '<leader>av', function() cli.send({ msg = '{selection}' }) end, 'Send Visual Selection' },
+            {
+               'n',
+               '<tab>',
+               function()
+                  if not sidekick.nes_jump_or_apply() then return '<Tab>' end
+               end,
+               'Goto/Apply Next Edit Suggestion',
+               { expr = true },
+            },
+         }
+         for _, km in ipairs(keymaps) do
+            vim.keymap.set(km[1], km[2], km[3], vim.tbl_extend('force', { desc = km[4] }, km[5] or {}))
+         end
+
+         -- Disable fix_cursorline as I don't want cursorline, and it causes a lot of flickering
+         local terminal = require('sidekick.cli.terminal')
+         function terminal:fix_cursorline() end
       end,
    },
 
@@ -760,38 +835,38 @@ local M = {
       'nvzone/floaterm',
       event = 'VeryLazy',
       dependencies = 'nvzone/volt',
-      opts = {
-         border = false,
-         size = { h = 80, w = 60 },
-         terminals = {
-            { name = 'Terminal' },
-         },
-         mappings = {
-            sidebar = function(buf)
-               local api = require('floaterm.api')
-               vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
-               vim.keymap.set('n', '<C-h>', api.switch_wins, { buffer = buf })
-               vim.keymap.set('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
-               vim.keymap.set('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
-               pcall(function() vim.keymap.del('n', '<Esc>', { buffer = buf }) end)
-            end,
-            term = function(buf)
-               local api = require('floaterm.api')
-               vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
-               vim.keymap.del('n', '<Esc>', { buffer = buf })
-            end,
-         },
-      },
-      config = function(_, opts)
+      config = function()
          local floaterm = require('floaterm')
-         floaterm.setup(opts)
-         vim.keymap.set({ 'n', 't' }, '<Bslash>', function()
-            local width = style.unit_width * 4
+         floaterm.setup({
+            border = false,
+            size = { h = 80 },
+            terminals = {
+               { name = 'Terminal' },
+            },
+            mappings = {
+               sidebar = function(buf)
+                  local api = require('floaterm.api')
+                  vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                  vim.keymap.set('n', '<C-h>', api.switch_wins, { buffer = buf })
+                  vim.keymap.set('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
+                  vim.keymap.set('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
+                  pcall(function() vim.keymap.del('n', '<Esc>', { buffer = buf }) end)
+                  pcall(function() vim.keymap.del('n', '<C-t>', { buffer = buf }) end)
+               end,
+               term = function(buf)
+                  local api = require('floaterm.api')
+                  vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
+                  vim.keymap.del('n', '<Esc>', { buffer = buf })
+                  pcall(function() vim.keymap.del('n', '<C-t>', { buffer = buf }) end)
+               end,
+            },
+         })
+         vim.keymap.set({ 'n', 't' }, '<C-t>', function()
+            local width = style.unit_width * 5
             local pct = math.floor(width / vim.o.columns * 100)
             require('floaterm.state').config.size.w = math.min(pct, 95)
             floaterm.toggle()
          end, { desc = 'Toggle Floaterm' })
-         vim.keymap.set('t', '<C-Bslash>', '<Bslash>', { desc = 'Toggle Floaterm' })
       end,
    },
 
@@ -898,6 +973,10 @@ local M = {
          { '<c-j>', '<cmd>TmuxNavigateDown<CR>' },
          { '<c-k>', '<cmd>TmuxNavigateUp<CR>' },
          { '<c-l>', '<cmd>TmuxNavigateRight<CR>' },
+         { '<c-h>', '<C-\\><C-n><cmd>TmuxNavigateLeft<CR>', mode = 't' },
+         { '<c-j>', '<C-\\><C-n><cmd>TmuxNavigateDown<CR>', mode = 't' },
+         { '<c-k>', '<C-\\><C-n><cmd>TmuxNavigateUp<CR>', mode = 't' },
+         { '<c-l>', '<C-\\><C-n><cmd>TmuxNavigateRight<CR>', mode = 't' },
       },
    },
 
@@ -913,12 +992,11 @@ local M = {
       dependencies = { 'nvzone/volt' },
       keys = { { '<leader>iw', '<Cmd>NvimWrapped<CR>', desc = 'NvimWrapped' } },
       cmd = { 'NvimWrapped' },
-      opts = {},
    },
 
    -- NOTE: Language Tools
 
-   -- Mason
+   --Mason
    {
       'williamboman/mason.nvim',
       dependencies = {
@@ -958,7 +1036,6 @@ local M = {
                   { '<Leader>ca', fzf.lsp_code_actions, 'Code Action', { 'n', 'x' } },
                }
                -- <Leader>cf = Code Format (Conform)
-               -- <Leader>cc = Code Companion Chat (Codecompanion)
 
                for _, km in ipairs(keymaps) do
                   vim.keymap.set(km[4] or 'n', km[1], km[2], { buffer = event.buf, desc = 'LSP: ' .. km[3] })
@@ -985,7 +1062,7 @@ local M = {
       'saghen/blink.cmp',
       event = 'VeryLazy',
       dependencies = {
-         { 'saghen/blink.compat', version = '*', opts = {} },
+         { 'saghen/blink.compat', version = '*' },
          'rafamadriz/friendly-snippets',
          'rcarriga/cmp-dap',
       },
@@ -995,11 +1072,13 @@ local M = {
       opts = {
          cmdline = {
             enabled = true,
-            keymap = {
-               preset = 'cmdline',
-               ['<CR>'] = { 'accept', 'fallback' },
+            keymap = { preset = 'inherit', ['<Tab>'] = false },
+            sources = { 'lazydev', 'buffer', 'cmdline' },
+            completion = {
+               list = { selection = { preselect = false, auto_insert = true } },
+               menu = { auto_show = true },
+               ghost_text = { enabled = false },
             },
-            completion = { ghost_text = { enabled = false } },
          },
          enabled = function()
             local disabled_filetypes = { 'gitcommit' }
@@ -1024,7 +1103,7 @@ local M = {
          },
          sources = {
             default = function()
-               local sources = { 'lsp', 'path', 'snippets' }
+               local sources = { 'lazydev', 'lsp', 'path', 'snippets' }
                if require('cmp_dap').is_dap_buffer() then
                   table.insert(sources, 'dap')
                else
@@ -1032,11 +1111,9 @@ local M = {
                end
                return sources
             end,
-            per_filetype = {
-               codecompanion = { 'codecompanion' },
-            },
             providers = {
                dap = { name = 'dap', module = 'blink.compat.source' },
+               lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
             },
          },
       },
@@ -1047,16 +1124,15 @@ local M = {
       'stevearc/conform.nvim',
       event = 'VeryLazy',
       init = function() vim.g.format_on_save = false end,
-      opts = {
-         notify_on_error = false,
-         format_on_save = function(_)
-            if not vim.g.format_on_save then return end
-            return { timeout_ms = 500, lsp_format = 'fallback' }
-         end,
-         formatters_by_ft = formatters_by_ft,
-      },
-      config = function(_, opts)
-         require('conform').setup(opts)
+      config = function()
+         require('conform').setup({
+            notify_on_error = false,
+            format_on_save = function(_)
+               if not vim.g.format_on_save then return end
+               return { timeout_ms = 500, lsp_format = 'fallback' }
+            end,
+            formatters_by_ft = formatters_by_ft,
+         })
          local disabled_filetypes = { 'toml' }
 
          vim.keymap.set({ 'n', 'v' }, '<Leader>cf', function()
@@ -1134,7 +1210,9 @@ local M = {
          -- Window highlight and close window keymap
          vim.api.nvim_create_autocmd('FileType', {
             pattern = 'neotest-output',
-            callback = function() vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = true, desc = 'Close Window' }) end,
+            callback = function(args)
+               vim.keymap.set('n', 'q', '<Cmd>:q<CR>', { buffer = args.buf, desc = 'Close Window' })
+            end,
          })
       end,
    },
@@ -1150,9 +1228,6 @@ local M = {
             display = { 'Classic' },
             selected_interpreters = { 'Python3_fifo', 'Lua_nvim' },
             repl_enable = { 'Python3_fifo' },
-            interpreter_options = {
-               Lua_nvim = { use_on_filetypes = { 'codecompanion' } },
-            },
          })
          vim.keymap.set({ 'n', 'v' }, '<Leader>r', '<Plug>SnipRun', { desc = ' Run Code' })
       end,
@@ -1183,7 +1258,7 @@ local M = {
    --RenderMarkdown
    {
       'MeanderingProgrammer/render-markdown.nvim',
-      ft = { 'markdown', 'codecompanion' },
+      ft = { 'markdown' },
       dependencies = {
          'nvim-treesitter/nvim-treesitter',
          'nvim-tree/nvim-web-devicons',
@@ -1202,6 +1277,7 @@ local M = {
             min_width = style.unit_width * 2,
             right_pad = 1,
          },
+         file_types = { 'markdown' },
       },
    },
 

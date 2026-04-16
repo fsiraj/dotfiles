@@ -55,6 +55,7 @@ keybind = ctrl+shift+k=goto_split:up
 keybind = ctrl+shift+l=goto_split:right
 keybind = ctrl+shift+x=close_surface
 keybind = ctrl+shift+equal=equalize_splits
+
 # Resolves conflicts with other things
 keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
@@ -63,4 +64,3 @@ keybind = ctrl+equal=unbind
 keybind = ctrl++=unbind
 keybind = ctrl+-=unbind
 keybind = ctrl+minus=unbind
-

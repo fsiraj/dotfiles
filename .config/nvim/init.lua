@@ -50,7 +50,7 @@ vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
--- Sets how neovim will display certain whitespace characters in the editor.
+-- Sets how Neovim will display certain whitespace characters in the editor.
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
@@ -68,7 +68,7 @@ vim.opt.scrolloff = 12
 vim.opt.showtabline = 0
 
 -- Disable defualt cmdline
-vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 
 -- Show dialogue instead of error
 vim.opt.confirm = true
@@ -97,16 +97,25 @@ vim.diagnostic.config({
 
 --NOTE: Keymaps
 
+-- <CR> expands abbreviations without needing to type <Space> or <Tab>
+vim.keymap.set('c', '<CR>', function() return vim.fn.getcmdtype() == ':' and '<C-]><CR>' or '<CR>' end, { expr = true })
+
+-- :wqa works even when terminal buffers are open
+vim.keymap.set('ca', 'wqa', 'wa | qa')
+
 -- Navigate wrapped lines as multiple lines
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
 
+-- Mouse scroll behaves like keyboard
+vim.keymap.set({ 'n', 'v' }, '<ScrollWheelDown>', '5j')
+vim.keymap.set({ 'n', 'v' }, '<ScrollWheelUp>', '5k')
+
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
-vim.keymap.set('n', '<Leader>tb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
+vim.keymap.set('n', 'gb', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
 vim.keymap.set('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 vim.keymap.set('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
-vim.keymap.set('n', '<C-_>', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Find Replace
 vim.keymap.set('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
@@ -115,22 +124,9 @@ vim.keymap.set('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selec
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
--- Keybinds to make split navigation easier.
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- Escape insert mode in terminal easier
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal Mode' })
-
--- Keymaps to scroll lsp hover and signature
-vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
-   if not require('noice.lsp').scroll(4) then return '10j' end
-end, { silent = true, expr = true })
-vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
-   if not require('noice.lsp').scroll(-4) then return '10k' end
-end, { silent = true, expr = true })
+-- Leave terminal mode without stealing plain <Esc> from terminal apps
+vim.keymap.set('t', '<C-]>', '<C-\\><C-n>', { desc = 'Terminal Normal Mode' })
+vim.keymap.set('n', '<C-]>', '<Nop>')
 
 -- Toggle diagnostic information
 vim.keymap.set('n', '<Leader>td', function()
@@ -143,12 +139,13 @@ end, { desc = 'LSP: Toggle Diagnostics' })
 vim.api.nvim_create_autocmd('TermOpen', {
    desc = 'Set buffer local options for terminals',
    group = vim.api.nvim_create_augroup('terminal', { clear = true }),
-   callback = function()
-      vim.bo.filetype = 'terminal'
-      vim.opt.number = false
-      vim.opt.relativenumber = false
-      vim.opt.cursorline = false
-      vim.keymap.set('n', '<CR>', 'i', { buffer = true })
+   callback = function(args)
+      local bo = vim.bo[args.buf]
+      if bo.filetype == '' then bo.filetype = 'terminal' end
+      vim.wo.number = false
+      vim.wo.relativenumber = false
+      vim.wo.cursorline = false
+      vim.keymap.set('n', '<CR>', 'i', { buffer = args.buf })
    end,
 })
 
@@ -175,6 +172,21 @@ vim.api.nvim_create_autocmd({ 'CursorHold' }, {
 })
 
 vim.keymap.set('n', '<Leader>cq', function() open_diagnostic_float(true) end, { desc = 'Focus diagnostic float' })
+
+--Prevent W12 prompt everytime a change is made to the buffer outside Neovim
+vim.api.nvim_create_autocmd('FileChangedShell', {
+   callback = function(args)
+      if vim.bo[args.buf].modified then
+         vim.v.fcs_choice = 'ask'
+         return
+      end
+      vim.v.fcs_choice = 'reload'
+      vim.notify(
+         ('Reloaded %s because it changed on disk'):format(vim.fn.fnamemodify(args.file, ':~:.')),
+         vim.log.levels.WARN
+      )
+   end,
+})
 
 --NOTE: Plugins
 
