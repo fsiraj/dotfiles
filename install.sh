@@ -1,25 +1,20 @@
 #!/bin/bash
 
-# Global variable for OS detection
 OS=""
 
-# XDG directories
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_BIN_HOME="$HOME/.local/bin"
 
-# Install URLs
 BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
 
-# Color codes for logging
 COLOR_INFO="1;36"     # Cyan
 COLOR_STEP="1;35"     # Magenta
 COLOR_SUCCESS="1;34"  # Blue
 COLOR_COMPLETE="1;32" # Green
 COLOR_ERROR="1;31"    # Red
 
-# Colored logging function
 log() {
     msg="$1"
     color="${2:-$COLOR_INFO}"
@@ -27,12 +22,10 @@ log() {
     printf "\033[%sm%s %s\033[0m\n" "$color" "$emoji" "$msg"
 }
 
-# Check if a command exists
 installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Clone a repo or pull if it exists
 clone_or_pull() {
     local url="$1"
     local dest="$2"
@@ -44,7 +37,6 @@ clone_or_pull() {
     fi
 }
 
-# Install tool if not present, otherwise update
 install_or_update() {
     local tool="$1"
     local install_cmd="$2"
@@ -57,7 +49,6 @@ install_or_update() {
     fi
 }
 
-# Detect the operating system
 detect_os() {
     log "Detecting operating system..." "$COLOR_STEP" "🔍"
 
@@ -84,7 +75,6 @@ detect_os() {
     log "Detected OS: $OS" "$COLOR_SUCCESS" "✅"
 }
 
-# Install packages for macOS
 install_macos_packages() {
     log "Installing packages for macOS..." "$COLOR_STEP" "📦"
 
@@ -97,7 +87,7 @@ install_macos_packages() {
     fi
     # shellcheck disable=2034
     brew install --quiet \
-        git make unzip gnu-sed zsh tmux stow \
+        git make unzip gnu-sed tmux stow \
         fzf zoxide eza fd ripgrep bat fastfetch \
         node imagemagick \
         jandedobbeleer/oh-my-posh/oh-my-posh \
@@ -108,7 +98,6 @@ install_macos_packages() {
     log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
-# Install packages for Ubuntu
 install_ubuntu_packages() {
     log "Installing packages for ubuntu..." "$COLOR_STEP" "📦"
 
@@ -118,8 +107,8 @@ install_ubuntu_packages() {
     if ! installed brew; then
         /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
         printf "%s\n" "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)\"" >>"$HOME/.zshrc.local"
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
     fi
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     brew install --quiet \
         fzf zoxide eza fd ripgrep bat fastfetch \
@@ -137,7 +126,6 @@ install_ubuntu_packages() {
     log "ubuntu packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
-# Install packages for Arch Linux
 install_arch_packages() {
     log "Installing packages for arch..." "$COLOR_STEP" "📦"
 
@@ -158,7 +146,6 @@ install_arch_packages() {
     log "arch packages installed!" "$COLOR_SUCCESS" "🎉"
 }
 
-# Install packages based on OS
 install_packages() {
     case "$OS" in
     macos)
@@ -173,7 +160,6 @@ install_packages() {
     esac
 }
 
-# Setup language tools
 setup_language_tools() {
     log "Setting up language tools..." "$COLOR_STEP" "🛠️"
 
@@ -198,7 +184,6 @@ setup_language_tools() {
     log "tree-sitter-cli installed!" "$COLOR_SUCCESS" "🌲"
 }
 
-# Setup zsh shell
 setup_shell() {
     log "Setting up zsh..." "$COLOR_STEP" "🐚"
 
@@ -208,7 +193,7 @@ setup_shell() {
     fi
     if ! grep -q 'export ZDOTDIR=' "$HOME/.zshenv"; then
         # shellcheck disable=SC2016
-        echo 'export ZDOTDIR="$HOME/.config/zsh"' >>"$HOME/.zshenv"
+        printf 'export ZDOTDIR="$HOME/.config/zsh"\nsource "$ZDOTDIR/.zshenv"\n' >>"$HOME/.zshenv"
     fi
 
     log "shell set to zsh!" "$COLOR_SUCCESS" "🐚"
@@ -217,24 +202,23 @@ setup_shell() {
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
-    # shellcheck disable=SC1091
-    source "$ZINIT_HOME/zinit.zsh"
-    zinit update
-
     log "zinit installed!" "$COLOR_SUCCESS" "🔌"
+
+    # Update zsh plugins
+    zsh -c "source '$ZINIT_HOME/zinit.zsh' && zinit update --quiet && compinit"
+    log "zsh plugins updated!" "$COLOR_SUCCESS" "🔌"
+
 }
 
-# Setup dotfiles
 setup_dotfiles() {
     log "Setting up dotfiles..." "$COLOR_STEP" "📁"
 
     clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
-    stow -d "$HOME/dotfiles" -t "$HOME/.config" .config
+    stow -v -d "$HOME/dotfiles" -t "$HOME/.config" .config
 
     log "dotfiles stowed!" "$COLOR_SUCCESS" "🔗"
 }
 
-# Setup tmux plugins
 setup_tmux_plugins() {
     log "Setting up tmux plugins..." "$COLOR_STEP" "🪟"
 
@@ -251,7 +235,6 @@ setup_tmux_plugins() {
     log "tmux plugins installed!" "$COLOR_SUCCESS" "🔌"
 }
 
-# Setup neovim plugins
 setup_neovim_plugins() {
     log "Setting up neovim..." "$COLOR_STEP" "💤"
 
@@ -261,7 +244,6 @@ setup_neovim_plugins() {
     echo "" && log "neovim plugins and language tools installed!" "$COLOR_SUCCESS" "🔌"
 }
 
-# Main installation function
 main() {
     detect_os
     install_packages
@@ -273,5 +255,4 @@ main() {
     log "Setup complete!" "$COLOR_COMPLETE" "✅"
 }
 
-# Run main function
 main "$@"
