@@ -88,7 +88,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 > - **Editor:** [Neovim](https://neovim.io/) - The hyperextensible Vim-based text editor
 >   - **Plugin Manager:** [Lazy](https://github.com/folke/lazy.nvim) - Modern plugin manager
 > - **Multiplexing:** [tmux](https://github.com/tmux/tmux) - Terminal workspace management
-> - **Plugin Manager:** [tpm](https://github.com/tmux-plugins/tpm) - Tmux plugin manager
+>   - **Plugin Manager:** [tpm](https://github.com/tmux-plugins/tpm) - Tmux plugin manager
+> - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim):
+>   - [Claude Code](https://claude.ai/code) - Agentic coding tool by Anthropic
+>   - [OpenCode](https://opencode.ai/) - Open-source AI coding agent
 
 #### 🔧 **Languages**
 
@@ -103,7 +106,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 ## 🌈 Theme System
 
-> Works perfectly for the 6 themes (and most of their variants) showcased above
+> Works perfectly for the 6 themes and their variants showcased above
 
 **Synchronized theming across all applications!**
 

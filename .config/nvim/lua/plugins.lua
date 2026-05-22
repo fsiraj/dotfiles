@@ -1,26 +1,14 @@
-local style = require('style')
+local ui = require('ui')
 
 -- Applies highlight overrides on ColorScheme event
-style.setup_hl_autocmd()
-style.set_buffer_normal_autocmds()
+ui.setup_hl_autocmd()
+ui.set_buffer_normal_autocmds()
 
 -- Language support
 
 local language_servers = {
    -- Python
-   basedpyright = {
-      settings = {
-         basedpyright = {
-            analysis = {
-               diagnosticMode = 'openFilesOnly',
-               typeCheckingMode = 'standard',
-               autoSearchPaths = true,
-               useLibraryCodeForTypes = true,
-               diagnosticSeverityOverrides = {},
-            },
-         },
-      },
-   },
+   ty = {},
    ruff = {},
    -- Lua
    lua_ls = {
@@ -117,9 +105,8 @@ local function lsp_inlay_hints(event)
 end
 
 -- Plugin config
-local M = {
-   -- NOTE: Essentials
 
+local essential_plugins = {
    --Mini
    {
       'echasnovski/mini.nvim',
@@ -179,6 +166,7 @@ local M = {
 
          vim.opt.sessionoptions:append('globals')
          vim.opt.sessionoptions:remove('terminal')
+         vim.opt.sessionoptions:remove('blank')
 
          local function postread()
             if vim.g.SidekickTool == nil or vim.g.SidekickTool == '' then return end
@@ -191,6 +179,7 @@ local M = {
             require('sidekick.cli').close()
             require('neo-tree.command').execute({ action = 'close' })
             require('outline').close()
+            require('neogit').close()
             vim.cmd('helpclose')
          end
 
@@ -227,12 +216,11 @@ local M = {
             if found then sessions.delete(session_name) end
          end, { desc = 'Session Delete' })
 
-         vim.keymap.set('n', '<Leader>SR', function()
+         vim.keymap.set('n', '<Leader>R', function()
             local _, session_name = find_session()
-            sessions.write(session_name)
             require('noice').disable()
-            local cmd = string.format([[require("mini.sessions").read(%q)]], session_name)
-            vim.cmd('restart lua ' .. cmd)
+            sessions.write(session_name)
+            vim.cmd('restart lua require("mini.sessions").read(' .. session_name .. ')')
          end, { desc = 'Session Restart', nowait = true })
 
          vim.keymap.set('n', '<Leader>Ss', sessions.select, { desc = 'Session Select' })
@@ -255,12 +243,12 @@ local M = {
                   { section = 'header' },
                   { section = 'startup' },
                },
-               preset = { header = style.neovim_logo },
+               preset = { header = ui.neovim_logo },
             },
          })
          vim.keymap.set('n', '<Leader>gb', snacks.git.blame_line, { desc = 'Blame' })
          vim.keymap.set({ 'n', 'v' }, '<Leader>gB', snacks.gitbrowse.open, { desc = 'Browser' })
-         style.colorize_snacks_dashboard()
+         ui.colorize_snacks_dashboard()
       end,
    },
 
@@ -272,7 +260,7 @@ local M = {
          {
             '<Leader>?',
             function() require('which-key').show({ global = false }) end,
-            desc = ' [?] Which Key: Buffer Local Keymaps',
+            desc = 'Buffer Local Keymaps',
          },
       },
       opts = {
@@ -285,12 +273,13 @@ local M = {
          },
          icons = { mappings = true, keys = {} },
          spec = {
+            { '<Leader>a', group = 'Agent', icon = { icon = ' ', color = 'orange' } },
             { '<Leader>i', group = 'Info', icon = { icon = ' ', color = 'cyan' } },
             { '<Leader>c', group = 'Code', mode = { 'n', 'x' }, icon = { icon = ' ', color = 'orange' } },
             { '<Leader>d', group = 'Debug', icon = { icon = ' ', color = 'red' } },
             { '<Leader>s', group = 'Search', icon = { icon = ' ', color = 'green' } },
             { '<Leader>S', group = 'Sessions', icon = { icon = '󰙰 ', color = 'purple' } },
-            { '<Leader>f', group = 'F', icon = { icon = '󰈢 ', color = 'azure' } },
+            { '<Leader>f', group = 'File', icon = { icon = '󰈢 ', color = 'azure' } },
             { '<Leader>t', group = 'Toggle', icon = { icon = ' ', color = 'yellow' } },
             { '<Leader>n', group = 'Neotest', icon = { icon = ' ', color = 'azure' } },
             { '<Leader>g', group = 'Git', mode = { 'n', 'v' }, icon = { cat = 'filetype', name = 'git' } },
@@ -311,9 +300,10 @@ local M = {
             defaults = { formatter = 'path.filename_first' },
             fzf_colors = { ['bg'] = '-1' },
             winopts = {
-               width = math.min(style.unit_width * 4, math.floor(0.8 * vim.o.columns)),
+               width = math.min(ui.unit_width * 4, math.floor(0.8 * vim.o.columns)),
                height = 0.8,
                row = 0.5,
+               backdrop = false,
             },
             hls = { title = 'FloatTitle' },
             keymap = {
@@ -335,7 +325,7 @@ local M = {
                   ['enter'] = function(selected, _)
                      if #selected == 0 then return end
                      local colorscheme = selected[1]:match('^[^:]+')
-                     local ok = pcall(function() style.sync_theme(colorscheme) end)
+                     local ok = pcall(function() ui.sync_theme(colorscheme) end)
                      if not ok then vim.notify('Failed to load ' .. colorscheme, vim.log.levels.ERROR) end
                   end,
                },
@@ -343,7 +333,7 @@ local M = {
             grep = { hidden = true },
             buffers = {
                previewer = false,
-               winopts = { height = 16, width = style.unit_width * 2 },
+               winopts = { height = 16, width = ui.unit_width * 2 },
             },
             ui_select = function(fzf_opts, items)
                return {
@@ -351,7 +341,7 @@ local M = {
                   winopts = {
                      title = ' ' .. vim.trim((fzf_opts.prompt or 'Select'):gsub('%s*:%s*$', '')) .. ' ',
                      title_pos = 'center',
-                     width = style.unit_width * 2,
+                     width = ui.unit_width * 2,
                      height = math.ceil(math.min(vim.o.lines * 0.8, #items + 4)),
                   },
                }
@@ -359,31 +349,32 @@ local M = {
          })
 
          -- Custom pickers
-         local magic_colorschemes = function() return fzf.colorschemes({ colors = style.colorschemes }) end
+         local magic_colorschemes = function() return fzf.colorschemes({ colors = ui.colorschemes }) end
          local plugins = function() fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end
          local dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
 
          local keymaps = {
-            { 'n', '<Leader>sb', fzf.builtin, 'Search Builtin' },
-            { 'n', '<Leader>sr', fzf.resume, 'Search Resume' },
-            { 'n', '<Leader>sf', fzf.files, 'Search Files' },
-            { 'n', '<Leader>so', fzf.oldfiles, 'Search Oldfiles' },
-            { 'n', '<Leader>sw', fzf.grep_cword, 'Search Current Word' },
-            { 'n', '<Leader>sg', fzf.live_grep, 'Search by Grep' },
-            { 'n', '<Leader>sh', fzf.helptags, 'Search Help' },
-            { 'n', '<Leader>sH', fzf.highlights, 'Search Highlights' },
-            { 'n', '<Leader>sc', magic_colorschemes, 'Search Magic Colorschemes' },
-            { 'n', '<Leader>sC', fzf.colorschemes, 'Search All Colorschemes' },
-            { 'n', '<Leader>sk', fzf.keymaps, 'Search Keymaps' },
-            { 'v', '<Leader>ss', fzf.grep_visual, 'Search Selection' },
-            { 'n', '<Leader>/', fzf.lgrep_curbuf, ' [/] Fuzzy Search Current Buffer' },
-            { 'n', '<Leader>sd', dotfiles, 'Search Dotfiles' },
-            { 'n', '<Leader>sp', plugins, 'Search Plugins' },
-            { 'n', '<Leader><Leader>', fzf.buffers, ' [ ] Find Existing Buffers' },
+            { 'n', '<Leader>sb', fzf.builtin, 'Builtin' },
+            { 'n', '<Leader>sr', fzf.resume, 'Resume' },
+            { 'n', '<Leader>sf', fzf.files, 'Files' },
+            { 'n', '<Leader>so', fzf.oldfiles, 'Oldfiles' },
+            { 'n', '<Leader>sw', fzf.grep_cword, 'Current Word' },
+            { 'n', '<Leader>sg', fzf.live_grep, 'Grep' },
+            { 'n', '<Leader>sh', fzf.helptags, 'Help' },
+            { 'n', '<Leader>sH', fzf.highlights, 'Highlights' },
+            { 'n', '<Leader>sc', magic_colorschemes, 'Magic Colorschemes' },
+            { 'n', '<Leader>sC', fzf.colorschemes, 'All Colorschemes' },
+            { 'n', '<Leader>sk', fzf.keymaps, 'Keymaps' },
+            { 'v', '<Leader>ss', fzf.grep_visual, 'Selection' },
+            { 'n', '<Leader>/', fzf.lgrep_curbuf, 'Current Buffer' },
+            { 'n', '<Leader>sd', dotfiles, 'Dotfiles' },
+            { 'n', '<Leader>sp', plugins, 'Plugins' },
+            { 'n', '<Leader><Leader>', fzf.buffers, 'Open Buffers' },
+            { 'n', '<Leader>st', '<Cmd>TodoFzfLua<CR>', 'Search Todos' },
+            { 'n', '<Leader>ss', '<Cmd>Namu symbols<CR>', 'Search Symbols Buffer' },
+            { 'n', '<Leader>sS', '<Cmd>Namu workspace<CR>', 'Search Symbols Workspace' },
+            { 'n', '<Leader>sq', '<Cmd>Namu diagnostics<CR>', 'Search Diagnostics' },
          }
-         -- <Leader>ss = Search Symbol Buffer (Namu)
-         -- <Leader>sS = Search Symbol Workspace (Namu)
-         -- <Leader>sq = Search Quickfix (Namu)
 
          for _, map in ipairs(keymaps) do
             vim.keymap.set(map[1], map[2], map[3], { desc = 'FzfLua: ' .. map[4] })
@@ -404,6 +395,26 @@ local M = {
             return clone
          end
       end,
+   },
+
+   --Namu
+   {
+      'bassamsdata/namu.nvim',
+      cmd = { 'Namu' },
+      opts = {
+         namu_symbols = {
+            options = {
+               display = { mode = 'icon', format = 'tree_guides' },
+               window = { relative = 'win' },
+               AllowKinds = {
+                  --stylua: ignore
+                  rust = {
+                     'Function', 'Method', 'Struct', 'Field', 'Enum', 'Constant', 'Variable', 'Module', 'Property',
+                  },
+               },
+            },
+         },
+      },
    },
 
    --Treesitter
@@ -455,284 +466,9 @@ local M = {
       'nmac427/guess-indent.nvim',
       config = true,
    },
+}
 
-   -- NOTE: Styling
-
-   --TinyDeviconsAutoColors
-   {
-      'rachartier/tiny-devicons-auto-colors.nvim',
-      dependencies = { 'nvim-tree/nvim-web-devicons' },
-      event = 'VeryLazy',
-      config = function() require('tiny-devicons-auto-colors').setup({ autoreload = false }) end,
-   },
-
-   --Lualine
-   {
-      'nvim-lualine/lualine.nvim',
-      event = 'VeryLazy',
-      dependencies = {
-         'nvim-tree/nvim-web-devicons',
-         'folke/noice.nvim',
-      },
-      config = function()
-         -- Custom components
-         local copilot_icon = ' '
-         local mode = {
-            function() return string.upper(vim.api.nvim_get_mode().mode) end,
-         }
-         local branch = { 'branch', icon = '' }
-         local tabs = {
-            'tabs',
-            cond = function() return #vim.fn.gettabinfo() > 1 end,
-            show_modified_status = true,
-            tabs_color = {
-               active = { fg = vim.g.palette.green },
-               inactive = 'lualine_b_normal',
-            },
-         }
-         local lsp_status = {
-            'lsp_status',
-            icon = '󱚠 ',
-            ignore_lsp = { 'copilot' },
-         }
-         local dap_status = {
-            function() return require('dap').status() end,
-            icon = { ' ', color = { fg = vim.g.palette.red } },
-            cond = function()
-               if not package.loaded.dap then return false end
-               return require('dap').session() ~= nil
-            end,
-         }
-         local noice = require('noice')
-         local showmode = {
-            noice.api.status.mode.get, ---@diagnostic disable-line
-            cond = noice.api.status.mode.has, ---@diagnostic disable-line
-         }
-         local showcmd = {
-            noice.api.status.command.get, ---@diagnostic disable-line
-            cond = noice.api.status.command.has, ---@diagnostic disable-line
-         }
-         local text = function(t)
-            return function() return t end
-         end
-         local copilot_status = {
-            function() return copilot_icon end,
-            color = function()
-               local status = require('sidekick.status').get()
-               if status then
-                  return status.kind == 'Error' and 'DiagnosticError' or status.busy and 'DiagnosticWarn' or 'Special'
-               end
-            end,
-            cond = function()
-               local ok, status = pcall(require, 'sidekick.status')
-               return ok and status.get() ~= nil
-            end,
-         }
-
-         -- Custom extensions
-
-         -- Minimal
-         local minimal = {
-            winbar = { lualine_b = { 'filetype' } },
-            inactive_winbar = { lualine_a = { 'filetype' } },
-            filetypes = {
-               'qf',
-               'checkhealth',
-               'noice',
-               'codediff-explorer',
-               'dap-view-term',
-               'neotest-summary',
-               'neo-tree',
-               'Outline',
-            },
-         }
-
-         -- Terminal (No filetype)
-         local terminal = {
-            winbar = {
-               lualine_a = { text('Terminal') },
-               lualine_y = { showcmd },
-            },
-            inactive_winbar = {
-               lualine_a = { text('Terminal') },
-               lualine_c = { text(' ') },
-            },
-            filetypes = { 'terminal' },
-         }
-
-         -- Sidekick
-         local sidekick_cli_name = function()
-            local win = vim.api.nvim_get_current_win()
-            local buf = vim.api.nvim_win_get_buf(win)
-            local cli = vim.b[buf].sidekick_cli or vim.w[win].sidekick_cli
-            return cli.name:gsub('^%l', string.upper)
-         end
-
-         local sidekick_padding = function()
-            local name = sidekick_cli_name()
-            local pad = vim.api.nvim_win_get_width(0)
-               - vim.fn.strdisplaywidth(name)
-               - vim.fn.strdisplaywidth(copilot_icon)
-               - 6
-            return (' '):rep(pad)
-         end
-
-         local sidekick = {
-            winbar = {
-               lualine_a = { sidekick_cli_name },
-               lualine_y = { sidekick_padding },
-               lualine_z = { text(copilot_icon) },
-            },
-            filetypes = { 'sidekick_terminal' },
-         }
-         sidekick.inactive_winbar = vim.deepcopy(sidekick.winbar)
-
-         -- Lualine config
-         require('lualine').setup({
-            options = {
-               icons = true,
-               theme = 'custom',
-               section_separators = { left = '', right = '' },
-               component_separators = { left = '|', right = '|' },
-               disabled_filetypes = {
-                  winbar = {
-                     'dap-repl',
-                     'dap-view',
-                     'snacks_dashboard',
-                     'toggleterm',
-                  },
-               },
-            },
-            extensions = { minimal, terminal, sidekick },
-            sections = {},
-            inactive_sections = {},
-            winbar = {
-               lualine_a = { mode, 'filename' },
-               lualine_b = { tabs, branch, 'diff', 'diagnostics' },
-               lualine_c = { dap_status },
-               lualine_x = { showmode, copilot_status },
-               lualine_y = { showcmd, 'filetype' },
-               lualine_z = { lsp_status },
-            },
-            inactive_winbar = {
-               lualine_a = { 'filename' },
-               lualine_c = { text(' ') },
-            },
-         })
-      end,
-   },
-
-   --Noice
-   {
-      'folke/noice.nvim',
-      event = 'VeryLazy',
-      dependencies = { 'MunifTanjim/nui.nvim' },
-      config = function()
-         require('noice').setup({
-            cmdline = { enabled = true, format = {} },
-            messages = { enabled = true },
-            notify = { enabled = true },
-            popupmenu = { enabled = false },
-            lsp = {
-               progress = { enabled = false },
-               hover = { enabled = true },
-               signature = { enabled = true },
-               override = {
-                  ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
-                  ['vim.lsp.util.stylize_markdown'] = true,
-               },
-            },
-            views = {
-               mini = {
-                  timeout = 5000,
-                  size = { max_width = style.unit_width * 2 },
-                  reverse = false,
-                  position = { row = 1, col = '100%' },
-                  win_options = {
-                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
-                     winblend = 0,
-                  },
-               },
-               cmdline_popup = {
-                  size = {
-                     min_width = style.unit_width,
-                     max_width = style.unit_width * 2,
-                  },
-                  border = { style = 'none', padding = { 1, 2 } },
-                  filter_options = {},
-                  win_options = {
-                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
-                     wrap = true,
-                  },
-               },
-               cmdline_input = {
-                  border = { style = 'solid', padding = { 0, 2 } },
-               },
-               confirm = {
-                  position = { row = '50%' },
-               },
-            },
-            routes = {
-               {
-                  filter = {
-                     event = 'msg_show',
-                     kind = { 'shell_out', 'shell_err' },
-                  },
-                  view = 'notify',
-                  opts = {
-                     level = 'info',
-                     skip = false,
-                     replace = false,
-                  },
-               },
-            },
-         })
-
-         vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
-            if not require('noice.lsp').scroll(4) then return '10j' end
-         end, { silent = true, expr = true })
-         vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
-            if not require('noice.lsp').scroll(-4) then return '10k' end
-         end, { silent = true, expr = true })
-
-         vim.keymap.set('n', '<Leader>ii', function()
-            vim.cmd('NoiceAll')
-            vim.schedule(function()
-               for _, win in ipairs(vim.api.nvim_list_wins()) do
-                  local buf = vim.api.nvim_win_get_buf(win)
-                  if vim.bo[buf].filetype == 'noice' then
-                     vim.api.nvim_set_current_win(win)
-                     vim.api.nvim_win_call(win, function() vim.cmd('normal! Gzb') end)
-                     break
-                  end
-               end
-            end)
-         end, { desc = 'Messages' })
-      end,
-   },
-
-   --TinyGlimmer
-   {
-      'rachartier/tiny-glimmer.nvim',
-      event = 'VeryLazy',
-      priority = 10,
-      config = function()
-         require('tiny-glimmer').setup({
-            overwrite = {
-               yank = style.tiny_glimmer_animation(vim.g.palette.accent),
-               paste = style.tiny_glimmer_animation(),
-               undo = style.tiny_glimmer_animation(),
-               redo = style.tiny_glimmer_animation(),
-            },
-            animations = {
-               fade = { min_duration = 1000, max_duration = 1000 },
-            },
-         })
-      end,
-   },
-
-   --NOTE: Extras
-
+local extra_plugins = {
    --Neogit
    {
       'NeogitOrg/neogit',
@@ -744,7 +480,13 @@ local M = {
          'esmuellert/codediff.nvim',
          'ibhagwan/fzf-lua',
       },
-      config = true,
+      opts = {
+         mappings = {
+            status = {
+               ['<c-t>'] = false,
+            },
+         },
+      },
    },
 
    --CodeDiff
@@ -774,16 +516,13 @@ local M = {
       'zbirenbaum/copilot.lua',
       cmd = 'Copilot',
       build = ':Copilot auth',
-      keys = { '<Leader>tc', desc = 'Toggle Copilot' },
+      keys = '<Leader>tc',
       config = function()
          require('copilot').setup({
             suggestion = {
                enabled = true,
                auto_trigger = true,
-               keymap = {
-                  accept = '<S-Tab>',
-                  accept_word = '<C-l>',
-               },
+               keymap = { accept = '<S-Tab>', accept_word = '<C-l>' },
             },
             panel = { enabled = false },
             server = { type = 'binary' },
@@ -813,6 +552,7 @@ local M = {
             cli = {
                picker = 'fzf-lua',
                mux = { enabled = true, backend = 'tmux' },
+               tools = { claude = { native_scroll = true } },
                win = {
                   split = { width = 0 },
                   keys = {
@@ -829,24 +569,17 @@ local M = {
             },
          })
 
+         local session = require('sidekick.cli.session')
+         local sid = session.sid
+         session.sid = function(opts) return '_' .. sid(opts) end ---@diagnostic disable-line
+
          local cli = require('sidekick.cli')
+         local opts = { filter = { installed = true } }
          local keymaps = {
-            {
-               'n',
-               '<leader>aa',
-               function() cli.toggle({ focus = true, filter = { cwd = true } }) end,
-               'Sidekick Toggle CLI',
-            },
-            {
-               'n',
-               '<leader>as',
-               function()
-                  cli.close()
-                  cli.select({ filter = { installed = true } })
-               end,
-               'Select CLI',
-            },
-            { { 'n', 'x' }, '<leader>ap', function() cli.prompt() end, 'Sidekick Select Prompt' },
+            -- stylua: ignore
+            { 'n', '<leader>as', function() cli.close(); cli.select(opts) end, 'Select CLI' },
+            { 'n', '<leader>aa', function() cli.toggle(opts) end, 'Toggle CLI' },
+            { { 'n', 'x' }, '<leader>ap', function() cli.prompt() end, 'Select Prompt' },
             { 'n', '<leader>ad', function() cli.close() end, 'Detach a CLI Session' },
             { { 'n', 'x' }, '<leader>at', function() cli.send({ msg = '{this}' }) end, 'Send This' },
             { 'n', '<leader>af', function() cli.send({ msg = '{file}' }) end, 'Send File' },
@@ -878,9 +611,10 @@ local M = {
       dependencies = 'nvzone/volt',
       config = function()
          local floaterm = require('floaterm')
+         local max_scale = 90
          floaterm.setup({
             border = false,
-            size = { h = 80 },
+            size = { h = max_scale },
             terminals = {
                { name = 'Terminal' },
             },
@@ -898,41 +632,18 @@ local M = {
                   local api = require('floaterm.api')
                   vim.keymap.set('n', '<C-l>', api.switch_wins, { buffer = buf })
                   vim.keymap.del('n', '<Esc>', { buffer = buf })
+                  vim.keymap.del('n', 'q', { buffer = buf })
                   pcall(function() vim.keymap.del('n', '<C-t>', { buffer = buf }) end)
                end,
             },
          })
          vim.keymap.set({ 'n', 't' }, '<C-t>', function()
-            local width = style.unit_width * 5
+            local width = ui.unit_width * 5
             local pct = math.floor(width / vim.o.columns * 100)
-            require('floaterm.state').config.size.w = math.min(pct, 95)
+            require('floaterm.state').config.size.w = math.min(pct, max_scale)
             floaterm.toggle()
          end, { desc = 'Toggle Floaterm' })
       end,
-   },
-
-   --Namu
-   {
-      'bassamsdata/namu.nvim',
-      keys = {
-         { '<leader>ss', '<Cmd>Namu symbols<CR>', desc = 'Namu: Search Symbols Buffer' },
-         { '<leader>sS', '<Cmd>Namu workspace<CR>', desc = 'Namu: Search Symbols Workspace' },
-         { '<leader>sq', '<Cmd>Namu diagnostics<CR>', desc = 'Namu: Search Quickfix' },
-      },
-      opts = {
-         namu_symbols = {
-            options = {
-               display = { mode = 'icon', format = 'tree_guides' },
-               window = { relative = 'win' },
-               AllowKinds = {
-                  --stylua: ignore
-                  rust = {
-                     'Function', 'Method', 'Struct', 'Field', 'Enum', 'Constant', 'Variable', 'Module', 'Property',
-                  },
-               },
-            },
-         },
-      },
    },
 
    --Outline
@@ -943,7 +654,7 @@ local M = {
       },
       opts = {
          outline_window = {
-            split_command = style.unit_width .. 'vsplit',
+            split_command = ui.unit_width .. 'vsplit',
             winhl = 'Normal:NormalFloat',
          },
          outline_items = { show_symbol_details = true },
@@ -966,7 +677,7 @@ local M = {
       opts = {
          enable_git_status = false,
          enable_diagnostics = false,
-         window = { width = style.unit_width },
+         window = { width = ui.unit_width },
          filesystem = {
             filtered_items = { children_inherit_highlights = false },
          },
@@ -996,12 +707,6 @@ local M = {
    {
       'christoomey/vim-tmux-navigator',
       init = function() vim.g.tmux_navigator_no_mappings = 1 end,
-      cmd = {
-         'TmuxNavigateLeft',
-         'TmuxNavigateDown',
-         'TmuxNavigateUp',
-         'TmuxNavigateRight',
-      },
       keys = {
          { '<c-h>', '<cmd>TmuxNavigateLeft<CR>' },
          { '<c-j>', '<cmd>TmuxNavigateDown<CR>' },
@@ -1027,9 +732,9 @@ local M = {
       keys = { { '<leader>iw', '<Cmd>NvimWrapped<CR>', desc = 'NvimWrapped' } },
       cmd = { 'NvimWrapped' },
    },
+}
 
-   -- NOTE: Language Tools
-
+local language_plugins = {
    --Mason
    {
       'williamboman/mason.nvim',
@@ -1080,15 +785,16 @@ local M = {
             end,
          })
 
-         require('mason-lspconfig').setup({
-            automatic_enable = { exclude = { 'rust_analyzer' } },
-            ensure_installed = vim.tbl_keys(language_servers),
-         })
-
          -- Add custom configs to LSPs
          for server_name, server_config in pairs(language_servers) do
             vim.lsp.config(server_name, server_config)
          end
+
+         -- Automatically install and enable
+         require('mason-lspconfig').setup({
+            automatic_enable = { exclude = { 'rust_analyzer' } },
+            ensure_installed = vim.tbl_keys(language_servers),
+         })
       end,
    },
 
@@ -1106,7 +812,12 @@ local M = {
       opts = {
          cmdline = {
             enabled = true,
-            keymap = { preset = 'cmdline', ['<Left>'] = false, ['<Right>'] = false },
+            keymap = {
+               preset = 'cmdline',
+               ['<CR>'] = { 'accept', 'fallback' },
+               ['<Left>'] = false,
+               ['<Right>'] = false,
+            },
             sources = { 'lazydev', 'buffer', 'cmdline' },
             completion = {
                list = { selection = { preselect = false, auto_insert = true } },
@@ -1124,7 +835,7 @@ local M = {
          completion = {
             menu = {
                auto_show = function(ctx) return ctx.mode ~= 'cmdline' end,
-               draw = { components = { label = { width = { max = style.unit_width } } } },
+               draw = { components = { label = { width = { max = ui.unit_width } } } },
             },
             documentation = { auto_show = true, auto_show_delay_ms = 50 },
          },
@@ -1132,6 +843,7 @@ local M = {
             preset = 'enter',
             ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
             ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
+            ['<Esc>'] = { function(cmp) cmp.hide() end, 'fallback' },
          },
          appearance = {
             use_nvim_cmp_as_default = true,
@@ -1223,7 +935,7 @@ local M = {
             adapters = {
                require('neotest-python')({}),
             },
-            summary = { open = style.unit_width .. 'vsplit' },
+            summary = { open = ui.unit_width .. 'vsplit' },
             output = { open_on_run = false },
          })
 
@@ -1303,16 +1015,8 @@ local M = {
       ---@type render.md.UserConfig
       opts = {
          sign = { enabled = false },
-         heading = {
-            width = 'block',
-            icons = { '󰉫 : ', '󰉬 : ', '󰉭 : ', '󰉮 : ', '󰉯 : ', '󰉰 : ' },
-            right_pad = 1,
-         },
-         code = {
-            width = 'block',
-            min_width = style.unit_width * 2,
-            right_pad = 1,
-         },
+         heading = { width = 'block', right_pad = 1 },
+         code = { width = 'block', min_width = ui.unit_width * 2, right_pad = 1 },
          file_types = { 'markdown' },
       },
    },
@@ -1443,7 +1147,12 @@ local M = {
    },
 }
 
--- Insert colorscheme plugins
-vim.list_extend(M, style.colorscheme_plugins)
+-- Merge all sections into a single spec
+local M = {}
+vim.list_extend(M, essential_plugins)
+vim.list_extend(M, extra_plugins)
+vim.list_extend(M, language_plugins)
+vim.list_extend(M, ui.colorscheme_plugins)
+vim.list_extend(M, ui.ui_plugins)
 
 return M

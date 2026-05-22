@@ -1,0 +1,8 @@
+(defcfg
+  process-unmapped-keys yes)
+
+(defsrc
+  caps)
+
+(deflayer base
+  (tap-hold-press 200 200 esc lctl))

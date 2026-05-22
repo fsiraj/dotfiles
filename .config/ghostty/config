@@ -4,6 +4,8 @@ font-size = 16
 adjust-cell-width = -10%
 adjust-cell-height = 10%
 custom-shader = cursor-trail.glsl
+cursor-style = bar
+cursor-style-blink = true
 
 # Styling - Window
 title = " "
@@ -42,6 +44,7 @@ selection-background = #6e7681
 selection-foreground = #e6edf3
 
 # Other
+shell-integration-features = sudo,ssh-env,ssh-terminfo
 app-notifications = config-reload,no-clipboard-copy
 
 # Keymaps
@@ -56,8 +59,10 @@ keybind = ctrl+shift+l=goto_split:right
 keybind = ctrl+shift+x=close_surface
 keybind = ctrl+shift+equal=equalize_splits
 
+# Tabs (Windows)
+keybind = ctrl+shift+t=new_tab
+
 # Resolves conflicts with other things
-keybind = ctrl+left_bracket=text:\x1b
 keybind = alt+equal=increase_font_size:1
 keybind = alt+minus=decrease_font_size:1
 keybind = ctrl+equal=unbind

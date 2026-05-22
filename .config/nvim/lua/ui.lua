@@ -310,26 +310,24 @@ end
 local function generate_tmux_theme(p)
    return {
       thm_accent = p.accent,
-      thm_mantle = p.mantle,
-      thm_fg = p.text,
-      thm_bg = p.mantle,
       thm_base = p.base,
-      thm_inactive = p.subtext,
-      thm_orange = p.orange,
-      thm_mauve = p.mauve,
-      thm_blue = p.blue,
+      thm_fg = p.text,
       thm_green = p.green,
+      thm_inactive = p.subtext,
+      thm_mantle = p.mantle,
+      thm_mauve = p.mauve,
+      thm_orange = p.orange,
    }
 end
 
 local function generate_omp_theme(p)
    return {
-      teal = p.teal,
       green = p.green,
       mauve = p.mauve,
       pink = p.pink,
       red = p.red,
       subtext = p.subtext,
+      teal = p.teal,
    }
 end
 
@@ -362,6 +360,7 @@ local function generate_nvim_overrides(p)
       NoiceConfirmBorder = { link = 'FloatBorder' },
       NvimDapViewTabSelected = { bg = p.green, fg = p.base },
       NvimDapViewTabFill = { link = 'NormalFloat' },
+      SidekickChat = { link = 'Normal' },
       SidekickDiffAdd = { link = 'DiffAdd' },
       SidekickDiffContext = { bg = p.base },
       SidekickSign = { fg = p.teal },
@@ -379,7 +378,7 @@ local function generate_lualine_theme(p)
    return {
       normal = {
          a = { bg = p.accent, fg = p.mantle, gui = 'bold' },
-         b = { bg = p.mantle, fg = p.text },
+         b = { bg = p.mantle, fg = p.subtext },
          c = { bg = p.base, fg = p.text },
          y = { bg = p.mantle, fg = p.text },
       },
@@ -394,39 +393,17 @@ local function generate_lualine_theme(p)
          a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
       },
       terminal = {
-         a = { bg = p.teal, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
       },
       replace = {
          a = { bg = p.red, fg = p.mantle, gui = 'bold' },
       },
       inactive = {
-         a = { bg = p.mantle, fg = p.subtext, gui = 'bold' },
-         b = { bg = p.mantle, fg = p.text },
-         c = { bg = p.mantle, fg = p.subtext },
+         a = { bg = p.mantle, fg = p.subtext },
+         b = { bg = p.base, fg = p.subtext },
+         c = { bg = p.base, fg = p.subtext },
       },
    }
-end
-
-local function get_hyde_theme(colorscheme)
-   if string.find(colorscheme, 'tokyonight') then return 'Tokyo Night' end
-   if string.find(colorscheme, 'catppuccin') then
-      return string.find(colorscheme, 'latte') and 'Catppucin Latte' or 'Catppuccin Mocha'
-   end
-   if string.find(colorscheme, 'rose') then return 'Rosé Pine' end
-   if string.find(colorscheme, 'nord') then return 'Nordic Blue' end
-   tee('HyDE theme not found for ' .. colorscheme)
-   return nil
-end
-
-local function get_opencode_theme(colorscheme)
-   if string.find(colorscheme, 'github') then return 'github' end
-   if string.find(colorscheme, 'rose-pine') then return 'rosepine' end
-   if string.find(colorscheme, 'nord') then return 'nord' end
-   if string.find(colorscheme, 'everforest') then return 'everforest' end
-   if string.find(colorscheme, 'tokyonight') then return 'tokyonight' end
-   if string.find(colorscheme, 'catppuccin') then return 'catppuccin' end
-   tee('OpenCode theme not found for ' .. colorscheme)
-   return nil
 end
 
 --- Functions that wrap sed to overwrite config files for all the apps
@@ -470,8 +447,6 @@ end
 
 local function reload_tmux() vim.system({ 'tmux', 'source', vim.env.HOME .. '/.config/tmux/tmux.conf' }) end
 
-local function reload_hyde() vim.system({ 'hydectl', 'theme', 'set', vim.g.__hyde_theme }) end
-
 local function reload_oh_my_posh()
    vim.system({ 'oh-my-posh', 'enable', 'reload' })
    vim.defer_fn(function() vim.system({ 'oh-my-posh', 'disable', 'reload' }) end, 2500)
@@ -481,10 +456,10 @@ local function reload_nvim_servers()
    local servers = vim.fn.glob(vim.fn.fnamemodify(vim.fn.stdpath('run'), ':h') .. '/**/nvim.*', true, true)
    for _, addr in ipairs(servers) do
       if addr ~= vim.v.servername then
-            -- stylua: ignore
+            --stylua: ignore
             vim.system({
                 'nvim', '--server', addr, '--remote-send',
-                "<Cmd>lua require('style').set_theme('" .. vim.g.colorscheme .. "')<CR>",
+                "<Cmd>lua require('ui').set_theme('" .. vim.g.colorscheme .. "')<CR>",
             })
       end
    end
@@ -495,7 +470,7 @@ local function reload_nvim_plugins()
    vim.notify = function(...) end ---@diagnostic disable-line
 
    -- Plugins that work with Lazy's reload feature
-   local plugins_to_reload = { 'fzf-lua', 'tiny-glimmer.nvim' }
+   local plugins_to_reload = { 'fzf-lua', 'tiny-glimmer.nvim', 'lualine.nvim' }
    for _, plugin in ipairs(plugins_to_reload) do
       vim.cmd('Lazy reload ' .. plugin)
    end
@@ -565,22 +540,6 @@ function M.sync_theme(colorscheme)
       local tmux_overrides = generate_tmux_theme(p)
       run_sed_cmd(tmux, tmux_overrides)
       reload_tmux()
-   end
-
-   -- OpenCode
-   local opencode_theme = get_opencode_theme(vim.g.colorscheme)
-   if opencode_theme then
-      local opencode = '~/.config/opencode/tui.jsonc'
-      run_sed_cmd(opencode, { theme = opencode_theme })
-   end
-
-   -- HyDE
-   if vim.fn.executable('hydectl') == 1 then
-      local hyde_theme = get_hyde_theme(vim.g.colorscheme)
-      if hyde_theme then
-         vim.g.__hyde_theme = hyde_theme
-         reload_hyde()
-      end
    end
 end
 
@@ -665,5 +624,293 @@ function M.set_buffer_normal_autocmds()
       end,
    })
 end
+
+M.ui_plugins = {
+   --Lualine
+   {
+      'nvim-lualine/lualine.nvim',
+      event = 'VeryLazy',
+      dependencies = {
+         'nvim-tree/nvim-web-devicons',
+         'folke/noice.nvim',
+      },
+      config = function()
+         -- Custom components
+         local copilot_icon = ' '
+         local mode = {
+            function() return string.upper(vim.api.nvim_get_mode().mode) end,
+         }
+         local branch = { 'branch', icon = '', color = { fg = vim.g.palette.text } }
+         local tabs = {
+            'tabs',
+            cond = function() return #vim.fn.gettabinfo() > 1 end,
+            show_modified_status = false,
+         }
+         local lsp_status = {
+            'lsp_status',
+            icon = '󱚠 ',
+            ignore_lsp = { 'copilot' },
+            symbols = { done = '' },
+         }
+         local dap_status = {
+            function() return require('dap').status() end,
+            icon = { ' ', color = { fg = vim.g.palette.red } },
+            cond = function()
+               if not package.loaded.dap then return false end
+               return require('dap').session() ~= nil
+            end,
+         }
+         local noice = require('noice')
+         local showmode = {
+            noice.api.status.mode.get, ---@diagnostic disable-line
+            cond = noice.api.status.mode.has, ---@diagnostic disable-line
+         }
+         local showcmd = {
+            noice.api.status.command.get, ---@diagnostic disable-line
+            cond = noice.api.status.command.has, ---@diagnostic disable-line
+         }
+         local text = function(t)
+            return function() return t end
+         end
+         local copilot_status = {
+            function() return copilot_icon end,
+            color = function()
+               local status = require('sidekick.status').get()
+               if status then
+                  return status.kind == 'Error' and 'DiagnosticError' or status.busy and 'DiagnosticWarn' or 'Special'
+               end
+            end,
+            cond = function()
+               local ok, status = pcall(require, 'sidekick.status')
+               return ok and status.get() ~= nil
+            end,
+         }
+
+         -- Custom extensions
+
+         -- Minimal
+         local minimal = {
+            winbar = { lualine_b = { 'filetype' } },
+            inactive_winbar = { lualine_a = { 'filetype' } },
+            filetypes = {
+               'Outline',
+               'checkhealth',
+               'codediff-explorer',
+               'dap-view-term',
+               'neo-tree',
+               'neotest-summary',
+               'noice',
+               'qf',
+            },
+         }
+
+         -- Terminal (No filetype)
+         local terminal = {
+            winbar = {
+               lualine_a = { text('Terminal') },
+               lualine_y = { showcmd },
+            },
+            inactive_winbar = {
+               lualine_a = { text('Terminal') },
+               lualine_c = { text(' ') },
+            },
+            filetypes = { 'terminal' },
+         }
+
+         -- Sidekick
+         local sidekick_cli_name = function()
+            local win = vim.api.nvim_get_current_win()
+            local buf = vim.api.nvim_win_get_buf(win)
+            local cli = vim.b[buf].sidekick_cli or vim.w[win].sidekick_cli
+            return cli.name:gsub('^%l', string.upper)
+         end
+
+         local sidekick = {
+            winbar = {
+               lualine_a = { sidekick_cli_name },
+               lualine_z = { text(copilot_icon) },
+            },
+            filetypes = { 'sidekick_terminal' },
+         }
+         sidekick.inactive_winbar = vim.deepcopy(sidekick.winbar)
+
+         -- Lualine config
+         require('lualine').setup({
+            options = {
+               icons = true,
+               theme = M.get_lualine_theme(),
+               section_separators = { left = '', right = '' },
+               component_separators = { left = '|', right = '|' },
+               disabled_filetypes = {
+                  winbar = {
+                     'dap-repl',
+                     'dap-view',
+                     'snacks_dashboard',
+                     'toggleterm',
+                  },
+               },
+            },
+            extensions = { minimal, terminal, sidekick },
+            sections = {},
+            inactive_sections = {},
+            winbar = {
+               lualine_a = { mode, 'filename' },
+               lualine_b = { branch, 'diff', 'diagnostics' },
+               lualine_c = { tabs, dap_status },
+               lualine_x = { showmode, copilot_status },
+               lualine_y = { showcmd, 'filetype' },
+               lualine_z = { lsp_status },
+            },
+            inactive_winbar = {
+               lualine_a = { 'filename' },
+               lualine_c = { text(' ') },
+            },
+         })
+      end,
+   },
+
+   --Noice
+   {
+      'folke/noice.nvim',
+      event = 'VeryLazy',
+      dependencies = { 'MunifTanjim/nui.nvim' },
+      config = function()
+         require('noice').setup({
+            cmdline = { enabled = true, format = {} },
+            messages = { enabled = true },
+            notify = { enabled = true },
+            popupmenu = { enabled = false },
+            lsp = {
+               progress = { enabled = false },
+               hover = { enabled = true },
+               signature = { enabled = true },
+               override = {
+                  ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+                  ['vim.lsp.util.stylize_markdown'] = true,
+               },
+            },
+            views = {
+               mini = {
+                  timeout = 5000,
+                  size = { max_width = M.unit_width * 2 },
+                  reverse = false,
+                  position = { row = 1, col = '100%' },
+                  win_options = {
+                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+                     winblend = 0,
+                  },
+               },
+               cmdline_popup = {
+                  size = {
+                     min_width = M.unit_width,
+                     max_width = M.unit_width * 2,
+                  },
+                  border = { style = 'none', padding = { 1, 2 } },
+                  filter_options = {},
+                  win_options = {
+                     winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+                     wrap = true,
+                  },
+               },
+               cmdline_input = {
+                  border = { style = 'solid', padding = { 0, 2 } },
+               },
+               confirm = {
+                  position = { row = '50%' },
+               },
+            },
+            routes = {
+               {
+                  filter = {
+                     event = 'msg_show',
+                     kind = { 'shell_out', 'shell_err' },
+                  },
+                  view = 'notify',
+                  opts = {
+                     level = 'info',
+                     skip = false,
+                     replace = false,
+                  },
+               },
+            },
+         })
+
+         vim.keymap.set({ 'n', 'i', 's' }, '<C-d>', function()
+            if not require('noice.lsp').scroll(4) then return '10<C-d>' end
+         end, { silent = true, expr = true })
+         vim.keymap.set({ 'n', 'i', 's' }, '<C-u>', function()
+            if not require('noice.lsp').scroll(-4) then return '10<C-u>' end
+         end, { silent = true, expr = true })
+
+         vim.keymap.set('n', '<Leader>ii', function()
+            vim.cmd('NoiceAll')
+            vim.schedule(function()
+               for _, win in ipairs(vim.api.nvim_list_wins()) do
+                  local buf = vim.api.nvim_win_get_buf(win)
+                  if vim.bo[buf].filetype == 'noice' then
+                     vim.api.nvim_set_current_win(win)
+                     vim.api.nvim_win_call(win, function() vim.cmd('normal! Gzb') end)
+                     break
+                  end
+               end
+            end)
+         end, { desc = 'Messages' })
+      end,
+   },
+
+   --TinyGlimmer
+   {
+      'rachartier/tiny-glimmer.nvim',
+      event = 'VeryLazy',
+      priority = 10,
+      config = function()
+         require('tiny-glimmer').setup({
+            overwrite = {
+               yank = M.tiny_glimmer_animation(vim.g.palette.accent),
+               paste = M.tiny_glimmer_animation(),
+               undo = M.tiny_glimmer_animation(),
+               redo = M.tiny_glimmer_animation(),
+            },
+            animations = {
+               fade = { min_duration = 1000, max_duration = 1000 },
+            },
+         })
+      end,
+   },
+
+   --TinyDeviconsAutoColors
+   {
+      'rachartier/tiny-devicons-auto-colors.nvim',
+      dependencies = { 'nvim-tree/nvim-web-devicons' },
+      event = 'VeryLazy',
+      config = function() require('tiny-devicons-auto-colors').setup({ autoreload = false }) end,
+   },
+
+   --Foldtext
+   {
+      'OXY2DEV/foldtext.nvim',
+      lazy = false,
+      opts = {
+         styles = {
+            ts_expr = {
+               condition = function(_, window)
+                  return vim.wo[window].foldmethod == 'expr'
+                     and vim.wo[window].foldexpr == 'v:lua.vim.treesitter.foldexpr()'
+               end,
+               parts = {
+                  { kind = 'bufline', delimiter = ' ... ', hl = '@comment' },
+                  {
+                     kind = 'fold_size',
+                     padding_left = ' ',
+                     padding_right = ' lines',
+                     icon = ' <-| ',
+                     hl = 'MiniIndentscopeSymbol',
+                  },
+               },
+            },
+         },
+      },
+   },
+}
 
 return M

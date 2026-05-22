@@ -8,76 +8,54 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ','
 
 -- Tabs and spaces
-vim.g.tabstop = 4
-vim.g.shiftwidth = 4
-vim.g.expandtab = true
+vim.opt.expandtab = true
+vim.opt.list = true
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
 
--- Enable relative line numbering
+-- Line numbering
+vim.opt.cursorline = true
+vim.opt.cursorlineopt = 'number'
+vim.opt.fillchars:append({ eob = ' ', fold = ' ' })
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.fillchars:append({ eob = ' ', fold = ' ' })
 
--- Enable mouse mode
-vim.opt.mouse = 'a'
-
--- Lualine using winbar as status line
-vim.opt.laststatus = 3
-vim.opt.showmode = false
+-- Splits
+vim.opt.splitbelow = true
+vim.opt.splitright = true
 
 -- Sync clipboard between OS and Neovim.
 vim.schedule(function() vim.opt.clipboard = 'unnamedplus' end)
 
--- Enable break indent
-vim.opt.breakindent = true
-
 -- Save undo history
 vim.opt.undofile = true
 
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+-- Search
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
-
--- Decrease update time
+-- Timing
 vim.opt.updatetime = 250
-
--- Decrease mapped sequence wait time
 vim.opt.timeoutlen = 300
 
--- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-
--- Sets how Neovim will display certain whitespace characters in the editor.
-vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
--- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
-
--- Show which line your cursor is on
-vim.opt.cursorline = true
-vim.opt.cursorlineopt = 'number'
-
--- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 12
-
--- Disable tabline, shown with lualine instead
-vim.opt.showtabline = 0
-
--- Disable defualt cmdline
-vim.opt.cmdheight = 1
-
--- Show dialogue instead of error
-vim.opt.confirm = true
-
--- Use treesitter for folding
+-- Folds
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.opt.foldlevel = 99
-vim.opt.foldtext = ''
+
+-- UI
+vim.opt.breakindent = true
+vim.opt.cmdheight = 1
+vim.opt.confirm = true
+vim.opt.inccommand = 'split'
+vim.opt.laststatus = 0
+vim.opt.mouse = 'a'
+vim.opt.mousescroll = { 'ver:1', 'hor:2' }
+vim.opt.scrolloff = 6
+vim.opt.showmode = false
+vim.opt.showtabline = 0
+vim.opt.signcolumn = 'auto'
 
 -- Diagnostics
 vim.diagnostic.config({
@@ -95,7 +73,7 @@ vim.diagnostic.config({
    virtual_text = false,
 })
 
---NOTE: Keymaps
+-- NOTE: Keymaps
 
 -- <CR> expands abbreviations without needing to type <Space> or <Tab>
 vim.keymap.set('c', '<CR>', function() return vim.fn.getcmdtype() == ':' and '<C-]><CR>' or '<CR>' end, { expr = true })
@@ -104,12 +82,8 @@ vim.keymap.set('c', '<CR>', function() return vim.fn.getcmdtype() == ':' and '<C
 vim.keymap.set('ca', 'wqa', 'wa | qa')
 
 -- Navigate wrapped lines as multiple lines
-vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
-vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
-
--- Mouse scroll behaves like keyboard
-vim.keymap.set({ 'n', 'v' }, '<ScrollWheelDown>', '5j')
-vim.keymap.set({ 'n', 'v' }, '<ScrollWheelUp>', '5k')
+vim.keymap.set({ 'n', 'v' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+vim.keymap.set({ 'n', 'v' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
 
 -- Buffer keymaps
 vim.keymap.set('n', '<C-a>', 'ggVG', { desc = 'Select All' })
@@ -135,7 +109,7 @@ vim.keymap.set('n', '<Leader>td', function()
    vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
 end, { desc = 'LSP: Toggle Diagnostics' })
 
---NOTE: Autocommands
+-- NOTE: Autocommands
 
 vim.api.nvim_create_autocmd('TermOpen', {
    desc = 'Set buffer local options for terminals',
@@ -189,7 +163,7 @@ vim.api.nvim_create_autocmd('FileChangedShell', {
    end,
 })
 
---NOTE: Plugins
+-- NOTE: Plugins
 
 -- Bootstrap lazy
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'

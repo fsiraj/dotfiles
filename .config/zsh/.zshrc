@@ -1,12 +1,6 @@
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_BIN_HOME="$HOME/.local/bin"
-export EDITOR="nvim"
-export HOMEBREW_NO_ENV_HINTS=true
-
 # Keep PATH unique
 typeset -U path PATH
-path=("$XDG_BIN_HOME" $path)
+path=("$XDG_BIN_HOME" "$MASON_BIN" $path)
 
 # Source local shell customizations if present (needed here for linux brew)
 if [ -f "$HOME/.zshrc.local" ]; then
@@ -21,6 +15,11 @@ fpath=(~/.zfunc $fpath)
 
 # Load prompt
 eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/config.omp.toml)"
+
+# Restore a steady bar cursor whenever the shell prompt returns.
+autoload -Uz add-zsh-hook
+restore_bar_cursor() { printf '\e[5 q'; }
+add-zsh-hook precmd restore_bar_cursor
 
 # History
 HISTSIZE=10000
@@ -77,16 +76,16 @@ neogit() {
 
 theme() {
     local theme="${1:-$(
-        nvim --headless "+=require('style').colorschemes" +qa 2>&1 |
+        nvim --headless "+=require('ui').colorschemes" +qa 2>&1 |
             grep -o '"[^"]*"' | sed 's/"//g' |
             fzf --reverse --height=16 --prompt "Select colorscheme: "
     )}"
-    nvim --headless "+lua require('style').sync_theme('$theme')" +qa 2>/dev/null
+    nvim --headless "+lua require('ui').sync_theme('$theme')" +qa 2>/dev/null
 }
 
 attach() {
     if [[ -z "$1" ]]; then
-        local sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+        local sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -v '^_')
         [[ -z "$sessions" ]] && echo "No tmux sessions." && return 1
         local session=$(echo "$sessions" | fzf --reverse --height=16 --prompt "Attach to session: ")
         [[ -z "$session" ]] && return 1
@@ -98,24 +97,21 @@ attach() {
 
 # Custom aliases
 
+alias c="clear -x"
+alias cd..="cd .."
+alias reload="exec zsh"
+alias update="bash ~/dotfiles/install.sh"
+
 alias a=attach
-alias n="nvim --clean"
+alias n="nvim -u $XDG_CONFIG_HOME/nvim/minit.lua"
 
 if command -v eza &>/dev/null; then
     alias ls="eza --group-directories-first --color=auto --icons=auto"
     alias ll="ls -l"
     alias la="ls -a"
     alias lt="ls -T"
-else
-    alias ls="ls"
-    alias ll="ls -Al"
-    alias la="ls -A"
+    alias lla="ls -al"
 fi
-
-alias c="clear -x"
-alias cd..="cd .."
-alias reload="exec zsh"
-alias update="bash ~/dotfiles/install.sh"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
