@@ -32,8 +32,12 @@
     "pyright-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true
   },
+  "feedbackSurveyRate": 0,
   "effortLevel": "high",
   "tui": "fullscreen",
-  "theme": "custom:custom",
-  "skipAutoPermissionPrompt": true
+  "theme": "auto",
+  "skipAutoPermissionPrompt": true,
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "3"
+  }
 }

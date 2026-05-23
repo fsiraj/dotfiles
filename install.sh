@@ -8,19 +8,17 @@ export XDG_BIN_HOME="$HOME/.local/bin"
 
 BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
+CARGO_BINSTALL_URL="https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh"
 
-COLOR_INFO="1;36"     # Cyan
 COLOR_STEP="1;35"     # Magenta
-COLOR_SUCCESS="1;34"  # Blue
-COLOR_COMPLETE="1;32" # Green
+COLOR_SUCCESS="1;32"  # Green
 COLOR_ERROR="1;31"    # Red
+COLOR_COMPLETE="1;33" # Yellow
 
-log() {
-    msg="$1"
-    color="${2:-$COLOR_INFO}"
-    emoji="${3:-🚀}"
-    printf "\033[%sm%s %s\033[0m\n" "$color" "$emoji" "$msg"
-}
+step() { printf "\n\033[%sm==> %s\033[0m\n" "$COLOR_STEP" "$1"; }
+success() { printf "\033[%sm  ✓ %s\033[0m\n" "$COLOR_SUCCESS" "$1"; }
+error() { printf "\033[%sm  ! %s\033[0m\n" "$COLOR_ERROR" "$1"; }
+finish() { printf "\n\033[%sm ✨ %s\033[0m\n" "$COLOR_COMPLETE" "$1"; }
 
 installed() {
     command -v "$1" >/dev/null 2>&1
@@ -50,7 +48,7 @@ install_or_update() {
 }
 
 detect_os() {
-    log "Detecting operating system..." "$COLOR_STEP" "🔍"
+    step "Detecting operating system..."
 
     if [ "$(uname)" = "Darwin" ]; then
         OS="macos"
@@ -59,7 +57,7 @@ detect_os() {
         . /etc/os-release
         OS="$ID"
     else
-        log "Unsupported OS" "$COLOR_ERROR" "⛔"
+        error "Unsupported OS"
         exit 1
     fi
 
@@ -67,16 +65,16 @@ detect_os() {
     case "$OS" in
     arch | ubuntu | macos) ;;
     *)
-        log "Unsupported OS: $OS" "$COLOR_ERROR" "⛔"
+        error "Unsupported OS: $OS"
         exit 1
         ;;
     esac
 
-    log "Detected OS: $OS" "$COLOR_SUCCESS" "✅"
+    success "detected: $OS"
 }
 
 install_macos_packages() {
-    log "Installing packages for macOS..." "$COLOR_STEP" "📦"
+    step "Installing packages for macOS..."
 
     if ! installed brew; then
         /bin/bash -c \
@@ -88,18 +86,18 @@ install_macos_packages() {
     # shellcheck disable=2034
     brew install --quiet \
         git make unzip gnu-sed tmux stow \
-        fzf zoxide eza fd ripgrep bat fastfetch \
+        fzf zoxide eza fd ripgrep bat \
         node imagemagick \
-        jandedobbeleer/oh-my-posh/oh-my-posh \
+        oh-my-posh fastfetch \
         neovim \
         2>/dev/null
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
 
-    log "macOS packages installed!" "$COLOR_SUCCESS" "🎉"
+    success "macOS packages installed!"
 }
 
 install_ubuntu_packages() {
-    log "Installing packages for ubuntu..." "$COLOR_STEP" "📦"
+    step "Installing packages for ubuntu..."
 
     sudo apt update -qq
     sudo apt install -qq build-essential git unzip curl zsh tmux xsel stow
@@ -111,23 +109,20 @@ install_ubuntu_packages() {
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     brew install --quiet \
-        fzf zoxide eza fd ripgrep bat fastfetch \
+        fzf zoxide eza fd ripgrep bat \
         node imagemagick \
-        jandedobbeleer/oh-my-posh/oh-my-posh \
+        oh-my-posh fastfetch \
         neovim \
         2>/dev/null
     brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
 
     # ghostty (stable)
-    if ! installed ghostty; then
-        /bin/bash -c \
-            "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
-    fi
-    log "ubuntu packages installed!" "$COLOR_SUCCESS" "🎉"
+    /bin/bash -c "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
+    success "ubuntu packages installed!"
 }
 
 install_arch_packages() {
-    log "Installing packages for arch..." "$COLOR_STEP" "📦"
+    step "Installing packages for arch..."
 
     sudo pacman -Syu --needed \
         base-devel \
@@ -143,7 +138,7 @@ install_arch_packages() {
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
 
-    log "arch packages installed!" "$COLOR_SUCCESS" "🎉"
+    success "arch packages installed!"
 }
 
 install_packages() {
@@ -161,31 +156,32 @@ install_packages() {
 }
 
 setup_language_tools() {
-    log "Setting up language tools..." "$COLOR_STEP" "🛠️"
+    step "Setting up language tools..."
 
     install_or_update "uv" \
         "curl -LsSf https://astral.sh/uv/install.sh | sh" \
         "uv self update"
 
-    log "uv installed!" "$COLOR_SUCCESS" "🐍"
+    success "uv installed!"
 
     install_or_update "rustup" \
         "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" \
         "rustup update"
 
-    log "rustup installed!" "$COLOR_SUCCESS" "🦀"
+    success "rustup installed!"
 
     # installed by package managers
     if installed node; then
-        log "node installed " "$COLOR_SUCCESS" "😔"
+        success "node installed"
     fi
 
-    cargo install --locked tree-sitter-cli
-    log "tree-sitter-cli installed!" "$COLOR_SUCCESS" "🌲"
+    curl -L --proto '=https' --tlsv1.2 -sSf $CARGO_BINSTALL_URL | bash 2>/dev/null
+    cargo binstall -y tree-sitter-cli
+    success "tree-sitter-cli installed!"
 }
 
 setup_shell() {
-    log "Setting up zsh..." "$COLOR_STEP" "🐚"
+    step "Setting up zsh..."
 
     # Change shell to zsh
     if ! echo "$SHELL" | grep -q "zsh"; then
@@ -196,31 +192,36 @@ setup_shell() {
         printf 'export ZDOTDIR="$HOME/.config/zsh"\nsource "$ZDOTDIR/.zshenv"\n' >>"$HOME/.zshenv"
     fi
 
-    log "shell set to zsh!" "$COLOR_SUCCESS" "🐚"
+    success "shell set to zsh!"
 
     # Install zinit for zsh plugins
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
-    log "zinit installed!" "$COLOR_SUCCESS" "🔌"
+    success "zinit installed!"
 
     # Update zsh plugins
     zsh -c "source '$ZINIT_HOME/zinit.zsh' && zinit update --quiet && compinit"
-    log "zsh plugins updated!" "$COLOR_SUCCESS" "🔌"
+    success "zsh plugins updated!"
 
+    # Live reload prompts on theme change
+    oh-my-posh enable reload
+
+    # Use minimal nvim as git editor
+    git config --global core.editor "nvim -u $HOME/.config/nvim/minit.lua"
 }
 
 setup_dotfiles() {
-    log "Setting up dotfiles..." "$COLOR_STEP" "📁"
+    step "Setting up dotfiles..."
 
     clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
     stow -v -d "$HOME/dotfiles" -t "$HOME/.config" .config
 
-    log "dotfiles stowed!" "$COLOR_SUCCESS" "🔗"
+    success "dotfiles stowed!"
 }
 
 setup_tmux_plugins() {
-    log "Setting up tmux plugins..." "$COLOR_STEP" "🪟"
+    step "Setting up tmux plugins..."
 
     TPM_HOME="$HOME/.config/tmux/plugins/tpm"
     clone_or_pull "https://github.com/tmux-plugins/tpm" "$TPM_HOME"
@@ -232,27 +233,27 @@ setup_tmux_plugins() {
         "$TPM_HOME/bin/update_plugins" all
     fi
 
-    log "tmux plugins installed!" "$COLOR_SUCCESS" "🔌"
+    success "tmux plugins installed!"
 }
 
 setup_neovim_plugins() {
-    log "Setting up neovim..." "$COLOR_STEP" "💤"
+    step "Setting up neovim..."
 
     nvim --headless "+Lazy! sync" +qa
     nvim --headless "+MasonToolsUpdateSync" +qa
 
-    echo "" && log "neovim plugins and language tools installed!" "$COLOR_SUCCESS" "🔌"
+    echo "" && success "neovim plugins and language tools installed!"
 }
 
 main() {
     detect_os
     install_packages
     setup_language_tools
-    setup_shell
     setup_dotfiles
+    setup_shell
     setup_tmux_plugins
     setup_neovim_plugins
-    log "Setup complete!" "$COLOR_COMPLETE" "✅"
+    finish "Setup complete!"
 }
 
 main "$@"
