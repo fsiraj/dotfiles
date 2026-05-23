@@ -34,27 +34,13 @@
 
 </details>
 
-<details>
-<summary><strong>❄️ Nord</strong> - Arctic, north-bluish color palette</summary>
-
-<img alt="Screenshot 2025-10-04 at 10 39 49 PM" src="https://github.com/user-attachments/assets/43213fe7-ce2d-4173-9c31-25a86198cf7c" />
-
-</details>
-
-<details>
-<summary><strong>🌲 Everforest</strong> - Forest-inspired green theme</summary>
-
-<img alt="Screenshot 2025-10-04 at 10 40 22 PM" src="https://github.com/user-attachments/assets/6b0f4db9-1432-45c2-89c3-2fcc876cc729" />
-
-</details>
-
 ## 🚀 Quick Start
 
 > [!IMPORTANT]
 > Run the command below only if you've read and fully understood the script.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install.sh)
+bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 ```
 
 > **Supported Systems:** macOS • Ubuntu • Arch Linux
@@ -91,7 +77,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 >   - **Plugin Manager:** [tpm](https://github.com/tmux-plugins/tpm) - Tmux plugin manager
 > - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim):
 >   - [Claude Code](https://claude.ai/code) - Agentic coding tool by Anthropic
->   - [OpenCode](https://opencode.ai/) - Open-source AI coding agent
 
 #### 🔧 **Languages**
 
@@ -106,7 +91,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 ## 🌈 Theme System
 
-> Works perfectly for the 6 themes and their variants showcased above
+> Works perfectly for the 4 themes and their variants showcased above
 
 **Synchronized theming across all applications!**
 
@@ -114,7 +99,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/fsiraj/dotfiles/main/install
 
 **Want to add more themes?**
 
-> Add it to `style.lua` using any existing theme as a template. Add an entry to `M.colorschemes`, `M.colorscheme_plugins`, and `get_palette`.
+> Use any existing theme as a template.
 
 ---
 

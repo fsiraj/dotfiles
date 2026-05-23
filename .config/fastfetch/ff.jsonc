@@ -7,7 +7,13 @@
     "modules": [
         {
             "type": "colors",
-            "symbol": "circle"
+            "symbol": "circle",
+            "brightness": "normal"
+        },
+        {
+            "type": "colors",
+            "symbol": "circle",
+            "brightness": "light"
         },
         "break",
         {

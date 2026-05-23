@@ -14,7 +14,7 @@ bindkey -e
 fpath=(~/.zfunc $fpath)
 
 # Load prompt
-eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/config.omp.toml)"
+eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/omp.toml)"
 
 # Restore a steady bar cursor whenever the shell prompt returns.
 autoload -Uz add-zsh-hook
@@ -69,18 +69,22 @@ eval "$(zoxide init --cmd cd zsh)"
 source <(fzf --zsh)
 bindkey -r '^[c'
 
-# Custom functions
-neogit() {
-    nvim +"lua require('neogit').open({ kind = 'replace' })"
+# Custom functions and aliases
+
+ansi16() {
+    for i in {0..15}; do
+        printf "\e[48;5;${i}m %3d \e[0m" "$i"
+        (((i + 1) % 8 == 0)) && echo
+    done
 }
 
 theme() {
     local theme="${1:-$(
-        nvim --headless "+=require('ui').colorschemes" +qa 2>&1 |
-            grep -o '"[^"]*"' | sed 's/"//g' |
+        nvim --headless "+NvimColorschemes" +qa 2>&1 |
             fzf --reverse --height=16 --prompt "Select colorscheme: "
     )}"
-    nvim --headless "+lua require('ui').sync_theme('$theme')" +qa 2>/dev/null
+    [[ -z "$theme" ]] && return
+    nvim --headless "+NvimSyncTheme $theme" +qa 2>/dev/null
 }
 
 attach() {
@@ -89,25 +93,23 @@ attach() {
         [[ -z "$sessions" ]] && echo "No tmux sessions." && return 1
         local session=$(echo "$sessions" | fzf --reverse --height=16 --prompt "Attach to session: ")
         [[ -z "$session" ]] && return 1
-        tmux attach-session -t "$session"
+        tmux attach -t "$session"
     else
-        tmux attach-session -t "$1"
+        tmux new -A -s "$1"
     fi
 }
 
-# Custom aliases
-
 alias c="clear -x"
 alias cd..="cd .."
-alias reload="exec zsh"
+alias reload="clear -x && exec zsh"
 alias update="bash ~/dotfiles/install.sh"
 
 alias a=attach
-alias n="nvim -u $XDG_CONFIG_HOME/nvim/minit.lua"
+alias n="nvim -u $HOME/.config/nvim/minit.lua"
 
 if command -v eza &>/dev/null; then
     alias ls="eza --group-directories-first --color=auto --icons=auto"
-    alias ll="ls -l"
+    alias ll="ls -l --time-style=relative"
     alias la="ls -a"
     alias lt="ls -T"
     alias lla="ls -al"
@@ -117,7 +119,10 @@ alias ga="git add -v"
 alias gc="git commit -vm"
 alias gca="git commit --amend"
 alias gs="git status -sb"
-alias gl="git log --oneline -n 10"
+gl() {
+    git log -n 15 --color=always --pretty=format:'%C(auto)%h%x1f%d%x1f%s' "$@" |
+        awk -F$'\x1f' '$2=="" {print $1" "$3; next} {printf "%s%s\n        %s\n",$1,$2,$3}'
+}
 alias gb="git branch"
 alias gch="git checkout"
 alias gp="git pull"
@@ -127,12 +132,9 @@ alias grs="git restore --staged"
 
 alias py="python3"
 alias venv="source .venv/bin/activate"
-alias d="deactivate"
 
 # fastfetch
-if [[ $- == *i* ]]; then
-    if command -v fastfetch &>/dev/null; then
-        alias ff="fastfetch"
-        fastfetch
-    fi
+if command -v fastfetch &>/dev/null; then
+    ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
+    [[ $- == *i* ]] && ff
 fi

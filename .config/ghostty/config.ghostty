@@ -20,7 +20,7 @@ gtk-titlebar-hide-when-maximized = true
 
 # WARNING: Managed by `style.lua`
 # Colors
-palette = 0 = #6e7681
+palette = 0 = #161b22
 palette = 1 = #ff7b72
 palette = 2 = #3fb950
 palette = 3 = #d29922
@@ -28,14 +28,14 @@ palette = 4 = #58a6ff
 palette = 5 = #bc8cff
 palette = 6 = #76e3ea
 palette = 7 = #e6edf3
-palette = 8 = #6e7681
-palette = 9 = #ff7b72
-palette = 10 = #3fb950
-palette = 11 = #d29922
-palette = 12 = #58a6ff
-palette = 13 = #bc8cff
-palette = 14 = #76e3ea
-palette = 15 = #e6edf3
+palette = 8 = #2a3340
+palette = 9 = #ffaaa4
+palette = 10 = #61c970
+palette = 11 = #e1ae45
+palette = 12 = #8bc1fe
+palette = 13 = #d9bfff
+palette = 14 = #a2ecf0
+palette = 15 = #ffffff
 background = #0d1117
 foreground = #e6edf3
 cursor-color = #e6edf3
@@ -46,6 +46,7 @@ selection-foreground = #e6edf3
 # Other
 shell-integration-features = sudo,ssh-env,ssh-terminfo
 app-notifications = config-reload,no-clipboard-copy
+macos-option-as-alt = true
 
 # Keymaps
 

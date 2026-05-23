@@ -1,7 +1,0 @@
-{
-  "name": "custom",
-  "base": "dark",
-  "overrides": {
-    "userMessageBackground": "ansi:blackBright"
-  }
-}
