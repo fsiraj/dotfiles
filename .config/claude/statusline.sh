@@ -15,7 +15,7 @@ red='\033[31m'
 reset='\033[0m'
 
 # Replace $HOME with ~
-cwd="${cwd/#$HOME/\~}"
+cwd="${cwd/#$HOME/~}"
 
 # Color helper: only color when concerning
 color_for_pct() {

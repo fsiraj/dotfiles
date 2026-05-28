@@ -48,13 +48,13 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 <details>
 <summary>Slow (and Safe) Start</summary>
 
-> The install script detects your OS, installs a lot of things, and sets up the dotfiles. Download the script and take a look at the `main()` function. The script is modularized so you can comment out any step you don't want. For example `setup_language_tools` installs tooling for Rust and Python. If you don't care about these, you should comment this function call out.
+> The install script detects your OS, installs your tooling, and deploys the dotfiles. Before running it, download it and read the `main()` function. Everything is modular, so you can comment out any step you don't want. For example, `setup_language_tools` installs Rust and Python tooling — skip it if you don't need either.
 >
-> Similarly, `install_packages` will install a lot of packages, many of which aren't required, and can be commented out. For example, it installs `node` which is needed by many Neovim plugins and LSPs, but without it you still get a very usable IDE experience. As another example, it installs `ghostty` but if you don't want to switch your terminal emulator or if you're working in a remote ssh environment, you should comment it out.
+> The same goes for `install_packages`, which pulls in a lot that isn't strictly required. It installs `node`, for instance, which many Neovim plugins and LSPs rely on — but you'll still get a very usable IDE without it. It also installs `ghostty`, which you can drop if you'd rather keep your current terminal or are working over SSH.
 >
-> You can go a step further and omit the script altogether and use it only as a reference while you manually execute the commands relevant to you. The script is not at all complicated and only exists for convenience as it's quite difficult to track all requirements and dependencies.
+> You can skip the script entirely and treat it as a reference, running only the commands relevant to you. It's nothing complicated — it just exists to save you the trouble of tracking every requirement and dependency by hand.
 >
-> ⚠️ The script does not backup any existing configs you may have. Please take a look at the contents of `.config/` in this repo to see which applications may conflict. If you have existing configs for any of those applications, back them up with a different name. For example, if you have a Neovim config already, run `mv ~/.config/nvim ~/.config/nvim.bak`.
+> ⚠️ The script does **not** back up existing configs. Check `.config/` in this repo to see which apps may conflict, and rename any configs you already have. For example, if you already use Neovim: `mv ~/.config/nvim ~/.config/nvim.bak`.
 
 </details>
 
@@ -66,17 +66,13 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 > - **Terminal:** [Ghostty](https://ghostty.org/) - Lightning fast GPU-accelerated terminal
 > - **Shell:** [ZSH](https://www.zsh.org/) - Fast UNIX shell with modern enhancements
->   - **Plugin Manager:** [zinit](https://github.com/zdharma-continuum/zinit) - Turbo-charged plugin loading
 > - **Prompt:** [Oh My Posh](https://ohmyposh.dev/) - Beautiful, customizable prompt
 
 #### ⚡ **Development**
 
 > - **Editor:** [Neovim](https://neovim.io/) - The hyperextensible Vim-based text editor
->   - **Plugin Manager:** [Lazy](https://github.com/folke/lazy.nvim) - Modern plugin manager
 > - **Multiplexing:** [tmux](https://github.com/tmux/tmux) - Terminal workspace management
->   - **Plugin Manager:** [tpm](https://github.com/tmux-plugins/tpm) - Tmux plugin manager
 > - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim):
->   - [Claude Code](https://claude.ai/code) - Agentic coding tool by Anthropic
 
 #### 🔧 **Languages**
 

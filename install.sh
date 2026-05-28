@@ -4,7 +4,9 @@ OS=""
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_BIN_HOME="$HOME/.local/bin"
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_BIN_HOME"
 
 BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
@@ -83,7 +85,7 @@ install_macos_packages() {
     if ! xcode-select -p >/dev/null 2>&1; then
         xcode-select --install 2>/dev/null || true
     fi
-    # shellcheck disable=2034
+    HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
     brew install --quiet \
         git make unzip gnu-sed tmux stow \
         fzf zoxide eza fd ripgrep bat \
@@ -92,6 +94,7 @@ install_macos_packages() {
         neovim \
         2>/dev/null
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
+    ln -sf "$(brew --prefix)/bin/gsed" "$XDG_BIN_HOME/sed"
 
     success "macOS packages installed!"
 }
@@ -108,6 +111,7 @@ install_ubuntu_packages() {
     fi
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
+    HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
     brew install --quiet \
         fzf zoxide eza fd ripgrep bat \
         node imagemagick \
@@ -207,8 +211,8 @@ setup_shell() {
     # Live reload prompts on theme change
     oh-my-posh enable reload
 
-    # Use minimal nvim as git editor
-    git config --global core.editor "nvim -u $HOME/.config/nvim/minit.lua"
+    # Use clean nvim as git editor
+    git config --global core.editor "nvim --clean"
 }
 
 setup_dotfiles() {
@@ -223,15 +227,8 @@ setup_dotfiles() {
 setup_tmux_plugins() {
     step "Setting up tmux plugins..."
 
-    TPM_HOME="$HOME/.config/tmux/plugins/tpm"
-    clone_or_pull "https://github.com/tmux-plugins/tpm" "$TPM_HOME"
-
-    PLUGINS_DIR="$(dirname "$TPM_HOME")"
-    if [ "$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l)" -le 1 ]; then
-        "$TPM_HOME/bin/install_plugins"
-    else
-        "$TPM_HOME/bin/update_plugins" all
-    fi
+    clone_or_pull "https://github.com/tmux-plugins/tmux-resurrect" \
+        "$HOME/.config/tmux/plugins/tmux-resurrect"
 
     success "tmux plugins installed!"
 }
