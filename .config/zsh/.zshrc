@@ -105,7 +105,7 @@ alias reload="clear -x && exec zsh"
 alias update="bash ~/dotfiles/install.sh"
 
 alias a=attach
-alias n="nvim -u $HOME/.config/nvim/minit.lua"
+alias n="nvim --clean"
 
 if command -v eza &>/dev/null; then
     alias ls="eza --group-directories-first --color=auto --icons=auto"

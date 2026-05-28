@@ -52,12 +52,14 @@ vim.opt.cmdheight = 1
 vim.opt.confirm = true
 vim.opt.inccommand = 'split'
 vim.opt.laststatus = 0
+vim.opt.linebreak = true
 vim.opt.mouse = 'a'
 vim.opt.mousescroll = { 'ver:1', 'hor:2' }
 vim.opt.scrolloff = 6
 vim.opt.showmode = false
 vim.opt.showtabline = 0
 vim.opt.signcolumn = 'yes'
+vim.opt.wrap = true
 
 -- Diagnostics
 vim.diagnostic.config({
@@ -271,8 +273,6 @@ end
 
 local function lighten(color, pct) return require('volt.color').change_hex_lightness(color, pct) end
 
-local function darken(color, pct) return require('volt.color').change_hex_lightness(color, -pct) end
-
 local function light_or_dark(colorscheme)
    return vim.tbl_contains({
       'catppuccin-latte',
@@ -425,7 +425,7 @@ local function get_palette(colorscheme)
    return num_to_hex(palette)
 end
 
-local function get_ansi_palette(p)
+local function generate_ansi_palette(p)
    local pct = 10
    return {
       p.mantle,
@@ -441,7 +441,7 @@ local function get_ansi_palette(p)
       lighten(p.green, pct),
       lighten(p.yellow, pct),
       lighten(p.blue, pct),
-      lighten(p.mauve, pct),
+      p.pink,
       lighten(p.teal, pct),
       lighten(p.text, pct),
    }
@@ -449,8 +449,8 @@ end
 
 local function generate_ghostty_theme(p)
    local cursor = vim.api.nvim_get_hl(0, { name = 'Cursor', link = false })
-   local cursor_bg = cursor.bg and string.format('#%06x', cursor.bg)
-   local cursor_fg = cursor.fg and string.format('#%06x', cursor.fg)
+   local cursor_bg = string.format('#%06x', cursor.bg)
+   local cursor_fg = string.format('#%06x', cursor.fg)
    local theme = {
       ['background'] = p.base,
       ['foreground'] = p.text,
@@ -459,7 +459,7 @@ local function generate_ghostty_theme(p)
       ['selection-background'] = p.subtext,
       ['selection-foreground'] = p.text,
    }
-   for i, c in ipairs(get_ansi_palette(p)) do
+   for i, c in ipairs(generate_ansi_palette(p)) do
       theme['palette = ' .. (i - 1)] = c
    end
    return theme
@@ -498,7 +498,6 @@ local function generate_nvim_overrides(p)
       FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
       Folded = { bg = p.base },
       NormalFloat = { bg = p.mantle },
-      NormalFloatDark = { bg = darken(p.base, 3) },
       NormalNC = { link = 'Normal' },
       Pmenu = { link = 'NormalFloat' },
       Special = { fg = p.teal },
@@ -511,9 +510,6 @@ local function generate_nvim_overrides(p)
       DapBreak = { fg = p.red },
       DapStop = { fg = p.yellow },
       FzfLuaBorder = { link = 'FloatBorder' },
-      FzfLuaFzfCursorLine = { fg = p.text, bg = fzf_detail },
-      FzfLuaFzfGutter = { bg = fzf_detail },
-      FzfLuaFzfSeparator = { fg = fzf_detail },
       FzfLuaNormal = { link = 'NormalFloat' },
       LazyButton = { bg = p.base },
       LazySpecial = { fg = p.accent },
@@ -537,7 +533,7 @@ local function generate_nvim_overrides(p)
       SnacksDashboardHeaderSecondary = { fg = p.blue },
       SnacksDashboardSpecial = { fg = p.accent },
       TreesitterContext = { bg = p.base },
-      TreesitterContextBottom = { sp = p.accent, underline = true },
+      TreesitterContextSeparator = { fg = p.accent, bg = p.base },
       WhichKeyBorder = { link = 'FloatBorder' },
    }
 end
@@ -619,13 +615,7 @@ local function reload_nvim_plugins()
 
    -- Plugins that work with Lazy's reload feature
    local plugins_to_reload = { 'fzf-lua', 'tiny-glimmer.nvim' }
-   for _, plugin in ipairs(plugins_to_reload) do
-      vim.cmd('Lazy reload ' .. plugin)
-   end
-
-   -- Floaterm
-   package.loaded['volt.highlights'] = nil
-   require('volt.highlights')
+   vim.iter(plugins_to_reload):each(function(p) vim.cmd('Lazy reload ' .. p) end)
 
    -- Lualine
    local config = require('lualine').get_config()
@@ -640,7 +630,7 @@ local function set_theme(colorscheme)
    vim.cmd('colorscheme ' .. colorscheme)
    vim.opt.background = light_or_dark(colorscheme)
    reload_nvim_plugins()
-   emit_cursor_color()
+   vim.schedule(emit_cursor_color)
 end
 
 local function sync_theme(colorscheme)
@@ -705,23 +695,27 @@ vim.api.nvim_create_user_command(
    { nargs = 1, desc = 'Sync theme across Neovim, tmux, ghostty, and oh-my-posh' }
 )
 
-vim.api.nvim_create_user_command('NvimColorschemes', function()
-   for _, c in ipairs(colorschemes) do
-      print(c)
+vim.api.nvim_create_user_command(
+   'NvimColorschemes',
+   function() vim.iter(colorschemes):each(print) end,
+   { desc = 'Print supported colorschemes, one per line' }
+)
+
+local function apply_nvim_overrides(p)
+   local hl_overrides = generate_nvim_overrides(p)
+   for hl, col in pairs(hl_overrides) do
+      vim.api.nvim_set_hl(0, hl, col)
    end
-end, { desc = 'Print supported colorschemes, one per line' })
+   for i, c in ipairs(generate_ansi_palette(p)) do
+      vim.g['terminal_color_' .. (i - 1)] = c
+   end
+end
 
 autocmd('ColorScheme', {
    callback = function()
       local p = get_palette(vim.g.colorscheme)
       vim.g.palette = vim.deepcopy(p)
-      local hl_overrides = generate_nvim_overrides(p)
-      for hl, col in pairs(hl_overrides) do
-         vim.api.nvim_set_hl(0, hl, col)
-      end
-      for i, c in ipairs(get_ansi_palette(p)) do
-         vim.g['terminal_color_' .. (i - 1)] = c
-      end
+      apply_nvim_overrides(p)
    end,
 })
 
@@ -754,12 +748,13 @@ local non_lsps = {
 
 local all_tools = vim.iter({ lsps, non_lsps }):flatten():totable()
 
+--stylua: ignore
 local formatters_by_ft = {
-   lua = { 'stylua' },
-   python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
+   lua      = { 'stylua' },
+   python   = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
    markdown = { 'prettier' },
-   zsh = { 'shfmt', 'shellcheck' },
-   sh = { 'shfmt', 'shellcheck' },
+   zsh      = { 'shfmt', 'shellcheck' },
+   sh       = { 'shfmt', 'shellcheck' },
 }
 
 local linters_by_ft = {
@@ -828,13 +823,10 @@ end
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+   --stylua: ignore
    local out = vim.fn.system({
-      'git',
-      'clone',
-      '--filter=blob:none',
-      '--branch=stable',
-      lazyrepo,
-      lazypath,
+      'git', 'clone', '--filter=blob:none', '--branch=stable',
+      lazyrepo, lazypath,
    })
    if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
 end
@@ -901,19 +893,12 @@ local core_plugins = {
 
          -- Scope Lines
          local indent = require('mini.indentscope')
-         indent.setup({ symbol = '┊', draw = { animation = require('mini.indentscope').gen_animation.none() } })
+         indent.setup({ symbol = '│', draw = { animation = require('mini.indentscope').gen_animation.none() } })
 
-         local disabled_filetypes = { 'snacks_dashboard' }
          autocmd('FileType', {
             desc = 'Disable indentscope for non-code buffers',
             callback = function()
-               if
-                  vim.bo.buftype ~= ''
-                  or vim.bo.filetype == ''
-                  or vim.tbl_contains(disabled_filetypes, vim.bo.filetype)
-               then
-                  vim.b.miniindentscope_disable = true
-               end
+               if vim.bo.buftype ~= '' or vim.bo.filetype == '' then vim.b.miniindentscope_disable = true end
             end,
          })
 
@@ -932,9 +917,6 @@ local core_plugins = {
          local function prewrite()
             local term = require('sidekick.cli.terminal').sessions()[1]
             vim.g.SidekickTool = term and term.tool.name or ''
-            require('sidekick.cli').close()
-            require('neo-tree.command').execute({ action = 'close' })
-            require('outline').close()
             require('neogit').close()
             vim.cmd('helpclose')
          end
@@ -975,7 +957,7 @@ local core_plugins = {
          keymap('n', '<Leader>R', function()
             local _, session_name = find_session()
             require('noice').disable()
-            sessions.write(session_name)
+            sessions.write(session_name, { verbose = false })
             vim.cmd('restart lua require("mini.sessions").read(' .. session_name .. ')')
          end, { desc = 'Session Restart', nowait = true })
 
@@ -1079,8 +1061,10 @@ local core_plugins = {
          local width = math.min(unit_width * 4, math.floor(0.8 * vim.o.columns))
 
          fzf.setup({
-            defaults = { formatter = 'path.filename_first' },
-            fzf_colors = true,
+            defaults = {
+               formatter = 'path.filename_first',
+               fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
+            },
             winopts = {
                width = width,
                height = 0.8,
@@ -1099,7 +1083,6 @@ local core_plugins = {
             files = {
                hidden = true,
                follow = true,
-               fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
             },
             helptags = {
                actions = { ['enter'] = actions.help_vert },
@@ -1140,7 +1123,12 @@ local core_plugins = {
                fn_transform = fmt,
             })
          end
-         fzf.plugins = function() fzf.files({ cwd = vim.fn.stdpath('data') .. '/lazy' }) end
+         fzf.plugins = function()
+            local roots = { vim.fn.stdpath('data') .. '/lazy' }
+            local dev = vim.fn.expand('~/nvim-plugins')
+            if vim.uv.fs_stat(dev) then table.insert(roots, dev) end
+            fzf.files({ search_paths = roots })
+         end
          fzf.dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
          ---@diagnostic enable: inject-field
 
@@ -1227,7 +1215,7 @@ local core_plugins = {
    {
       'nvim-treesitter/nvim-treesitter-context',
       event = 'VeryLazy',
-      opts = { enable = true, max_lines = 12 },
+      opts = { enable = true, separator = '─', max_lines = 12, min_window_height = 24 },
    },
    {
       'nvim-treesitter/nvim-treesitter-textobjects',
@@ -1281,7 +1269,7 @@ local editing_plugins = {
       opts = {
          mappings = {
             status = {
-               ['<C-t>'] = false,
+               ['<c-t>'] = false,
             },
          },
       },
@@ -1411,7 +1399,7 @@ local editing_plugins = {
             { desc = 'See token usage' }
          )
 
-         -- Disable fix_cursorline as I don't want cursorline, and it causes a lot of flickering
+         -- Disable fix_cursorline as it's unwanted and it causes a lot of flickering
          local terminal = require('sidekick.cli.terminal')
          function terminal:fix_cursorline() end
 
@@ -1451,69 +1439,19 @@ local editing_plugins = {
 
    --Floaterm
    {
-      'nvzone/floaterm',
+      'fsiraj/floaterm',
+      dev = true,
       keys = { '<C-t>', '<Leader>r' },
       dependencies = 'nvzone/volt',
       config = function()
          local floaterm = require('floaterm')
-         local utils = require('floaterm.utils')
-         local api = require('floaterm.api')
-         local state = function() return require('floaterm.state') end
-
-         local function set_keymaps(buf)
-            -- Add
-            keymap('n', '<C-l>', api.switch_wins, { buffer = buf })
-            keymap('n', '<C-h>', api.switch_wins, { buffer = buf })
-            keymap('n', '<C-j>', function() api.cycle_term_bufs('next') end, { buffer = buf })
-            keymap('n', '<C-k>', function() api.cycle_term_bufs('prev') end, { buffer = buf })
-            -- Del
-            pcall(function() vim.keymap.del('n', 'q', { buffer = buf }) end)
-            pcall(function() vim.keymap.del('n', '<Esc>', { buffer = buf }) end)
-            pcall(function() vim.keymap.del('n', '<C-t>', { buffer = buf }) end)
-         end
-         local max_scale = 90
-
          floaterm.setup({
-            border = false,
-            size = { h = max_scale },
-            terminals = { { name = 'main' } },
-            mappings = {
-               sidebar = set_keymaps,
-               term = set_keymaps,
-            },
+            size = { h = 0.9, w = unit_width * 5, max_w = 0.9 },
+            mappings = { toggle = '<C-t>', send = '<Leader>rc' },
+            sidebar_w = unit_width / 2,
          })
 
-         local open = floaterm.open
-         floaterm.open = function()
-            local width = unit_width * 5
-            local pct = math.floor(width / vim.o.columns * 100)
-            require('floaterm.state').config.size.w = math.min(pct, max_scale)
-            open()
-         end
-
-         utils.set_termwin_hl = function()
-            vim.wo[state().win].winhl = winhl({ Normal = 'NormalFloatDark', floatBorder = 'NormalFloatDark' })
-         end
-
-         floaterm.is_open = function() return state().volt_set == true end
-         floaterm.send = function(cmd, name)
-            name = name or cmd
-            if not floaterm.is_open() then floaterm.open() end
-            local term = utils.get_term_by_key(name, 'name')
-            if term then
-               utils.switch_buf(term[2].buf)
-            else
-               api.new_term({ cmd = cmd, name = name })
-            end
-         end
-
-         keymap({ 'n', 't' }, '<C-t>', floaterm.toggle, { desc = 'Toggle Floaterm' })
-         keymap('n', '<Leader>rb', function() floaterm.send('btop +t', 'btop') end, { desc = 'Run Btop' })
-         keymap('n', '<Leader>rc', function()
-            vim.ui.input({ prompt = 'cmd: ' }, function(cmd)
-               if cmd and cmd ~= '' then floaterm.send(cmd) end
-            end)
-         end, { desc = 'Run Command' })
+         keymap('n', '<Leader>rb', function() floaterm.send('btop') end, { desc = 'Run Btop' })
       end,
    },
 
@@ -1558,13 +1496,7 @@ local editing_plugins = {
       },
    },
 
-   --Neotab
-   {
-      'kawre/neotab.nvim',
-      event = 'VeryLazy',
-      config = true,
-   },
-
+   --Wrapped
    {
       'aikhe/wrapped.nvim',
       dependencies = { 'nvzone/volt' },
@@ -1587,7 +1519,6 @@ local language_plugins = {
          autocmd('LspAttach', {
             group = augroup('lsp-attach', { clear = true }),
             callback = function(event)
-               -- Keymaps
                local fzf = require('fzf-lua')
                keymap('n', '<Leader>cd', fzf.lsp_definitions, { buffer = event.buf, desc = 'LSP: Code Definition' })
                keymap(
@@ -1761,13 +1692,9 @@ local language_plugins = {
       event = 'VeryLazy',
       config = function()
          local lint = require('lint')
-         -- Disable all default linters, enable manually if needed
          lint.linters_by_ft = linters_by_ft
-
-         -- Configure linters
          lint.linters.markdownlint.args = { '--disable', 'MD013', '--' }
 
-         -- Autocommand to start linting
          autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
             group = augroup('lint', { clear = true }),
             callback = function()
@@ -1808,7 +1735,6 @@ local language_plugins = {
          keymap('n', ']n', function() neotest.jump.next({ status = 'failed' }) end, { desc = 'Neotest Next' })
          keymap('n', '[n', function() neotest.jump.prev({ status = 'failed' }) end, { desc = 'Neotest Previous' })
 
-         -- Window highlight and close window keymap
          autocmd('FileType', {
             pattern = { 'neotest-output', 'neotest-summary' },
             callback = function(args) keymap('n', 'q', '<Cmd>:q<CR>', { buffer = args.buf, desc = 'Close Window' }) end,
@@ -1900,12 +1826,10 @@ local language_plugins = {
          local widgets = require('dap.ui.widgets')
          local pb = require('persistent-breakpoints.api')
 
-         -- Persist breakpoints across sessions
          require('persistent-breakpoints').setup({
             load_breakpoints_event = { 'BufReadPost' },
          })
 
-         -- Keybindings
          keymap('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
          keymap('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
          keymap('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
@@ -1935,7 +1859,6 @@ local language_plugins = {
             callback = function(event) keymap('n', 'q', '<C-w>q', { silent = true, buffer = event.buf }) end,
          })
 
-         -- Installs all dependencies with mason
          require('mason-nvim-dap').setup({
             automatic_installation = true,
             ensure_installed = {
@@ -1947,7 +1870,6 @@ local language_plugins = {
          -- Dap View setup
          dap.defaults.fallback.switchbuf = 'usevisible,useopen,uselast'
 
-         -- Change breakpoint icons
          local breakpoint_icons = {
             Breakpoint = '',
             BreakpointCondition = '',
@@ -1961,16 +1883,15 @@ local language_plugins = {
             vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
          end
 
-         -- Launch dap view automatically when dap starts
          dap.listeners.before.attach['dap-view-config'] = dv.open
          dap.listeners.before.launch['dap-view-config'] = dv.open
          dap.listeners.before.event_terminated['dap-view-config'] = dv.close
          dap.listeners.before.event_exited['dap-view-config'] = dv.close
 
          -- Python specific config
-         local python_path =
+         require('dap-python').setup(
             vim.fs.joinpath(vim.fn.stdpath('data'), 'mason', 'packages', 'debugpy', 'venv', 'bin', 'python')
-         require('dap-python').setup(python_path)
+         )
       end,
    },
 }
@@ -2162,10 +2083,11 @@ local ui_plugins = {
          local views = {
             mini = {
                timeout = 5000,
-               size = { max_width = unit_width * 2 },
+               align = 'message_left',
+               size = { width = unit_width, max_height = math.floor(vim.o.lines / 2) },
                reverse = false,
                position = { row = 2, col = '100%' },
-               win_options = { winhighlight = winhighlight, winblend = 0 },
+               win_options = { winhighlight = winhighlight, winblend = 0, wrap = true, linebreak = true },
             },
             cmdline_popup = {
                size = { min_width = unit_width, max_width = unit_width * 2 },
@@ -2183,6 +2105,7 @@ local ui_plugins = {
                view = 'popup',
                size = { width = unit_width * 2, height = '80%' },
                border = { text = { top = ' Notifications ' } },
+               win_options = { winhighlight = winhighlight, wrap = true, linebreak = true },
             },
          }
          local routes = {
@@ -2230,7 +2153,7 @@ local ui_plugins = {
             if not require('noice.lsp').scroll(delta) then return fallback end
          end
 
-         keymap('n', '<Leader>ii', '<Cmd>Noice dismiss<CR><Cmd>Noice recents<CR>', { desc = 'Messages' })
+         keymap('n', '<Leader>in', '<Cmd>Noice dismiss<CR><Cmd>Noice recents<CR>', { desc = 'Notifications' })
          keymap({ 'n', 'i', 's' }, '<C-d>', function() return scroll('down') end, { silent = true, expr = true })
          keymap({ 'n', 'i', 's' }, '<C-u>', function() return scroll('up') end, { silent = true, expr = true })
       end,
@@ -2343,5 +2266,9 @@ local specs = vim.iter({
 require('lazy').setup(specs, {
    defaults = { version = nil },
    headless = { task = false },
+   dev = {
+      path = '~/nvim-plugins/',
+      fallback = true,
+   },
 })
 vim.cmd.colorscheme(vim.g.colorscheme)

@@ -207,8 +207,8 @@ setup_shell() {
     # Live reload prompts on theme change
     oh-my-posh enable reload
 
-    # Use minimal nvim as git editor
-    git config --global core.editor "nvim -u $HOME/.config/nvim/minit.lua"
+    # Use clean nvim as git editor
+    git config --global core.editor "nvim --clean"
 }
 
 setup_dotfiles() {
