@@ -3,15 +3,14 @@ version = 3
 final_space = true
 
 
-# WARNING: Managed by `style.lua`
-# Colors
+# Colors — ANSI names track ghostty's synced palette (see init.lua)
 [palette]
-green = '#3fb950'
-mauve = '#bc8cff'
-pink = '#f778ba'
-red = '#ff7b72'
-subtext = '#6e7681'
-teal = '#76e3ea'
+green = 'green'
+mauve = 'magenta'
+pink = 'lightMagenta'
+red = 'red'
+subtext = 'darkGray'
+teal = 'cyan'
 
 
 # Prompt - 'Zero-th' Line

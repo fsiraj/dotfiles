@@ -1,3 +1,5 @@
+# XDG directories created in install.sh and set in .zshenv
+
 # Keep PATH unique
 typeset -U path PATH
 path=("$XDG_BIN_HOME" "$MASON_BIN" $path)
@@ -32,15 +34,16 @@ ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 zinit light zsh-users/zsh-completions
 
-# compinit (most expensive operation)
+# compinit rebuilt only if stale (most expensive operation)
 autoload -Uz compinit
-zcompdump=${ZDOTDIR:-$HOME}/.zcompdump
-if [[ $OSTYPE == darwin* ]]; then
-    zcompdump_mtime=$(stat -f %m "$zcompdump" 2>/dev/null || print 0)
-else
-    zcompdump_mtime=$(stat -c %Y -- "$zcompdump" 2>/dev/null || print 0)
-fi
-(($(date +%s) - zcompdump_mtime > 86400)) && compinit || compinit -C
+zcompdump=$ZDOTDIR/.zcompdump
+cached=-C
+[[ -s $zcompdump ]] || cached=
+for dir in $fpath; do
+    [[ $dir -nt $zcompdump ]] && cached= && break
+done
+compinit $cached
+unset dir cached
 zinit cdreplay -q
 
 # Post-compinit
@@ -105,7 +108,7 @@ alias reload="clear -x && exec zsh"
 alias update="bash ~/dotfiles/install.sh"
 
 alias a=attach
-alias n="nvim -u $HOME/.config/nvim/minit.lua"
+alias n="nvim --clean"
 
 if command -v eza &>/dev/null; then
     alias ls="eza --group-directories-first --color=auto --icons=auto"
@@ -133,8 +136,12 @@ alias grs="git restore --staged"
 alias py="python3"
 alias venv="source .venv/bin/activate"
 
-# fastfetch
 if command -v fastfetch &>/dev/null; then
     ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
-    [[ $- == *i* ]] && ff
+    if [[ $- == *i* && $COLUMNS -ge 100 && -z $NO_FF ]]; then
+        cache=$XDG_CACHE_HOME/fastfetch.txt
+        [[ -s $cache ]] && cat $cache
+        ff --pipe false >| $cache &!
+        unset cache
+    fi
 fi
