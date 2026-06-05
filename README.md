@@ -39,6 +39,8 @@
 > [!IMPORTANT]
 > Run the command below only if you've read and fully understood the script.
 
+> **Requirements:** sudo • curl
+
 ```bash
 bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 ```
