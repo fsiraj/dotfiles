@@ -1,3 +1,5 @@
+test/
+
 .config/nvim/*.log
 .config/nvim/nvim-pack-lock.json
 

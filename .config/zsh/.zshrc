@@ -105,7 +105,7 @@ attach() {
 alias c="clear -x"
 alias cd..="cd .."
 alias reload="clear -x && exec zsh"
-alias update="bash ~/dotfiles/install.sh"
+alias install="bash ~/dotfiles/install.sh"
 
 alias a=attach
 alias n="nvim --clean"

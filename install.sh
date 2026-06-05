@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC1091
+# shellcheck disable=SC2015
 
 OS=""
 
@@ -21,6 +23,10 @@ step() { printf "\n\033[%sm==> %s\033[0m\n" "$COLOR_STEP" "$1"; }
 success() { printf "\033[%sm  ✓ %s\033[0m\n" "$COLOR_SUCCESS" "$1"; }
 error() { printf "\033[%sm  ! %s\033[0m\n" "$COLOR_ERROR" "$1"; }
 finish() { printf "\n\033[%sm ✨ %s\033[0m\n" "$COLOR_COMPLETE" "$1"; }
+ok() {
+    local code=$?
+    [ "$code" -eq 0 ] && success "$1" || error "$1"
+}
 
 installed() {
     command -v "$1" >/dev/null 2>&1
@@ -55,7 +61,6 @@ detect_os() {
     if [ "$(uname)" = "Darwin" ]; then
         OS="macos"
     elif [ -f /etc/os-release ]; then
-        # shellcheck disable=SC1091
         . /etc/os-release
         OS="$ID"
     else
@@ -79,8 +84,7 @@ install_macos_packages() {
     step "Installing packages for macOS..."
 
     if ! installed brew; then
-        /bin/bash -c \
-            "$(curl -fsSL "$BREW_INSTALL_URL")"
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
     fi
     if ! xcode-select -p >/dev/null 2>&1; then
         xcode-select --install 2>/dev/null || true
@@ -103,10 +107,10 @@ install_ubuntu_packages() {
     step "Installing packages for ubuntu..."
 
     sudo apt update -qq
-    sudo apt install -qq build-essential git unzip curl zsh tmux xsel stow
+    sudo apt install -y -qq build-essential git unzip curl zsh tmux xsel stow
 
     if ! installed brew; then
-        /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
         printf "%s\n" "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)\"" >>"$HOME/.zshrc.local"
     fi
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -128,16 +132,15 @@ install_ubuntu_packages() {
 install_arch_packages() {
     step "Installing packages for arch..."
 
-    sudo pacman -Syu --needed \
+    sudo pacman -Syu --needed --noconfirm \
         base-devel \
         git unzip \
-        zsh tmux stow fastfetch \
-        fzf zoxide eza fd ripgrep \
-        nodejs \
-        imagemagick \
+        zsh tmux stow fastfetch ghostty \
+        fzf zoxide eza fd ripgrep bat \
+        nodejs npm imagemagick \
+        neovim \
         ttf-jetbrains-mono-nerd
-    sudo pacman -S --needed yay
-    yay -S --needed neovim-git ghostty-git
+
     if ! installed oh-my-posh; then
         curl -s https://ohmyposh.dev/install.sh | bash -s
     fi
@@ -166,13 +169,13 @@ setup_language_tools() {
         "curl -LsSf https://astral.sh/uv/install.sh | sh" \
         "uv self update"
 
-    success "uv installed!"
+    ok "uv installed!"
 
     install_or_update "rustup" \
-        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" \
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path" \
         "rustup update"
-
-    success "rustup installed!"
+    ok "rustup installed!"
+    [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
     # installed by package managers
     if installed node; then
@@ -181,7 +184,7 @@ setup_language_tools() {
 
     curl -L --proto '=https' --tlsv1.2 -sSf $CARGO_BINSTALL_URL | bash 2>/dev/null
     cargo binstall -y tree-sitter-cli
-    success "tree-sitter-cli installed!"
+    ok "tree-sitter-cli installed!"
 }
 
 setup_shell() {
@@ -189,7 +192,7 @@ setup_shell() {
 
     # Change shell to zsh
     if ! echo "$SHELL" | grep -q "zsh"; then
-        chsh -s "$(which zsh)"
+        sudo chsh -s "$(which zsh)" "$(id -un)"
     fi
     if ! grep -q 'export ZDOTDIR=' "$HOME/.zshenv"; then
         # shellcheck disable=SC2016
@@ -202,11 +205,11 @@ setup_shell() {
     ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
     clone_or_pull "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
-    success "zinit installed!"
+    ok "zinit installed!"
 
     # Update zsh plugins
-    zsh -c "source '$ZINIT_HOME/zinit.zsh' && zinit update --quiet && compinit"
-    success "zsh plugins updated!"
+    zsh -ic "zinit update --quiet && compinit"
+    ok "zsh plugins updated!"
 
     # Live reload prompts on theme change
     oh-my-posh enable reload
@@ -221,7 +224,7 @@ setup_dotfiles() {
     clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
     stow -v -d "$HOME/dotfiles" -t "$HOME/.config" .config
 
-    success "dotfiles stowed!"
+    ok "dotfiles stowed!"
 }
 
 setup_tmux_plugins() {
@@ -230,16 +233,15 @@ setup_tmux_plugins() {
     clone_or_pull "https://github.com/tmux-plugins/tmux-resurrect" \
         "$HOME/.config/tmux/plugins/tmux-resurrect"
 
-    success "tmux plugins installed!"
+    ok "tmux plugins installed!"
 }
 
 setup_neovim_plugins() {
     step "Setting up neovim..."
 
     nvim --headless "+Lazy! sync" +qa
-    nvim --headless "+MasonToolsUpdateSync" +qa
-
-    echo "" && success "neovim plugins and language tools installed!"
+    nvim --headless "+MasonToolsUpdateSync" +qa && echo
+    ok "neovim plugins and language tools installed!"
 }
 
 main() {
