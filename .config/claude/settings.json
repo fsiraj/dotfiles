@@ -24,6 +24,7 @@
       "~/.local/share/nvim/"
     ]
   },
+  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.config/claude/statusline.sh\""
@@ -35,6 +36,7 @@
   "feedbackSurveyRate": 0,
   "effortLevel": "high",
   "tui": "fullscreen",
+  "autoMemoryEnabled": true,
   "theme": "auto",
   "skipAutoPermissionPrompt": true
 }
