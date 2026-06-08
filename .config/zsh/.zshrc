@@ -16,7 +16,7 @@ bindkey -e
 fpath=(~/.zfunc $fpath)
 
 # Load prompt
-eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/omp.toml)"
+eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/omp.json)"
 
 # Restore a steady bar cursor whenever the shell prompt returns.
 autoload -Uz add-zsh-hook
@@ -25,7 +25,7 @@ add-zsh-hook precmd restore_bar_cursor
 
 # History
 HISTSIZE=10000
-HISTFILE=~/.config/zsh/.zsh_history
+HISTFILE=$ZDOTDIR/.zsh_history
 SAVEHIST=$HISTSIZE
 setopt appendhistory hist_find_no_dups hist_ignore_all_dups hist_ignore_space sharehistory
 
@@ -57,17 +57,12 @@ bindkey "^[[Z" autosuggest-accept                               # shift + tab
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' # case insensitive matching
 zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'         # show color for matches
 zstyle ':completion:*' menu no                                  # disable defualt in favour of fzf-tab
-zstyle ':fzf-tab:complete:*' fzf-preview '
-if [[ -d $realpath ]]; then
-  eza -a --color=always $realpath
-elif [[ -f $realpath ]]; then
-  bat --theme base16 --color=always --style=plain $realpath
-else
-  printf "%s\n" "$word"
-fi
-' # tab completion preview
+zstyle ':fzf-tab:complete:cd:*' fzf-preview '
+    eza -aT --level=2 --color=always --icons=always $realpath
+' # show directory preview on cd
 
 # Load shell integrations
+source <(jj util completion zsh)
 eval "$(zoxide init --cmd cd zsh)"
 source <(fzf --zsh)
 bindkey -r '^[c'
@@ -94,7 +89,7 @@ attach() {
     if [[ -z "$1" ]]; then
         local sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -v '^_')
         [[ -z "$sessions" ]] && echo "No tmux sessions." && return 1
-        local session=$(echo "$sessions" | fzf --reverse --height=16 --prompt "Attach to session: ")
+        local session=$(echo "$sessions" | fzf --reverse --height=16 --prompt "Session: ")
         [[ -z "$session" ]] && return 1
         tmux attach -t "$session"
     else
@@ -103,20 +98,19 @@ attach() {
 }
 
 alias c="clear -x"
-alias cd..="cd .."
 alias reload="clear -x && exec zsh"
 alias install="bash ~/dotfiles/install.sh"
 
 alias a=attach
 alias n="nvim --clean"
+alias py="python3"
+alias venv="source .venv/bin/activate"
 
-if command -v eza &>/dev/null; then
-    alias ls="eza --group-directories-first --color=auto --icons=auto"
-    alias ll="ls -l --time-style=relative"
-    alias la="ls -a"
-    alias lt="ls -T"
-    alias lla="ls -al"
-fi
+alias ls="eza --group-directories-first --color=auto --icons=auto"
+alias ll="ls -l --time-style=relative"
+alias la="ls -a"
+alias lt="ls -T"
+alias lla="ls -al"
 
 alias ga="git add -v"
 alias gc="git commit -vm"
@@ -129,19 +123,15 @@ gl() {
 alias gb="git branch"
 alias gch="git checkout"
 alias gp="git pull"
+alias gf="git fetch"
 alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 alias grs="git restore --staged"
 
-alias py="python3"
-alias venv="source .venv/bin/activate"
+alias cat="bat -p"
 
-if command -v fastfetch &>/dev/null; then
-    ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
+if command -v fastfetch &>/dev/null; then ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
     if [[ $- == *i* && $COLUMNS -ge 100 && -z $NO_FF ]]; then
-        cache=$XDG_CACHE_HOME/fastfetch.txt
-        [[ -s $cache ]] && cat $cache
-        ff --pipe false >| $cache &!
-        unset cache
+        ff
     fi
 fi

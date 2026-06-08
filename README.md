@@ -85,7 +85,7 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 #### 🎨 **Theming**
 
 > - **Font:** [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/JetBrainsMono) - Perfect for coding
-> - **Default Theme:** GitHub - Clean theme inspired by GitHub's interface
+> - **Dynamic Theme Sync:** See below
 
 ## 🌈 Theme System
 

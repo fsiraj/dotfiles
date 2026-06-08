@@ -3,7 +3,7 @@
 -- └──────────────────────────────────────────────────────────────────────┘
 
 -- Colorscheme
-vim.g.colorscheme = 'github_dark_default'
+vim.g.colorscheme = 'default'
 
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
@@ -108,12 +108,10 @@ end
 keymap({ 'n', 'v' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
 keymap({ 'n', 'v' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
 keymap('n', 'ga', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
-keymap('n', '<C-a>', 'ggVG', { desc = 'Select All' })
 
 -- Splits
 keymap('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
 keymap('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
-keymap('n', '<C-_>', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
 
 -- Terminal Normal Mode
 keymap('t', '<C-]>', '<C-\\><C-n>', { desc = 'Terminal Normal Mode' })
@@ -130,7 +128,7 @@ local function open_diagnostic_float(focus)
    end
 end
 
-keymap('n', '<Leader>td', function()
+keymap('n', '<Leader>Td', function()
    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
    vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
 end, { desc = 'LSP: Toggle Diagnostics' })
@@ -198,10 +196,6 @@ autocmd('CursorHold', {
 autocmd('FileChangedShell', {
    --Prevent W12 prompt everytime a change is made to the buffer outside Neovim
    callback = function(args)
-      if vim.bo[args.buf].modified then
-         vim.v.fcs_choice = 'ask'
-         return
-      end
       vim.v.fcs_choice = 'reload'
       vim.notify(
          ('Reloaded %s because it changed on disk'):format(vim.fn.fnamemodify(args.file, ':~:.')),
@@ -219,6 +213,7 @@ local unit_width = 40
 
 --- All supported colorschemes
 local colorschemes = {
+   'default',
    'github_dark_default',
    'github_light_default',
    'rose-pine-main',
@@ -259,19 +254,63 @@ local neovim_logo = [[
 -- │                             UI: Helpers                              │
 -- └──────────────────────────────────────────────────────────────────────┘
 
+local get_hl = vim.api.nvim_get_hl
+
+local function get_hl_attr(name, attr)
+   local value = get_hl(0, { name = name, link = false })[attr]
+   if (attr == 'fg' or attr == 'bg' or attr == 'sp') and type(value) == 'number' then
+      return string.format('#%06x', value)
+   end
+   return value
+end
+
 local function tee(message, level)
    vim.notify(message, level or 'error')
    io.write(message .. '\n')
 end
 
-local function num_to_hex(palette)
-   for k, v in pairs(palette) do
-      if type(v) == 'number' then palette[k] = string.format('#%06x', v) end
+local sed_formatters = {
+   -- Example: key = 'value'
+   nvim = function(k, v) return ('-e "s|^%s = .*|%s = \'%s\'|"'):format(k, k, v) end,
+   -- Example: key = value
+   ghostty = function(k, v) return ('-e "s|^%s = .*|%s = %s|"'):format(k, k, v) end,
+   -- Example: set -g @key "value"
+   tmux = function(k, v) return ('-e "s|^set -g @%s \\".*\\"|set -g @%s \\"%s\\"|"'):format(k, k, v) end,
+}
+
+local function sed_format_for(path)
+   for name, fmt in pairs(sed_formatters) do
+      if path:find(name) then return fmt end
    end
-   return palette
 end
 
-local function lighten(color, pct) return require('volt.color').change_hex_lightness(color, pct) end
+local function winhl(links)
+   return table.concat(vim.iter(links):map(function(from, to) return from .. ':' .. to end):totable(), ',')
+end
+
+local function override_winhl(pattern, hl)
+   autocmd({ 'FileType', 'BufWinEnter' }, {
+      pattern = pattern,
+      callback = function(args)
+         hl = hl or winhl({ Normal = 'NormalFloat' })
+         vim.schedule(function()
+            local win = vim.fn.bufwinid(args.buf)
+            if win and win ~= -1 then vim.wo[win].winhl = hl end
+         end)
+      end,
+   })
+end
+
+local function emit_cursor_color()
+   local osc = string.format('\27]12;%s\7', get_hl_attr('Cursor', 'bg'))
+   if vim.env.TMUX then osc = '\27Ptmux;' .. osc:gsub('\27', '\27\27') .. '\27\\' end
+   io.stdout:write(osc)
+end
+
+local function lighten(color, pct)
+   -- Negative pct darkens
+   return require('volt.color').change_hex_lightness(color, pct)
+end
 
 local function light_or_dark(colorscheme)
    return vim.tbl_contains({
@@ -282,173 +321,143 @@ local function light_or_dark(colorscheme)
    }, colorscheme) and 'light' or 'dark'
 end
 
-local function palette_is_valid(palette)
-   local required_keys = {
-      'accent',
-      'text',
-      'base',
-      'mantle',
-      'subtext',
-      'black',
-      'white',
-      'red',
-      'orange',
-      'yellow',
-      'green',
-      'teal',
-      'blue',
-      'mauve',
-      'pink',
-   }
-   for _, key in ipairs(required_keys) do
-      if palette[key] == nil then
-         tee('Palette is missing ' .. key)
-         return false
-      end
-   end
-   return true
-end
-
---stylua: ignore
-local sed_formatters = {
-   -- Example: key = 'value'
-   nvim    = function(k, v) return ('-e "s|^%s = .*|%s = \'%s\'|"'):format(k, k, v) end,
-   -- Example: key = value
-   ghostty = function(k, v) return ('-e "s|^%s = .*|%s = %s|"'):format(k, k, v) end,
-   -- Example: set -g @key "value"
-   tmux    = function(k, v) return ('-e "s|^set -g @%s \\".*\\"|set -g @%s \\"%s\\"|"'):format(k, k, v) end,
-}
-
-local function sed_format_for(path)
-   for name, fmt in pairs(sed_formatters) do
-      if path:find(name) then return fmt end
-   end
-end
-
-local function emit_cursor_color()
-   local cursor = vim.api.nvim_get_hl(0, { name = 'Cursor', link = false })
-   local osc = string.format('\27]12;#%06x\7', cursor.bg)
-   if vim.env.TMUX then osc = '\27Ptmux;' .. osc:gsub('\27', '\27\27') .. '\27\\' end
-   io.stdout:write(osc)
-end
-
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                        UI: Palette Generation                        │
 -- └──────────────────────────────────────────────────────────────────────┘
 
 local function get_palette(colorscheme)
    local palette
+   --stylua: ignore start
    if string.find(colorscheme, 'catppuccin') then
       local flavor = vim.fn.split(colorscheme, '-')[2]
       local p = require('catppuccin.palettes').get_palette(flavor)
       palette = {
-         accent = p.mauve,
-         text = p.text,
-         base = p.base,
-         mantle = p.mantle,
+         accent  = p.mauve,
+         text    = p.text,
+         base    = p.base,
+         mantle  = p.mantle,
          subtext = p.subtext0,
-         black = p.surface1,
-         white = p.text,
-         red = p.red,
-         orange = p.peach,
-         yellow = p.yellow,
-         green = p.green,
-         teal = p.teal,
-         blue = p.blue,
-         mauve = p.mauve,
-         pink = p.pink,
+         black   = p.surface1,
+         white   = p.text,
+         red     = p.red,
+         orange  = p.peach,
+         yellow  = p.yellow,
+         green   = p.green,
+         cyan    = p.teal,
+         blue    = p.blue,
+         magenta = p.mauve,
       }
    elseif string.find(colorscheme, 'tokyonight') then
       local flavor = vim.fn.split(colorscheme, '-')[2]
       local p = require('tokyonight.colors.' .. flavor)
       if type(p) == 'function' then p = p({}) end
       palette = {
-         accent = p.cyan,
-         text = p.fg,
-         base = p.bg,
-         mantle = p.bg_dark,
+         accent  = p.cyan,
+         text    = p.fg,
+         base    = p.bg,
+         mantle  = p.bg_dark,
          subtext = p.comment,
-         black = p.terminal_black,
-         white = p.fg,
-         red = p.magenta2,
-         orange = p.orange,
-         yellow = p.yellow,
-         green = p.teal,
-         teal = p.cyan,
-         blue = p.blue,
-         mauve = p.magenta,
-         pink = '#ea76cb',
+         black   = p.terminal_black,
+         white   = p.fg,
+         red     = p.magenta2,
+         orange  = p.orange,
+         yellow  = p.yellow,
+         green   = p.teal,
+         cyan    = p.cyan,
+         blue    = p.blue,
+         magenta = p.magenta,
       }
    elseif string.find(colorscheme, 'rose') then
       local p = require('rose-pine.palette')
       palette = {
-         accent = p.rose,
-         text = p.text,
-         base = p.base,
-         mantle = p.surface,
+         accent  = p.rose,
+         text    = p.text,
+         base    = p.base,
+         mantle  = p.surface,
          subtext = p.subtle,
-         black = p.overlay,
-         white = p.text,
-         red = p.love,
-         orange = p.gold,
-         yellow = p.gold,
-         green = p.leaf,
-         teal = p.foam,
-         blue = p.pine,
-         mauve = p.iris,
-         pink = p.rose,
+         black   = p.overlay,
+         white   = p.text,
+         red     = p.love,
+         orange  = p.gold,
+         yellow  = p.gold,
+         green   = p.leaf,
+         cyan    = p.foam,
+         blue    = p.pine,
+         magenta = p.iris,
       }
    elseif string.find(colorscheme, 'github') then
       local p = require('github-theme.palette').load(colorscheme)
       palette = {
-         accent = p.accent.fg,
-         text = p.fg.default,
-         base = p.canvas.default,
-         mantle = p.canvas.overlay,
+         accent  = p.accent.fg,
+         text    = p.fg.default,
+         base    = p.canvas.default,
+         mantle  = p.canvas.overlay,
          subtext = p.fg.subtle,
-         black = p.gray.base or p.black.base,
-         white = p.fg.default,
-         red = p.red.base,
-         orange = p.orange,
-         yellow = p.yellow.base,
-         green = p.green.base,
-         teal = p.cyan.base,
-         blue = p.blue.base,
-         mauve = p.magenta.base,
-         pink = p.pink.base,
+         black   = p.gray.base or p.black.base,
+         white   = p.fg.default,
+         red     = p.red.base,
+         orange  = p.orange,
+         yellow  = p.yellow.base,
+         green   = p.green.base,
+         cyan    = p.cyan.base,
+         blue    = p.blue.base,
+         magenta = p.magenta.base,
+      }
+   elseif colorscheme == 'default' then
+      local p = vim.api.nvim_get_color_map()
+      palette = {
+         accent  = p.NvimLightCyan,
+         text    = p.NvimLightGrey2,
+         base    = p.NvimDarkGrey2,
+         mantle  = p.NvimDarkGrey1,
+         subtext = p.NvimLightGrey4,
+         black   = p.NvimDarkGrey3,
+         white   = p.NvimLightGrey2,
+         red     = p.NvimLightRed,
+         orange  = p.Orange,
+         yellow  = p.NvimLightYellow,
+         green   = p.NvimLightGreen,
+         cyan    = p.NvimLightCyan,
+         blue    = p.NvimLightBlue,
+         magenta = p.NvimLightMagenta,
       }
    else
       error('Unsupported colorscheme: ' .. tostring(colorscheme))
    end
-   return num_to_hex(palette)
+   --stylua: ignore end
+   for k, v in pairs(palette) do
+      if type(v) == 'number' then palette[k] = string.format('#%06x', v) end
+   end
+   return palette
 end
 
 local function generate_ansi_palette(p)
-   local pct = 10
+   local pct = 5
+   local black = vim.o.background == 'dark' and p.mantle or p.text
+   local white = vim.o.background == 'dark' and p.text or p.mantle
    return {
-      p.mantle,
+      black,
       p.red,
       p.green,
       p.yellow,
       p.blue,
-      p.mauve,
-      p.teal,
-      p.text,
-      lighten(p.mantle, pct),
+      p.magenta,
+      p.cyan,
+      white,
+      lighten(black, pct * 4),
       lighten(p.red, pct),
       lighten(p.green, pct),
       lighten(p.yellow, pct),
       lighten(p.blue, pct),
-      p.pink,
-      lighten(p.teal, pct),
-      lighten(p.text, pct),
+      lighten(p.magenta, pct),
+      lighten(p.cyan, pct),
+      lighten(white, pct),
    }
 end
 
 local function generate_ghostty_theme(p)
-   local cursor = vim.api.nvim_get_hl(0, { name = 'Cursor', link = false })
-   local cursor_bg = string.format('#%06x', cursor.bg)
-   local cursor_fg = string.format('#%06x', cursor.fg)
+   local cursor_bg = get_hl_attr('Cursor', 'bg')
+   local cursor_fg = get_hl_attr('Cursor', 'fg')
    local theme = {
       ['background'] = p.base,
       ['foreground'] = p.text,
@@ -464,63 +473,90 @@ local function generate_ghostty_theme(p)
 end
 
 local function generate_tmux_theme(p)
+   --stylua: ignore
    return {
-      thm_accent = p.accent,
-      thm_base = p.base,
-      thm_fg = p.text,
-      thm_green = p.green,
+      thm_accent   = p.accent,
+      thm_base     = p.base,
+      thm_fg       = p.text,
+      thm_green    = p.green,
       thm_inactive = p.subtext,
-      thm_mantle = p.mantle,
-      thm_mauve = p.mauve,
-      thm_orange = p.orange,
+      thm_mantle   = p.mantle,
+      thm_magenta  = p.magenta,
+      thm_orange   = p.orange,
    }
 end
 
 local function generate_nvim_overrides(p)
+   --stylua: ignore
    return {
       -- Neovim Built-in
-      CursorLineNr = { fg = p.accent },
-      FloatBorder = { fg = p.mantle, bg = p.mantle },
-      FloatTitle = { fg = p.mantle, bg = p.accent, bold = true },
-      Folded = { bg = p.base },
-      NormalFloat = { bg = p.mantle },
-      NormalNC = { link = 'Normal' },
-      Pmenu = { link = 'NormalFloat' },
-      Special = { fg = p.teal },
-      StatusLine = { fg = p.base, bg = p.base },
-      StatusLineNC = { fg = p.base, bg = p.base },
-      StatusLineTerm = { link = 'StatusLine' },
-      StatusLineTermNC = { link = 'StatusLineNC' },
+      CursorLine                  = { bg = 'NONE' },
+      CursorLineNr                = { fg = p.accent },
+      FloatBorder                 = { fg = p.mantle, bg = p.mantle },
+      FloatTitle                  = { fg = p.mantle, bg = p.accent, bold = true },
+      Folded                      = { bg = p.base },
+      Normal                      = { fg = p.text, bg = p.base },
+      NormalFloat                 = { bg = p.mantle },
+      NormalNC                    = { link = 'Normal' },
+      Pmenu                       = { link = 'NormalFloat' },
+      Special                     = { fg = p.cyan },
+      StatusLine                  = { fg = p.base, bg = p.base },
+      StatusLineNC                = { fg = p.base, bg = p.base },
+      StatusLineTerm              = { link = 'StatusLine' },
+      StatusLineTermNC            = { link = 'StatusLineNC' },
+      WinSeparator                = { fg = p.mantle, bg = p.base },
       -- Plugins
-      BlinkCmpDoc = { link = 'NormalFloat' },
-      DapBreak = { fg = p.red },
-      DapStop = { fg = p.yellow },
-      FzfLuaBorder = { link = 'FloatBorder' },
-      FzfLuaNormal = { link = 'NormalFloat' },
-      LazyButton = { bg = p.base },
-      LazySpecial = { fg = p.accent },
-      MiniIndentscopeSymbol = { fg = p.accent },
-      NeoTreeCursorLine = { link = 'NeotreeNormal' },
-      NeoTreeDirectoryIcon = { fg = p.accent },
-      NeoTreeIndentMarker = { link = 'NeoTreeDirectoryIcon' },
-      NeoTreeNormalNC = { link = 'NeotreeNormal' },
-      NeotreeNormal = { link = 'NormalFloat' },
+      BlinkCmpDoc                 = { link = 'NormalFloat' },
+      DapBreak                    = { fg = p.red },
+      DapStop                     = { fg = p.yellow },
+      FloatermActive              = { fg = p.accent },
+      FzfLuaBorder                = { link = 'FloatBorder' },
+      FzfLuaNormal                = { link = 'NormalFloat' },
+      JupynvimBorder              = { link = 'Comment' },
+      LazyButton                  = { bg = p.base },
+      LazySpecial                 = { fg = p.accent },
+      MiniIndentscopeSymbol       = { fg = p.accent },
+      NeotestAdapterName          = { fg = p.accent, bold = true },
+      NeotestDir                  = { fg = p.cyan },
+      NeotestExpandMarker         = { fg = p.subtext },
+      NeotestFailed               = { fg = p.red },
+      NeotestFile                 = { fg = p.blue },
+      NeotestFocused              = { fg = p.blue, bold = true, underline = true },
+      NeotestIndent               = { fg = p.subtext },
+      NeotestMarked               = { fg = p.orange, bold = true },
+      NeotestNamespace            = { fg = p.magenta },
+      NeotestPassed               = { fg = p.green },
+      NeotestRunning              = { fg = p.yellow },
+      NeotestSkipped              = { fg = p.subtext },
+      NeotestTarget               = { fg = p.red },
+      NeotestTest                 = { fg = p.subtext },
+      NeotestUnknown              = { fg = p.subtext },
+      NeotestWatching             = { fg = p.yellow },
+      NeotestWinSelect            = { fg = p.cyan, bold = true },
+      NeoTreeCursorLine           = { link = 'NeotreeNormal' },
+      NeoTreeDirectoryIcon        = { fg = p.accent },
+      NeoTreeGitConflict          = { link = '@diff.delta' },
+      NeoTreeGitUntracked         = { link = '@diff.delta' },
+      NeoTreeIndentMarker         = { link = 'NeoTreeDirectoryIcon' },
+      NeoTreeNormalNC             = { link = 'NeotreeNormal' },
+      NeotreeNormal               = { link = 'NormalFloat' },
       NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
-      NoiceConfirm = { link = 'NormalFloat' },
-      NoiceConfirmBorder = { link = 'FloatBorder' },
-      NvimDapViewTabFill = { link = 'NormalFloat' },
-      NvimDapViewTabSelected = { bg = p.green, fg = p.base },
-      SidekickChat = { link = 'Normal' },
-      SidekickDiffAdd = { link = 'DiffAdd' },
-      SidekickDiffContext = { bg = p.base },
-      SidekickSign = { fg = p.teal },
-      SnacksDashboardFooter = { fg = p.subtext },
-      SnacksDashboardHeader = { fg = p.green },
-      SnacksDashboardHeaderSecondary = { fg = p.blue },
-      SnacksDashboardSpecial = { fg = p.accent },
-      TreesitterContext = { bg = p.base },
-      TreesitterContextSeparator = { fg = p.accent, bg = p.base },
-      WhichKeyBorder = { link = 'FloatBorder' },
+      NoiceConfirm                = { link = 'NormalFloat' },
+      NoiceConfirmBorder          = { link = 'FloatBorder' },
+      NvimDapViewTabFill          = { link = 'NormalFloat' },
+      NvimDapViewTabSelected      = { bg = p.green, fg = p.base },
+      OutlineCurrent              = { fg = p.accent, bold = true },
+      SidekickChat                = { link = 'NormalFloat' },
+      SidekickDiffAdd             = { link = 'DiffAdd' },
+      SidekickDiffContext         = { bg = p.base },
+      SidekickSign                = { fg = p.cyan },
+      SnacksDashboardFooter       = { fg = p.subtext },
+      SnacksDashboardHeader       = { fg = p.green },
+      SnacksDashboardHeaderAlt    = { fg = p.blue },
+      SnacksDashboardSpecial      = { fg = p.accent },
+      TreesitterContext           = { bg = p.base },
+      TreesitterContextSeparator  = { fg = p.accent, bg = p.base },
+      WhichKeyBorder              = { link = 'FloatBorder' },
    }
 end
 
@@ -534,10 +570,10 @@ local function generate_lualine_theme(p)
       },
       -- Missing sections default to normal mode settings
       insert = {
-         a = { bg = p.teal, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.cyan, fg = p.mantle, gui = 'bold' },
       },
       visual = {
-         a = { bg = p.mauve, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.magenta, fg = p.mantle, gui = 'bold' },
       },
       command = {
          a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
@@ -569,17 +605,9 @@ local function run_sed_cmd(path, overrides)
    vim.fn.system(cmd)
 end
 
-local function reload_ghostty()
-   -- Mac
-   if vim.uv.os_uname().sysname == 'Darwin' then
-      vim.system({ 'pkill', '-SIGUSR2', '-a', 'ghostty' })
-   -- Linux
-   else
-      vim.system({ 'pkill', '-SIGUSR2', 'ghostty' })
-   end
-end
+local function reload_ghostty() vim.system({ 'killall', '-SIGUSR2', 'ghostty' }) end
 
-local function reload_tmux() vim.system({ 'tmux', 'source', vim.env.HOME .. '/.config/tmux/tmux.conf' }) end
+local function reload_tmux() vim.system({ 'tmux', 'source', vim.fn.expand('~/.config/tmux/tmux.conf') }) end
 
 local function reload_nvim_servers()
    local servers = vim.fn.glob(vim.fn.fnamemodify(vim.fn.stdpath('run'), ':h') .. '/**/nvim.*', true, true)
@@ -612,8 +640,8 @@ end
 
 local function set_theme(colorscheme)
    vim.g.colorscheme = colorscheme
-   vim.cmd('colorscheme ' .. colorscheme)
    vim.opt.background = light_or_dark(colorscheme)
+   vim.cmd.colorscheme(vim.g.colorscheme)
    reload_nvim_plugins()
    vim.schedule(emit_cursor_color)
 end
@@ -637,7 +665,6 @@ local function sync_theme(colorscheme)
 
    -- Palette
    local p = get_palette(colorscheme)
-   if not palette_is_valid(p) then return end
 
    -- Nvim
    local nvim = '~/.config/nvim/init.lua'
@@ -726,13 +753,14 @@ local non_lsps = {
 
 local all_tools = vim.iter({ lsps, non_lsps }):flatten():totable()
 
---stylua: ignore
 local formatters_by_ft = {
+   --stylua: ignore start
    lua      = { 'stylua' },
    python   = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
    markdown = { 'prettier' },
    zsh      = { 'shfmt', 'shellcheck' },
    sh       = { 'shfmt', 'shellcheck' },
+   --stylua: ignore end
 }
 
 local linters_by_ft = {
@@ -769,29 +797,12 @@ end
 local function lsp_inlay_hints(event)
    local client = vim.lsp.get_client_by_id(event.data.client_id)
    if client and client:supports_method('textDocument/inlayHint', event.buf) then
-      keymap('n', '<Leader>ti', function()
+      keymap('n', '<Leader>Ti', function()
          local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
          vim.lsp.inlay_hint.enable(not is_enabled)
          vim.notify('Inlay Hints: ' .. tostring(not is_enabled))
       end, { buffer = event.buf, desc = 'LSP: Toggle Inlay Hints' })
    end
-end
-
-local function winhl(links)
-   return table.concat(vim.iter(links):map(function(from, to) return from .. ':' .. to end):totable(), ',')
-end
-
-local function override_winhl(pattern, hl)
-   autocmd({ 'FileType', 'BufWinEnter' }, {
-      pattern = pattern,
-      callback = function(args)
-         hl = hl or winhl({ Normal = 'NormalFloat' })
-         vim.schedule(function()
-            local win = vim.fn.bufwinid(args.buf)
-            if win and win ~= -1 then vim.wo[win].winhl = hl end
-         end)
-      end,
-   })
 end
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
@@ -830,6 +841,11 @@ local core_plugins = {
          require('mini.bufremove').setup()
          keymap('ca', 'bd', 'lua MiniBufremove.delete()')
          keymap('ca', 'bw', 'lua MiniBufremove.wipeout()')
+
+         -- Align text
+         require('mini.align').setup({
+            mappings = { start = '', start_with_preview = 'gA' },
+         })
 
          -- Better Around/Inside textobjects
          local ai = require('mini.ai')
@@ -888,13 +904,17 @@ local core_plugins = {
          vim.opt.sessionoptions:remove('blank')
 
          local function postread()
-            if vim.g.SidekickTool == nil or vim.g.SidekickTool == '' then return end
-            require('sidekick.cli').show({ name = vim.g.SidekickTool, focus = false, filter = { cwd = true } })
+            if vim.g.SidekickTool ~= nil and vim.g.SidekickTool ~= '' then
+               require('sidekick.cli').show({ name = vim.g.SidekickTool, focus = false, filter = { cwd = true } })
+            end
+            if vim.g.NeotreeOpen == 1 then vim.schedule(function() vim.cmd('Neotree show') end) end
          end
 
          local function prewrite()
             local term = require('sidekick.cli.terminal').sessions()[1]
             vim.g.SidekickTool = term and term.tool.name or ''
+            vim.g.NeotreeOpen = vim.iter(vim.api.nvim_list_wins())
+               :any(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].ft == 'neo-tree' end) and 1 or 0
             require('neogit').close()
             vim.cmd('helpclose')
          end
@@ -960,13 +980,16 @@ local core_plugins = {
          autocmd('User', {
             pattern = 'SnacksDashboardOpened',
             callback = function()
-               vim.fn.matchadd('SnacksDashboardHeaderSecondary', '#')
+               vim.fn.matchadd('SnacksDashboardHeaderAlt', '#')
                vim.fn.matchadd('WarningMsg', '⚡')
             end,
          })
          autocmd('User', {
             pattern = 'SnacksDashboardClosed',
-            callback = function() vim.fn.clearmatches() end,
+            callback = function()
+               vim.fn.clearmatches()
+               vim.schedule(function() vim.cmd('Neotree show') end)
+            end,
          })
       end,
    },
@@ -975,20 +998,13 @@ local core_plugins = {
    {
       'folke/which-key.nvim',
       event = 'VeryLazy',
-      keys = {
-         {
-            '<Leader>?',
-            function() require('which-key').show({ global = false }) end,
-            desc = 'Buffer Local Keymaps',
-         },
-      },
       opts = {
          preset = 'helix',
          delay = 500,
          win = { title_pos = 'center' },
          triggers = {
             { '<auto>', mode = 'nixsoc' },
-            { 's', mode = { 'n', 'v' } },
+            { 'a', mode = { 'n', 'v' } },
          },
          icons = { mappings = false },
          spec = {
@@ -999,8 +1015,9 @@ local core_plugins = {
             { '<Leader>s', group = 'Search' },
             { '<Leader>S', group = 'Sessions' },
             { '<Leader>f', group = 'File' },
-            { '<Leader>t', group = 'Toggle' },
-            { '<Leader>n', group = 'Neotest' },
+            { '<Leader>t', group = 'Neotest' },
+            { '<Leader>T', group = 'Toggle' },
+            { '<Leader>n', group = 'Notebook' },
             { '<Leader>g', group = 'Git', mode = { 'n', 'v' } },
             { '<Leader>r', group = 'Run' },
          },
@@ -1032,7 +1049,7 @@ local core_plugins = {
          fzf.setup({
             defaults = {
                formatter = 'path.filename_first',
-               fd_opts = [[--color=never --hidden --type f --type l --exclude .git --exclude .venv]],
+               fd_opts = '--color=never --hidden --type f --type l --exclude .git --exclude .venv',
             },
             winopts = {
                width = width,
@@ -1146,10 +1163,7 @@ local core_plugins = {
       opts = {
          namu_symbols = {
             options = {
-               display = {
-                  mode = 'icon',
-                  format = 'tree_guides',
-               },
+               display = { mode = 'icon', format = 'tree_guides' },
                window = { relative = 'win' },
             },
          },
@@ -1163,10 +1177,11 @@ local core_plugins = {
       config = function()
          local treesitter = require('nvim-treesitter')
          local supported = vim.list_extend(treesitter.get_available(1), treesitter.get_available(2))
+         local excluded = { 'tmux' }
          autocmd('FileType', {
             callback = function(args)
                local lang = vim.bo[args.buf].filetype
-               if vim.tbl_contains(supported, lang) then
+               if vim.tbl_contains(supported, lang) and not vim.tbl_contains(excluded, lang) then
                   local installed = treesitter.get_installed()
                   if not vim.tbl_contains(installed, lang) then
                      treesitter.install(lang)
@@ -1212,7 +1227,7 @@ local core_plugins = {
 -- │                     Plugins: Editing & Workflow                      │
 -- └──────────────────────────────────────────────────────────────────────┘
 
-local editing_plugins = {
+local utility_plugins = {
    --Neogit
    {
       'NeogitOrg/neogit',
@@ -1221,11 +1236,7 @@ local editing_plugins = {
             '<C-g>',
             function()
                local neogit = require('neogit')
-               if neogit.status.is_open() then
-                  neogit.close()
-               else
-                  neogit.open()
-               end
+               neogit[neogit.status.is_open() and 'close' or 'open']()
             end,
             desc = 'Neogit (toggle)',
          },
@@ -1235,13 +1246,7 @@ local editing_plugins = {
          'esmuellert/codediff.nvim',
          'ibhagwan/fzf-lua',
       },
-      opts = {
-         mappings = {
-            status = {
-               ['<c-t>'] = false,
-            },
-         },
-      },
+      opts = { graph_style = 'kitty', mappings = { status = { ['<c-t>'] = false } } },
    },
 
    --CodeDiff
@@ -1250,10 +1255,17 @@ local editing_plugins = {
       keys = {
          { '<Leader>gD', '<Cmd>CodeDiff<CR>', desc = 'CodeDiff' },
       },
+      cmd = 'CodeDiff',
       dependencies = { 'MunifTanjim/nui.nvim' },
       config = function()
          require('codediff').setup({
-            diff = { conflict_ours_position = 'left' },
+            diff = {
+               conflict_ours_position = 'left',
+               cycle_hunks_across_files = true,
+            },
+            explorer = {
+               auto_open_on_cursor = true,
+            },
             keymaps = {
                view = {
                   stage_hunk = '<Leader>gs',
@@ -1272,7 +1284,7 @@ local editing_plugins = {
    {
       'zbirenbaum/copilot.lua',
       cmd = 'Copilot',
-      keys = '<Leader>tc',
+      keys = '<Leader>Tc',
       build = ':Copilot auth',
       init = function() vim.g.copilot_enabled = false end,
       config = function()
@@ -1288,16 +1300,10 @@ local editing_plugins = {
             panel = { enabled = false },
             server = { type = 'binary' },
          })
-         keymap('n', '<Leader>tc', function()
-            if vim.g.copilot_enabled then
-               vim.cmd('Copilot disable')
-               vim.notify('Copilot Disabled')
-               vim.g.copilot_enabled = false
-            else
-               vim.cmd('Copilot enable')
-               vim.notify('Copilot Enabled')
-               vim.g.copilot_enabled = true
-            end
+         keymap('n', '<Leader>Tc', function()
+            vim.g.copilot_enabled = not vim.g.copilot_enabled
+            vim.cmd('Copilot ' .. (vim.g.copilot_enabled and 'enable' or 'disable'))
+            vim.notify('Copilot: ' .. tostring(vim.g.copilot_enabled))
          end, { desc = 'Toggle Copilot' })
       end,
    },
@@ -1315,62 +1321,40 @@ local editing_plugins = {
                tools = { claude = { native_scroll = true } },
                win = {
                   split = { width = 0 },
-                  keys = {
-                     buffers = { '<A-b>', 'buffers', mode = 'nt', desc = 'open buffer picker' },
-                     files = { '<A-f>', 'files', mode = 'nt', desc = 'open file picker' },
-                     prompt = { '<A-p>', 'prompt', mode = 't', desc = 'insert prompt or context' },
-                     nav_left = false,
-                     nav_down = false,
-                     nav_up = false,
-                     nav_right = false,
-                  },
                   wo = { winfixwidth = false },
                },
             },
          })
 
          local session = require('sidekick.cli.session')
-         local state = require('sidekick.cli.state')
-         local cli = require('sidekick.cli')
-         local nes = require('sidekick.nes')
-
          local sid = session.sid
          session.sid = function(opts) return '_' .. sid(opts) end
 
-         keymap('n', '<leader>aa', function()
-            if #state.get({ cwd = true, attached = true }) > 0 then
-               cli.toggle({ filter = { cwd = true } })
-            else
-               cli.select({ filter = { installed = true } })
-            end
-         end, { desc = 'Toggle CLI' })
-         keymap('n', '<leader>as', function()
-            cli.close()
-            cli.select({ filter = { installed = true } })
-         end, { desc = 'Select CLI' })
+         local terminal = require('sidekick.cli.terminal')
+         terminal.keys = function() end
+         terminal.fix_cursorline = function() end
+
+         local cli = require('sidekick.cli')
+         local nes = require('sidekick.nes')
+
+         --stylua: ignore start
+         keymap('n', '<leader>aa', function() cli.toggle({ filter = { cwd = true } }) end, { desc = 'Toggle CLI' })
+         keymap('n', '<leader>as', function() cli.select({ filter = { installed = true } }) end, { desc = 'Select CLI' })
          keymap('n', '<Leader>ad', function() cli.close() end, { desc = 'Detach a CLI Session' })
          keymap('n', '<Leader>af', function() cli.send({ msg = '{file}' }) end, { desc = 'Send File' })
          keymap('x', '<Leader>av', function() cli.send({ msg = '{selection}' }) end, { desc = 'Send Visual Selection' })
+         keymap('n', '<Leader>au', function() require('floaterm').send('npx --yes tokscale', 'tokscale') end, { desc = 'See token usage' })
          keymap({ 'n', 'x' }, '<Leader>ap', function() cli.prompt() end, { desc = 'Select Prompt' })
          keymap({ 'n', 'x' }, '<Leader>at', function() cli.send({ msg = '{this}' }) end, { desc = 'Send This' })
          keymap('n', '<Tab>', function()
-            if nes.have() then
-               nes.jump()
-               nes.apply()
-            else
-               return '<Tab>'
-            end
+            if nes.have() then nes.jump(); nes.apply() else return '<Tab>' end
          end, { desc = 'Goto/Apply Next Edit Suggestion', expr = true })
-         keymap(
-            'n',
-            '<Leader>au',
-            function() require('floaterm').send('npx --yes tokscale', 'tokscale') end,
-            { desc = 'See token usage' }
-         )
+         --stylua: ignore end
 
-         -- Disable fix_cursorline as it's unwanted and it causes a lot of flickering
-         local terminal = require('sidekick.cli.terminal')
-         function terminal:fix_cursorline() end
+         local function tui_tool(buf)
+            local tool = vim.b[buf].sidekick_cli or vim.w[vim.api.nvim_get_current_win()].sidekick_cli
+            return tool and vim.tbl_contains({ 'claude', 'opencode' }, tool.name)
+         end
 
          local function scroll_wheel(dir)
             local r, c = unpack(vim.api.nvim_win_get_position(0))
@@ -1387,10 +1371,13 @@ local editing_plugins = {
             group = augroup('sidekick-scroll', { clear = true }),
             callback = function(args)
                local buf = args.buf
-               keymap('t', '<C-u>', function() scroll_wheel('up') end, { buffer = buf })
-               keymap('t', '<C-d>', function() scroll_wheel('down') end, { buffer = buf })
-               keymap('n', '<ScrollWheelUp>', function() vim.cmd('startinsert') end, { buffer = buf })
-               keymap('n', '<ScrollWheelDown>', function() vim.cmd('startinsert') end, { buffer = buf })
+               vim.schedule(function()
+                  if not tui_tool(buf) then return end
+                  keymap('t', '<C-u>', function() scroll_wheel('up') end, { buffer = buf })
+                  keymap('t', '<C-d>', function() scroll_wheel('down') end, { buffer = buf })
+                  keymap('n', '<ScrollWheelUp>', function() vim.cmd('startinsert') end, { buffer = buf })
+                  keymap('n', '<ScrollWheelDown>', function() vim.cmd('startinsert') end, { buffer = buf })
+               end)
             end,
          })
 
@@ -1414,10 +1401,12 @@ local editing_plugins = {
       dependencies = 'nvzone/volt',
       config = function()
          local floaterm = require('floaterm')
+         local pct = 0.85
          floaterm.setup({
-            size = { h = 0.9, w = unit_width * 5, max_w = 0.9 },
+            size = { h = pct, w = unit_width * 5, max_w = pct },
             mappings = { toggle = '<C-t>', send = '<Leader>rc' },
             sidebar_w = unit_width / 2,
+            contrast = 5
          })
 
          keymap('n', '<Leader>rb', function() floaterm.send('btop') end, { desc = 'Run Btop' })
@@ -1447,6 +1436,7 @@ local editing_plugins = {
       keys = {
          { '<leader>ft', '<Cmd>Neotree toggle<CR>', desc = 'File Tree' },
       },
+      cmd = 'Neotree',
       branch = 'v3.x',
       dependencies = {
          'nvim-lua/plenary.nvim',
@@ -1458,11 +1448,20 @@ local editing_plugins = {
             indent = { indent_marker = '┊' },
          },
          filesystem = {
-            filtered_items = { children_inherit_highlights = false },
+            filtered_items = {
+               children_inherit_highlights = false,
+               always_show = { '.config' },
+            },
          },
-         enable_git_status = false,
+         enable_git_status = true,
          enable_diagnostics = false,
          window = { width = unit_width },
+         event_handlers = {
+            {
+               event = 'neo_tree_window_after_open',
+               handler = function(_) vim.cmd('wincmd =') end,
+            },
+         },
       },
    },
 
@@ -1648,7 +1647,7 @@ local language_plugins = {
             require('conform').format({ async = true, lsp_format = 'fallback' })
          end, { desc = 'Code Format Buffer/Selection' })
 
-         keymap('n', '<Leader>tf', function()
+         keymap('n', '<Leader>Tf', function()
             vim.g.format_on_save = not vim.g.format_on_save
             vim.notify('Format On Save: ' .. tostring(vim.g.format_on_save))
          end, { desc = 'Toggle Format On Save' })
@@ -1677,7 +1676,7 @@ local language_plugins = {
    --Neotest
    {
       'nvim-neotest/neotest',
-      keys = '<Leader>n',
+      keys = '<Leader>t',
       dependencies = {
          'nvim-neotest/nvim-nio',
          'nvim-lua/plenary.nvim',
@@ -1695,21 +1694,40 @@ local language_plugins = {
          })
 
          -- Keymaps
-         keymap('n', '<Leader>nr', function() neotest.run.run() end, { desc = 'Neotest Run' })
-         keymap('n', '<Leader>nl', function() neotest.run.run_last() end, { desc = 'Neotest Run Last' })
-         keymap('n', '<Leader>nf', function() neotest.run.run(vim.fn.expand('%')) end, { desc = 'Neotest Run File' })
-         keymap('n', '<Leader>na', function() neotest.run.run({ suite = true }) end, { desc = 'Neotest Run All' })
-         keymap('n', '<Leader>nw', function() neotest.watch.toggle() end, { desc = 'Neotest Watch' })
-         keymap('n', '<Leader>no', function() neotest.output.open({ enter = true }) end, { desc = 'Neotest Output' })
-         keymap('n', '<Leader>ns', function() neotest.summary.toggle() end, { desc = 'Neotest Summary' })
+         keymap('n', '<Leader>tr', function() neotest.run.run() end, { desc = 'Neotest Run' })
+         keymap('n', '<Leader>tl', function() neotest.run.run_last() end, { desc = 'Neotest Run Last' })
+         keymap('n', '<Leader>tf', function() neotest.run.run(vim.fn.expand('%')) end, { desc = 'Neotest Run File' })
+         keymap('n', '<Leader>ta', function() neotest.run.run({ suite = true }) end, { desc = 'Neotest Run All' })
+         keymap('n', '<Leader>tw', function() neotest.watch.toggle() end, { desc = 'Neotest Watch' })
+         keymap('n', '<Leader>to', function() neotest.output.open({ enter = true }) end, { desc = 'Neotest Output' })
+         keymap('n', '<Leader>ts', function() neotest.summary.toggle() end, { desc = 'Neotest Summary' })
          keymap('n', ']n', function() neotest.jump.next({ status = 'failed' }) end, { desc = 'Neotest Next' })
          keymap('n', '[n', function() neotest.jump.prev({ status = 'failed' }) end, { desc = 'Neotest Previous' })
 
          autocmd('FileType', {
             pattern = { 'neotest-output', 'neotest-summary' },
-            callback = function(args) keymap('n', 'q', '<Cmd>:q<CR>', { buffer = args.buf, desc = 'Close Window' }) end,
+            callback = function(args)
+               keymap('n', 'q', '<Cmd>:q<CR>', { buffer = args.buf, desc = 'Close Window' })
+               vim.wo.wrap = false
+            end,
          })
          override_winhl('neotest-summary')
+      end,
+   },
+
+   --Jupynvim
+   {
+      'sheng-tse/jupynvim',
+      event = { 'BufReadCmd *.ipynb', 'BufNewFile *.ipynb' },
+      build = function(plugin)
+         local install = loadfile(plugin.dir .. '/lua/jupynvim/install.lua')()
+         install.run(plugin)
+      end,
+      config = function()
+         require('jupynvim').setup({
+            image_rows = unit_width * 0.5,
+            image_cols = unit_width * 1.5,
+         })
       end,
    },
 
@@ -1881,17 +1899,20 @@ local colorscheme_plugins = {
          auto_integrations = true,
       },
    },
+
    --Tokyonight
    {
       'folke/tokyonight.nvim',
       opts = { style = 'night', plugins = { auto = true } },
    },
+
    --RosePine
    {
       'rose-pine/neovim',
       name = 'rose-pine',
       opts = { variant = 'main' },
    },
+
    --Github
    {
       'projekt0n/github-nvim-theme',
@@ -1917,6 +1938,14 @@ local ui_plugins = {
          local copilot_icon = ' '
          local mode = {
             function() return string.upper(vim.api.nvim_get_mode().mode) end,
+         }
+         local diff = {
+            'diff',
+            diff_color = {
+               added = function() return { fg = get_hl_attr('@diff.plus', 'fg') } end,
+               modified = function() return { fg = get_hl_attr('@diff.delta', 'fg') } end,
+               removed = function() return { fg = get_hl_attr('@diff.minus', 'fg') } end,
+            },
          }
          local branch = { 'branch', icon = '' }
          local tabs = {
@@ -1982,6 +2011,7 @@ local ui_plugins = {
                'checkhealth',
                'codediff-explorer',
                'dap-view-term',
+               'gitcommit',
                'neo-tree',
                'neotest-summary',
                'noice',
@@ -2014,7 +2044,7 @@ local ui_plugins = {
                icons = true,
                theme = generate_lualine_theme(vim.g.palette),
                section_separators = { left = '', right = '' },
-               component_separators = { left = '|', right = '|' },
+               component_separators = { left = '•', right = '•' },
                disabled_filetypes = {
                   winbar = {
                      'dap-repl',
@@ -2029,7 +2059,7 @@ local ui_plugins = {
             inactive_sections = {},
             winbar = {
                lualine_a = { mode, 'filename' },
-               lualine_b = { branch, 'diff', 'diagnostics' },
+               lualine_b = { branch, diff, 'diagnostics' },
                lualine_c = { tabs, dap_status },
                lualine_x = { showmode, copilot_status },
                lualine_y = { showcmd, 'filetype' },
@@ -2052,7 +2082,7 @@ local ui_plugins = {
          local winhighlight = winhl({ NormalFloat = 'NormalFloat', FloatBorder = 'FloatBorder' })
          local views = {
             mini = {
-               timeout = 5000,
+               timeout = 2000,
                align = 'message_left',
                size = { width = unit_width, max_height = math.floor(vim.o.lines / 2) },
                reverse = false,
@@ -2153,12 +2183,8 @@ local ui_plugins = {
                undo = animation(),
                redo = animation(),
             },
-            animations = {
-               fade = {
-                  min_duration = 1000,
-                  max_duration = 1000,
-               },
-            },
+            animations = { fade = { min_duration = 1000, max_duration = 1000 } },
+            hijack_ft_disabled = { 'snacks_dashboard', 'neo-tree' },
          })
       end,
    },
@@ -2168,7 +2194,18 @@ local ui_plugins = {
       'rachartier/tiny-devicons-auto-colors.nvim',
       dependencies = { 'nvim-tree/nvim-web-devicons' },
       event = 'VeryLazy',
-      config = function() require('tiny-devicons-auto-colors').setup({ autoreload = true }) end,
+      config = function()
+         local devicons = require('nvim-web-devicons')
+         local autocolors = require('tiny-devicons-auto-colors')
+         local originals = vim.deepcopy(devicons.get_icons())
+         autocolors.setup({ autoreload = false, cache = { enabled = false } })
+         autocmd('ColorScheme', {
+            callback = function()
+               devicons.set_icon(vim.deepcopy(originals))
+               autocolors.apply()
+            end,
+         })
+      end,
    },
 
    --TodoComments
@@ -2186,6 +2223,7 @@ local ui_plugins = {
       opts = {
          render = 'virtual',
          virtual_symbol = '',
+         enable_named_colors = false,
          exclude_filetypes = { 'lazy' },
       },
    },
@@ -2203,14 +2241,16 @@ local ui_plugins = {
                         and vim.wo[window].foldexpr == 'v:lua.vim.treesitter.foldexpr()'
                   end,
                   parts = {
-                     { kind = 'bufline', delimiter = ' ... ', hl = '@comment' },
                      {
-                        kind = 'fold_size',
-                        padding_left = ' ',
-                        padding_right = ' lines',
-                        icon = ' <-| ',
-                        hl = 'MiniIndentscopeSymbol',
+                        kind = 'section',
+                        output = function()
+                           local size = (vim.v.foldend - vim.v.foldstart) + 1
+                           return {
+                              { string.format('%3d lines |-> ', size), 'MiniIndentscopeSymbol' },
+                           }
+                        end,
                      },
+                     { kind = 'bufline', delimiter = ' ... ', hl = '@comment' },
                   },
                },
             },
@@ -2226,7 +2266,7 @@ local ui_plugins = {
 
 local specs = vim.iter({
    core_plugins,
-   editing_plugins,
+   utility_plugins,
    language_plugins,
    colorscheme_plugins,
    ui_plugins,

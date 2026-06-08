@@ -1,5 +1,5 @@
 {
   "workspace.checkThirdParty": false,
   "diagnostics.globals": ["vim", "require"],
-  "diagnostics.disable": ["duplicate-set-field", "missing-fields"]
+  "diagnostics.disable": ["duplicate-set-field", "missing-fields", "unused-function"]
 }

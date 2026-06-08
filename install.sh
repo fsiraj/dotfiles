@@ -92,7 +92,7 @@ install_macos_packages() {
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
     brew install --quiet \
         git make unzip gnu-sed tmux stow \
-        fzf zoxide eza fd ripgrep bat \
+        fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick \
         oh-my-posh fastfetch \
         neovim \
@@ -111,13 +111,12 @@ install_ubuntu_packages() {
 
     if ! installed brew; then
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
-        printf "%s\n" "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)\"" >>"$HOME/.zshrc.local"
     fi
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
     brew install --quiet \
-        fzf zoxide eza fd ripgrep bat \
+        fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick \
         oh-my-posh fastfetch \
         neovim \
@@ -133,10 +132,9 @@ install_arch_packages() {
     step "Installing packages for arch..."
 
     sudo pacman -Syu --needed --noconfirm \
-        base-devel \
-        git unzip \
+        base-devel git unzip \
         zsh tmux stow fastfetch ghostty \
-        fzf zoxide eza fd ripgrep bat \
+        fzf zoxide eza fd ripgrep bat btop jq jujutsu \
         nodejs npm imagemagick \
         neovim \
         ttf-jetbrains-mono-nerd

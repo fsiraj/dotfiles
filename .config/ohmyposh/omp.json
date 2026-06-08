@@ -1,0 +1,120 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 3,
+  "upgrade": {
+    "source": "cdn",
+    "interval": "168h",
+    "auto": false,
+    "notice": false
+  },
+  "transient_prompt": {
+    "template": "╰─ {{ .Segments.Executiontime.FormattedMs }}{{ .Segments.Status.Text }}\n╭─ ",
+    "foreground": "darkGray"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "executiontime",
+          "style": "plain",
+          "template": "╰─ {{ .FormattedMs }}",
+          "foreground": "darkGray",
+          "options": {
+            "always_enabled": true,
+            "style": "austin",
+            "threshold": 500
+          }
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "template": "{{ if .Error }} [{{ reason .Code }}] {{ end }}\n",
+          "foreground": "darkGray",
+          "options": {
+            "always_enabled": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "╭─ ",
+          "foreground": "magenta"
+        },
+        {
+          "type": "session",
+          "style": "plain",
+          "template": "{{ if .SSHSession }}{{ .UserName }}@{{ index (splitList \".\" .HostName) 0 }}{{ end }} ",
+          "foreground": "yellow"
+        },
+        {
+          "type": "path",
+          "style": "plain",
+          "template": "{{ .Path }} ",
+          "foreground": "green",
+          "options": {
+            "style": "agnoster_full"
+          }
+        },
+        {
+          "type": "jujutsu",
+          "style": "plain",
+          "template": "<default>•</> 󰁥 {{.ChangeID}}{{if .Working.Changed}} {{ .Working.String }}{{ end }}{{ if .ClosestBookmarks }} <d>{{ .ClosestBookmarks }}</>{{ end }}",
+          "foreground": "blue",
+          "options": {
+            "fetch_status": true,
+            "ignore_working_copy": true,
+            "fetch_ahead_counter": true,
+            "ahead_icon": "󰐕"
+          }
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "template": "{{ if not (.Segments.Contains \"Jujutsu\") }}<default>•</> {{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ end }}",
+          "foreground": "blue",
+          "options": {
+            "fetch_status": true,
+            "fetch_upstream_icon": false,
+            "branch_icon": " ",
+            "cherry_pick_icon": " ",
+            "commit_icon": " ",
+            "merge_icon": " ",
+            "no_commits_icon": " ",
+            "rebase_icon": " ",
+            "revert_icon": " ",
+            "tag_icon": " "
+          }
+        },
+        {
+          "type": "python",
+          "style": "plain",
+          "template": " <default>•</> {{ if .Venv }}󰌠  {{ .Venv }} {{ end }}",
+          "foreground": "magenta"
+        }
+      ],
+      "newline": true
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "╰─",
+          "foreground": "magenta"
+        }
+      ],
+      "newline": true
+    }
+  ],
+  "final_space": true
+}
