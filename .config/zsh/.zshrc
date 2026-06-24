@@ -69,11 +69,40 @@ bindkey -r '^[c'
 
 # Custom functions and aliases
 
-ansi16() {
-    for i in {0..15}; do
-        printf "\e[48;5;${i}m %3d \e[0m" "$i"
-        (((i + 1) % 8 == 0)) && echo
+palette() {
+    local all i r b bc t
+    [[ $1 == -a || $1 == --all ]] && all=1
+    # Print one cell: the index over its color as background
+    cell() printf "\e[48;5;%dm %3d \e[0m" $1 $1
+    # Single index: print its cell, then query the terminal for its hex
+    if [[ $1 == <-> ]]; then
+        cell $1; unfunction cell
+        printf '\e]4;%d;?\e\\' $1; read -rs -d '\' -t 0.2 r
+        printf '%s\n' "$r" | sed -E 's/.*rgb:(..)..\/(..)..\/(..).*/: #\1\2\3/'
+        return
+    fi
+    # Base 16: two rows of 8
+    for ((i = 0; i < 16; i++)); do
+        cell $i; (((i + 1) % 8 == 0)) && echo
     done
+    if [[ -n $all ]]; then
+        echo
+        # 6x6x6 cube (16-231): 2x3 grid of 6x6 blocks
+        for ((t = 0; t < 12; t++)); do
+            for ((bc = 0; bc < 3; bc++)); do
+                r=$((t / 6 * 3 + bc))
+                for ((b = 0; b < 6; b++)); do cell $((16 + 36 * r + 6 * (t % 6) + b)); done
+                ((bc < 2)) && printf "  "
+            done
+            echo; ((t == 5)) && echo
+        done
+        echo
+        # Grayscale 232-255: two rows of 12
+        for ((i = 232; i < 256; i++)); do
+            cell $i; (((i - 231) % 8 == 0)) && echo
+        done
+    fi
+    unfunction cell
 }
 
 theme() {
@@ -82,7 +111,7 @@ theme() {
             fzf --reverse --height=16 --prompt "Select colorscheme: "
     )}"
     [[ -z "$theme" ]] && return
-    nvim --headless "+NvimSyncTheme $theme" +qa 2>/dev/null
+    nvim --headless "+NvimSyncTheme $theme" +qa
 }
 
 attach() {
@@ -130,7 +159,8 @@ alias grs="git restore --staged"
 
 alias cat="bat -p"
 
-if command -v fastfetch &>/dev/null; then ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
+if command -v fastfetch &>/dev/null; then
+    ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
     if [[ $- == *i* && $COLUMNS -ge 100 && -z $NO_FF ]]; then
         ff
     fi

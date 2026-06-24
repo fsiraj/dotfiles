@@ -11,9 +11,9 @@ resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 effort=$(echo "$input" | jq -r '.effort.level // empty')
 
 # ANSI colors
-accent='\033[38;2;217;119;87m' #d97757
-yellow='\033[33m'
 red='\033[31m'
+orange='\033[38;5;214m'
+yellow='\033[33m'
 reset='\033[0m'
 
 # Replace $HOME with ~
@@ -34,7 +34,7 @@ color_for_pct() {
 # cwd · model (with effort level if present)
 model_label="$model"
 [ -n "$effort" ] && model_label="${model}-${effort}"
-parts="${accent}${model_label}${reset} · ${cwd}"
+parts="${orange}${model_label}${reset} · ${cwd}"
 
 # ctx x%
 if [ -n "$ctx_used" ]; then

@@ -7,6 +7,15 @@
 > A carefully crafted development environment that just works (most of the time)
 
 <details open>
+<summary><strong>💚 Neovim</strong> - Clean cool-toned default, built for contrast</summary>
+
+<img alt="Screenshot 2026-06-25 at 1 21 49 PM" src="https://github.com/user-attachments/assets/94258bc5-5860-48fd-850c-903afdcc2a1d" />
+
+\**most up to date*
+
+</details>
+
+<details>
 <summary><strong>🐙 GitHub</strong> - Clean theme inspired by GitHub's interface</summary>
 
 <img alt="Screenshot 2025-10-04 at 10 39 22 PM" src="https://github.com/user-attachments/assets/f17437a6-174a-43eb-b1c2-05ec314826c1" />
@@ -74,7 +83,7 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 > - **Editor:** [Neovim](https://neovim.io/) - The hyperextensible Vim-based text editor
 > - **Multiplexing:** [tmux](https://github.com/tmux/tmux) - Terminal workspace management
-> - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim):
+> - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim)
 
 #### 🔧 **Languages**
 
@@ -89,7 +98,7 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 ## 🌈 Theme System
 
-> Works perfectly for the 4 themes and their variants showcased above
+> Works perfectly for the 5 themes and their variants showcased above
 
 **Synchronized theming across all applications!**
 

@@ -96,7 +96,7 @@
         {
           "type": "python",
           "style": "plain",
-          "template": " <default>•</> {{ if .Venv }}󰌠  {{ .Venv }} {{ end }}",
+          "template": " <default>•</> {{ if .Venv }} <d>{{ .Venv }}</d> {{ end }}",
           "foreground": "magenta"
         }
       ],
