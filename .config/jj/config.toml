@@ -1,0 +1,9 @@
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+
+[user]
+name = "fsiraj"
+email = "farzadsiraj@gmail.com"
+
+[ui]
+default-command = ["log", "-n", "5"]
+diff-editor = ":builtin"

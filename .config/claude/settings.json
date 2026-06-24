@@ -19,12 +19,8 @@
       "Read(**/.npmrc)",
       "Read(**/.pypirc)",
       "Bash(git push *)"
-    ],
-    "additionalDirectories": [
-      "~/.local/share/nvim/"
     ]
   },
-  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.config/claude/statusline.sh\""

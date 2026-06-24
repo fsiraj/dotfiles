@@ -11,37 +11,16 @@ cursor-style-blink = true
 title = " "
 window-theme = ghostty
 window-padding-x = 32
-window-padding-y = 32,0
+window-padding-y = 0,16
 window-padding-balance = true
 macos-titlebar-proxy-icon = hidden
 gtk-tabs-location = hidden
 gtk-toolbar-style = flat
 gtk-titlebar-hide-when-maximized = true
 
-# WARNING: Managed by `style.lua`
-# Colors
-palette = 0 = #07080d
-palette = 1 = #ffc0b9
-palette = 2 = #b3f6c0
-palette = 3 = #fce094
-palette = 4 = #a6dbff
-palette = 5 = #ffcaff
-palette = 6 = #8cf8f7
-palette = 7 = #e0e2ea
-palette = 8 = #2a304f
-palette = 9 = #ffd6d2
-palette = 10 = #c9f8d2
-palette = 11 = #fce7ac
-palette = 12 = #bfe5ff
-palette = 13 = #ffe3ff
-palette = 14 = #a4f9f8
-palette = 15 = #eff0f4
-background = #14161b
-foreground = #e0e2ea
-cursor-color = #e0e2ea
-cursor-text = #14161b
-selection-background = #9b9ea4
-selection-foreground = #e0e2ea
+# Colors (auto generated on theme sync)
+config-file = ?theme.ghostty
+palette-generate = true
 
 # Other
 shell-integration-features = sudo,ssh-env,ssh-terminfo
@@ -64,8 +43,8 @@ keybind = ctrl+shift+equal=equalize_splits
 keybind = ctrl+shift+t=new_tab
 
 # Resolves conflicts with other things
-keybind = alt+equal=increase_font_size:1
-keybind = alt+minus=decrease_font_size:1
+keybind = alt+equal=increase_font_size:2
+keybind = alt+minus=decrease_font_size:2
 keybind = ctrl+equal=unbind
 keybind = ctrl++=unbind
 keybind = ctrl+-=unbind

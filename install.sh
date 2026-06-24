@@ -237,8 +237,9 @@ setup_tmux_plugins() {
 setup_neovim_plugins() {
     step "Setting up neovim..."
 
-    nvim --headless "+Lazy! sync" +qa
+    nvim --headless "+Lazy! restore" +qa && echo
     nvim --headless "+MasonToolsUpdateSync" +qa && echo
+    nvim --headless "+NvimSyncTheme" +qa && echo
     ok "neovim plugins and language tools installed!"
 }
 

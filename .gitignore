@@ -1,7 +1,12 @@
 test/
 **.log
 
+.config/nvim/theme.lua
 .config/tmux/plugins/
+.config/ghostty/theme.ghostty
+
+.config/jj/*
+!.config/jj/config.toml
 
 .config/zsh/*
 !.config/zsh/.zshrc
