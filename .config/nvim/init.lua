@@ -85,25 +85,25 @@ vim.diagnostic.config({
 
 local keymap = vim.keymap.set
 
--- Neovim <-> Tmux Navigation
-local vim_tmux_dirs = { { 'h', 'L' }, { 'j', 'D' }, { 'k', 'U' }, { 'l', 'R' } }
+-- Neovim <-> Herdr Navigation
+local vim_herdr_dirs = { { 'h', 'left' }, { 'j', 'down' }, { 'k', 'up' }, { 'l', 'right' } }
 
-local function move(dv, dt)
+local function move(dv, dh)
    local prev = vim.api.nvim_get_current_win()
    vim.cmd('wincmd ' .. dv)
-   if prev == vim.api.nvim_get_current_win() and vim.env.TMUX then
-      vim.fn.system({ 'tmux', 'select-pane', '-' .. dt })
+   if prev == vim.api.nvim_get_current_win() and vim.env.HERDR_PANE_ID then
+      vim.fn.system({ 'herdr', 'pane', 'focus', '--direction', dh, '--current' })
    end
 end
 
-for _, dirs in ipairs(vim_tmux_dirs) do
-   local dv, dt = unpack(dirs)
+for _, dirs in ipairs(vim_herdr_dirs) do
+   local dv, dh = unpack(dirs)
    local lhs = '<C-' .. dv .. '>'
-   keymap('n', lhs, function() move(dv, dt) end, { desc = 'Navigate ' .. dv })
+   keymap('n', lhs, function() move(dv, dh) end, { desc = 'Navigate ' .. dv })
    keymap('t', lhs, function()
       vim.cmd('stopinsert')
-      move(dv, dt)
-   end, { desc = 'Navigate ' .. dt })
+      move(dv, dh)
+   end, { desc = 'Navigate ' .. dh })
 end
 
 -- Buffer Navigation
@@ -443,6 +443,7 @@ local function generate_nvim_overrides(p)
       SnacksDashboardFooter = { fg = p.subtext }, SnacksDashboardHeader = { fg = p.green }, SnacksDashboardHeaderAlt = { fg = p.blue }, SnacksDashboardSpecial      = { fg = p.accent },
       TreesitterContext     = { bg = p.base }, TreesitterContextBottom = { underline = false }, TreesitterContextSeparator = { fg = p.accent, bg = p.base },
       WhichKeyBorder        = { link = 'FloatBorder' }, WhichKeyNormal = { link = 'NormalFloat' }
+      WhichKeyBorder        = { link = 'FloatBorder' },
    }
 end
 

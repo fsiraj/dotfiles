@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Vim-aware pane navigation for herdr — the herdr half of the C-h/j/k/l flow.
+# herdr binds C-h/j/k/l to this script; it forwards the key into Neovim panes
+# (so Neovim's own wincmd/herdr-focus logic takes over) and otherwise focuses
+# the neighbouring herdr pane. Mirrors the old tmux IS_VIM if-shell binding.
+# usage: herdr-nav <left|down|up|right> <h|j|k|l>
+set -euo pipefail
+
+dir=$1
+key=$2
+
+info=$(herdr pane process-info --current 2>/dev/null || true)
+is_nvim=$(printf '%s' "$info" | jq -r '
+   [.result.process_info.foreground_processes[]?.name | ascii_downcase]
+   | any(. == "nvim")' 2>/dev/null || echo false)
+
+if [ "$is_nvim" = "true" ]; then
+   pane=$(printf '%s' "$info" | jq -r '.result.process_info.pane_id')
+   herdr pane send-keys "$pane" "ctrl+$key"
+else
+   herdr pane focus --direction "$dir" --current
+fi

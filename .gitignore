@@ -5,6 +5,10 @@ test/
 .config/tmux/plugins/
 .config/ghostty/theme.ghostty
 
+.config/herdr/*
+!.config/herdr/config.toml
+!.config/herdr/herdr-nav
+
 .config/jj/*
 !.config/jj/config.toml
 

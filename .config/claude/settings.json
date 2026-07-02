@@ -1,5 +1,26 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "autoMemoryEnabled": true,
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true
+  },
+  "feedbackSurveyRate": 0,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/farzad/.config/claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(* --version)",
@@ -21,18 +42,11 @@
       "Bash(git push *)"
     ]
   },
+  "skipAutoPermissionPrompt": true,
   "statusLine": {
-    "type": "command",
-    "command": "bash \"$HOME/.config/claude/statusline.sh\""
+    "command": "bash \"$HOME/.config/claude/statusline.sh\"",
+    "type": "command"
   },
-  "enabledPlugins": {
-    "pyright-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true
-  },
-  "feedbackSurveyRate": 0,
-  "effortLevel": "high",
-  "tui": "fullscreen",
-  "autoMemoryEnabled": true,
   "theme": "auto",
-  "skipAutoPermissionPrompt": true
+  "tui": "fullscreen"
 }
