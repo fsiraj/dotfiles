@@ -107,7 +107,7 @@ install_ubuntu_packages() {
     step "Installing packages for ubuntu..."
 
     sudo apt update -qq
-    sudo apt install -y -qq build-essential git unzip curl zsh tmux xsel stow
+    sudo apt install -y -qq build-essential git unzip curl zsh xsel stow
 
     if ! installed brew; then
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL "$BREW_INSTALL_URL")"
@@ -116,6 +116,7 @@ install_ubuntu_packages() {
 
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
     brew install --quiet \
+        tmux \
         fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick \
         oh-my-posh fastfetch \
@@ -238,9 +239,8 @@ setup_neovim_plugins() {
     step "Setting up neovim..."
 
     nvim --headless "+Lazy! restore" +qa && echo
-    nvim --headless "+MasonToolsUpdateSync" +qa && echo
     nvim --headless "+NvimSyncTheme" +qa && echo
-    ok "neovim plugins and language tools installed!"
+    ok "neovim plugins installed!"
 }
 
 main() {
