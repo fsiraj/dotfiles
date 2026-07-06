@@ -29,27 +29,25 @@ HISTFILE=$ZDOTDIR/.zsh_history
 SAVEHIST=$HISTSIZE
 setopt appendhistory hist_find_no_dups hist_ignore_all_dups hist_ignore_space sharehistory
 
-# Pre-compinit
+# Zinit
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
-zinit light zsh-users/zsh-completions
 
-# compinit rebuilt only if stale (most expensive operation)
-autoload -Uz compinit
-zcompdump=$ZDOTDIR/.zcompdump
-cached=-C
-[[ -s $zcompdump ]] || cached=
-for dir in $fpath; do
-    [[ $dir -nt $zcompdump ]] && cached= && break
-done
-compinit $cached
-unset dir cached
-zinit cdreplay -q
+# Compinit (most expensive step)
+_zsh_setup_completions() {
+    zicompinit
+    zicdreplay
+    eval "$(zoxide init --cmd cd zsh)"
+    source <(fzf --zsh)
+    bindkey -r '^[c'
+}
 
-# Post-compinit
-zinit light Aloxaf/fzf-tab
-zinit light zsh-users/zsh-autosuggestions
-zinit light zsh-users/zsh-syntax-highlighting
+# Plugins (turbo mode)
+zinit wait lucid light-mode for \
+    atload'_zsh_setup_completions' zsh-users/zsh-completions \
+                                   Aloxaf/fzf-tab \
+                                   zsh-users/zsh-syntax-highlighting \
+    atload'_zsh_autosuggest_start' zsh-users/zsh-autosuggestions
 
 # Configure completion behavior
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
@@ -59,15 +57,17 @@ zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'         # show color for
 zstyle ':completion:*' menu no                                  # disable defualt in favour of fzf-tab
 zstyle ':fzf-tab:complete:cd:*' fzf-preview '
     eza -aT --level=2 --color=always --icons=always $realpath
-' # show directory preview on cd
-
-# Load shell integrations
-source <(jj util completion zsh)
-eval "$(zoxide init --cmd cd zsh)"
-source <(fzf --zsh)
-bindkey -r '^[c'
+'                                                               # show directory preview on cd
 
 # Custom functions and aliases
+theme() {
+    local theme="${1:-$(
+        nvim --headless "+NvimColorschemes" +qa 2>&1 |
+            fzf --reverse --height=16 --prompt "Select colorscheme: "
+    )}"
+    [[ -z "$theme" ]] && return
+    nvim --headless "+NvimSyncTheme $theme" +qa
+}
 
 palette() {
     local all i r b bc t
@@ -105,15 +105,6 @@ palette() {
     unfunction cell
 }
 
-theme() {
-    local theme="${1:-$(
-        nvim --headless "+NvimColorschemes" +qa 2>&1 |
-            fzf --reverse --height=16 --prompt "Select colorscheme: "
-    )}"
-    [[ -z "$theme" ]] && return
-    nvim --headless "+NvimSyncTheme $theme" +qa
-}
-
 attach() {
     if [[ -z "$1" ]]; then
         local sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -v '^_')
@@ -126,14 +117,9 @@ attach() {
     fi
 }
 
-alias c="clear -x"
+alias clear="clear -x"
 alias reload="clear -x && exec zsh"
 alias install="bash ~/dotfiles/install.sh"
-
-alias a=attach
-alias n="nvim --clean"
-alias py="python3"
-alias venv="source .venv/bin/activate"
 
 alias ls="eza --group-directories-first --color=auto --icons=auto"
 alias ll="ls -l --time-style=relative"
@@ -141,6 +127,7 @@ alias la="ls -a"
 alias lt="ls -T"
 alias lla="ls -al"
 
+alias jjs="jj && jj st"
 alias ga="git add -v"
 alias gc="git commit -vm"
 alias gca="git commit --amend"
@@ -157,7 +144,7 @@ alias gd="git diff"
 alias grhh="git reset --hard HEAD"
 alias grs="git restore --staged"
 
-alias cat="bat -p"
+alias venv="source .venv/bin/activate"
 
 if command -v fastfetch &>/dev/null; then
     ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }

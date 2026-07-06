@@ -34,5 +34,6 @@
   "tui": "fullscreen",
   "autoMemoryEnabled": true,
   "theme": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "model": "opus"
 }
