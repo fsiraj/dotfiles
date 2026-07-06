@@ -109,11 +109,12 @@ end
 -- Buffer Navigation
 keymap({ 'n', 'v' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
 keymap({ 'n', 'v' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
-keymap('n', 'ga', '<Cmd>e #<CR>', { desc = 'Toggle Buffer Alternative (#)' })
+keymap('n', 'ga', '<Cmd>e #<CR>', { desc = 'Goto Alternate Buffer' })
 
 -- Splits
-keymap('n', '<C-Bslash>', '<Cmd>vsp<CR>', { desc = 'Vertical split' })
-keymap('n', '<C-->', '<Cmd>sp<CR>', { desc = 'Horizontal split' })
+keymap('n', '<C-w>\\', '<Cmd>vsplit<CR>', { desc = 'Vertical split' })
+keymap('n', '<C-w>-', '<Cmd>split<CR>', { desc = 'Horizontal split' })
+keymap('n', '<C-w>z', '<Cmd>tab split<CR>', { desc = 'Tab split' })
 
 -- Terminal Normal Mode
 keymap('t', '<C-]>', '<C-\\><C-n>', { desc = 'Terminal Normal Mode' })
@@ -133,24 +134,19 @@ end
 keymap('n', '<Leader>Td', function()
    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
    vim.notify('Diagnostics: ' .. tostring(vim.diagnostic.is_enabled()))
-end, { desc = 'LSP: Toggle Diagnostics' })
+end, { desc = 'Toggle Diagnostics' })
 keymap('n', '<Leader>cq', function() open_diagnostic_float(true) end, { desc = 'Focus diagnostic float' })
 
--- Find Replace
+-- Misc
+keymap('ca', 'wqa', 'wa | qa')
+keymap('c', '<CR>', function() return vim.fn.getcmdtype() == ':' and '<C-]><CR>' or '<CR>' end, { expr = true })
+keymap('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 keymap('n', '<Leader>fr', ':%s/<C-r><C-w>/', { desc = 'Find Replace Word' })
 keymap('v', '<Leader>fr', '"zy:%s/<C-r>z/', { desc = 'Find Replace Selection' })
 
--- <CR> expands abbreviations without needing to type <Space> or <Tab>
-keymap('c', '<CR>', function() return vim.fn.getcmdtype() == ':' and '<C-]><CR>' or '<CR>' end, { expr = true })
-
--- :wqa works even when terminal buffers are open
-keymap('ca', 'wqa', 'wa | qa')
-
--- Lazy
+-- Lazy (plugins) + Mason (language tools)
 keymap('n', '<Leader>il', '<Cmd>Lazy<CR>', { desc = 'Lazy' })
-
--- Misc
-keymap('n', '<Esc>', '<Cmd>nohlsearch<CR>')
+keymap('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                             Autocommands                             │
@@ -174,7 +170,7 @@ autocmd('TermOpen', {
 
 autocmd('FileType', {
    desc = 'Click into terminal buffers enters terminal mode (unless drag-selecting)',
-   pattern = { 'terminal', 'sidekick_terminal', 'Floaterm' },
+   pattern = { 'terminal', 'Floaterm' },
    group = augroup('terminal-click', { clear = true }),
    callback = function(args)
       keymap('n', '<LeftRelease>', function()
@@ -286,19 +282,6 @@ local function winhl(links)
    return table.concat(vim.iter(links):map(function(from, to) return from .. ':' .. to end):totable(), ',')
 end
 
-local function override_winhl(pattern, hl)
-   autocmd({ 'FileType', 'BufWinEnter' }, {
-      pattern = pattern,
-      callback = function(args)
-         hl = hl or winhl({ Normal = 'NormalSidebar' })
-         vim.schedule(function()
-            local win = vim.fn.bufwinid(args.buf)
-            if win and win ~= -1 then vim.wo[win].winhl = hl end
-         end)
-      end,
-   })
-end
-
 local function emit_cursor_color()
    local osc = string.format('\27]12;%s\7', get_hl_attr('Cursor', 'bg'))
    if vim.env.TMUX then osc = '\27Ptmux;' .. osc:gsub('\27', '\27\27') .. '\27\\' end
@@ -343,18 +326,18 @@ local function get_palette(colorscheme)
    elseif string.find(colorscheme, 'rose') then
       local p = require('rose-pine.palette')
       palette = {
-         accent = p.rose, text  = p.text   ,
-         base   = p.base, crust = p._nc    , subtext = p.subtle, black   = p.highlight_med,
-         white  = p.text, red   = p.love   , orange  = p.gold  , yellow  = p.gold         ,
-         green  = p.leaf, cyan  = p.foam   , blue    = p.pine  , magenta = p.iris         ,
+         accent = p.rose, text  = p.text,
+         base   = p.base, crust = p._nc , subtext = p.subtle, black   = p.highlight_med,
+         white  = p.text, red   = p.love, orange  = p.gold  , yellow  = p.gold         ,
+         green  = p.leaf, cyan  = p.foam, blue    = p.pine  , magenta = p.iris         ,
       }
    elseif string.find(colorscheme, 'github') then
       local p = require('github-theme.palette').load(colorscheme)
       palette = {
          accent = p.accent.fg    , orange = p.orange        ,
-         text   = p.fg.default   , base   = p.canvas.default, crust = p.canvas.inset  , subtext = p.fg.subtle   ,
-         black  = p.neutral.muted, white  = p.fg.default    , red   = p.red.base      , yellow  = p.yellow.base ,
-         green  = p.green.base   , cyan   = p.cyan.base     , blue  = p.blue.base     , magenta = p.magenta.base,
+         text   = p.fg.default   , base   = p.canvas.default, crust = p.canvas.inset, subtext = p.fg.subtle   ,
+         black  = p.neutral.muted, white  = p.fg.default    , red   = p.red.base    , yellow  = p.yellow.base ,
+         green  = p.green.base   , cyan   = p.cyan.base     , blue  = p.blue.base   , magenta = p.magenta.base,
       }
    elseif colorscheme == 'default' then
       local p = vim.api.nvim_get_color_map()
@@ -371,7 +354,6 @@ local function get_palette(colorscheme)
    for k, v in pairs(palette) do
       if type(v) == 'number' then palette[k] = string.format('#%06x', v) end
    end
-   palette.mantle = require('volt.color').mix(palette.base, palette.crust, 62.5)
    return palette
 end
 
@@ -393,7 +375,7 @@ local function generate_ansi_palette(p)
    end
    --stylua: ignore
    local extra = {
-      { 51, p.accent }, { 232, p.crust }, { 233, p.mantle }, { 234, p.base },
+      { 51, p.accent }, { 232, p.crust }, { 233, p.base },
    }
    palette = vim.list_extend(palette, extra)
    return palette
@@ -418,59 +400,60 @@ local function generate_nvim_overrides(p)
    --stylua: ignore
    return {
       -- Neovim Built-in
-      CursorLineNr          = { fg = p.accent },
-      FloatBorder           = { fg = p.crust, bg = p.crust }, FloatTitle = { fg = p.crust, bg = p.accent, bold = true },
-      Folded                = { bg = p.base },
-      Normal                = { fg = p.text, bg = p.base }, NormalFloat = { bg = p.crust }, NormalNC = { link = 'Normal' }, NormalSidebar = { bg = p.mantle },
-      Pmenu                 = { link = 'NormalFloat' },
-      Special               = { fg = p.cyan },
-      StatusLine            = { fg = p.base, bg = p.base }, StatusLineNC = { fg = p.base, bg = p.base }, StatusLineTerm = { link = 'StatusLine' }, StatusLineTermNC            = { link = 'StatusLineNC' },
-      WinSeparator          = { fg = p.crust, bg = p.base },
+      --[[ Cursor      ]] CursorLineNr= { fg = p.accent },
+      --[[ Float       ]] FloatBorder= { fg = p.crust, bg = p.crust }, FloatTitle = { fg = p.crust, bg = p.accent, bold = true },
+      --[[ Fold        ]] Folded= { bg = p.base },
+      --[[ Normal      ]] Normal= { fg = p.text, bg = p.base }, NormalFloat = { bg = p.crust }, NormalNC = { link = 'Normal' },
+      --[[ Pmenu       ]] Pmenu= { link = 'NormalFloat' },
+      --[[ Special     ]] Special= { fg = p.cyan },
+      --[[ StatusLine  ]] StatusLine= { fg = p.base, bg = p.base }, StatusLineNC = { fg = p.base, bg = p.base }, StatusLineTerm = { link = 'StatusLine' }, StatusLineTermNC = { link = 'StatusLineNC' },
+      --[[ Window      ]] WinSeparator= { fg = p.crust, bg = p.base },
       -- Plugins
-      BlinkCmpDoc           = { link = 'NormalFloat' },
-      DapBreak              = { fg = p.red }, DapStop = { fg = p.yellow },
-      FloatermActive        = { fg = p.green }, FloatermNormal = { link = 'NormalFloat' },
-      FzfLuaBorder          = { link = 'FloatBorder' }, FzfLuaNormal = { link = 'NormalFloat' },
-      JupynvimBorder        = { link = 'Comment' },
-      LazyButton            = { bg = p.base }, LazySpecial = { fg = p.accent },
-      MiniIndentscopeSymbol = { fg = p.accent },
-      NeotestAdapterName    = { fg = p.accent, bold = true }, NeotestDir = { fg = p.cyan }, NeotestExpandMarker = { fg = p.subtext }, NeotestFailed = { fg = p.red }, NeotestFile = { fg = p.blue }, NeotestFocused = { fg = p.blue, bold = true, underline = true }, NeotestIndent = { fg = p.subtext }, NeotestMarked = { fg = p.orange, bold = true }, NeotestNamespace = { fg = p.magenta }, NeotestPassed = { fg = p.green }, NeotestRunning = { fg = p.yellow }, NeotestSkipped = { fg = p.subtext }, NeotestTarget = { fg = p.red }, NeotestTest = { fg = p.subtext }, NeotestUnknown = { fg = p.subtext }, NeotestWatching = { fg = p.yellow }, NeotestWinSelect = { fg = p.cyan, bold = true },
-      NeoTreeCursorLine     = { link = 'NeotreeNormal' }, NeoTreeDirectoryIcon = { fg = p.subtext }, NeoTreeGitConflict = { link = '@diff.delta' }, NeoTreeGitUntracked = { link = '@diff.delta' }, NeoTreeIndentMarker = { link = 'NeoTreeDirectoryIcon' }, NeoTreeNormalNC = { link = 'NeotreeNormal' }, NeotreeNormal = { link = 'NormalSidebar' },
-      NoiceConfirm          = { link = 'NormalFloat' }, NoiceConfirmBorder = { link = 'FloatBorder' }, NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
-      NvimDapViewTabFill    = { link = 'NormalFloat' }, NvimDapViewTabSelected = { bg = p.green, fg = p.base },
-      OutlineCurrent        = { fg = p.accent, bold = true },
-      SidekickChat          = { link = 'NormalSidebar' }, SidekickDiffAdd = { link = 'DiffAdd' }, SidekickDiffContext = { bg = p.base }, SidekickSign = { fg = p.cyan },
-      SnacksDashboardFooter = { fg = p.subtext }, SnacksDashboardHeader = { fg = p.green }, SnacksDashboardHeaderAlt = { fg = p.blue }, SnacksDashboardSpecial      = { fg = p.accent },
-      TreesitterContext     = { bg = p.base }, TreesitterContextBottom = { underline = false }, TreesitterContextSeparator = { fg = p.accent, bg = p.base },
-      WhichKeyBorder        = { link = 'FloatBorder' }, WhichKeyNormal = { link = 'NormalFloat' }
+      --[[ Blink       ]] BlinkCmpDoc= { link = 'NormalFloat' },
+      --[[ Dap         ]] DapBreak= { fg = p.red }, DapStop = { fg = p.yellow },
+      --[[ Flash       ]] FlashLabel= { fg = p.crust, bg = p.accent }, FlashPrompt = { link = 'Normal' },
+      --[[ Floaterm    ]] FloatermActive= { fg = p.green }, FloatermNormal = { link = 'NormalFloat' },
+      --[[ FzfLua      ]] FzfLuaBorder= { link = 'FloatBorder' }, FzfLuaNormal = { link = 'NormalFloat' },
+      --[[ Jupynvim    ]] JupynvimBorder= { link = 'Comment' },
+      --[[ Lazy        ]] LazyButton= { bg = p.base }, LazySpecial = { fg = p.accent },
+      --[[ Mini        ]] MiniIndentscopeSymbol= { fg = p.accent },
+      --[[ Neotest     ]] NeotestAdapterName= { fg = p.accent, bold = true }, NeotestDir = { fg = p.cyan }, NeotestExpandMarker = { fg = p.subtext }, NeotestFailed = { fg = p.red }, NeotestFile = { fg = p.blue }, NeotestFocused = { fg = p.blue, bold = true, underline = true }, NeotestIndent = { fg = p.subtext }, NeotestMarked = { fg = p.orange, bold = true }, NeotestNamespace = { fg = p.magenta }, NeotestPassed = { fg = p.green }, NeotestRunning = { fg = p.yellow }, NeotestSkipped = { fg = p.subtext }, NeotestTarget = { fg = p.red }, NeotestTest = { fg = p.subtext }, NeotestUnknown = { fg = p.subtext }, NeotestWatching = { fg = p.yellow }, NeotestWinSelect = { fg = p.cyan, bold = true },
+      --[[ NeoTree     ]] NeoTreeCursorLine= { fg = p.accent, bg = p.base, bold = true }, NeoTreeDirectoryIcon = { fg = p.subtext }, NeoTreeGitConflict = { link = '@diff.delta' }, NeoTreeGitUntracked = { link = '@diff.delta' }, NeoTreeIndentMarker = { link = 'NeoTreeDirectoryIcon' }, NeoTreeNormal = { bg = p.base }, NeoTreeNormalNC = { bg = p.base }, NeoTreeWinSeparator = { link = 'WinSeparator' },
+      --[[ Noice       ]] NoiceConfirm= { link = 'NormalFloat' }, NoiceConfirmBorder = { link = 'FloatBorder' }, NoiceCmdlinePopupTitleInput = { link = 'FloatTitle' },
+      --[[ NvimDapView ]] NvimDapViewTabFill= { link = 'NormalFloat' }, NvimDapViewTabSelected = { bg = p.green, fg = p.base },
+      --[[ Outline     ]] OutlineCurrent= { fg = p.accent, bold = true },
+      --[[ Sidekick    ]] SidekickDiffAdd= { link = 'DiffAdd' }, SidekickDiffContext = { bg = p.base }, SidekickSign = { fg = p.cyan },
+      --[[ Snacks      ]] SnacksDashboardFooter= { fg = p.subtext }, SnacksDashboardHeader = { fg = p.green }, SnacksDashboardHeaderAlt = { fg = p.blue }, SnacksDashboardSpecial      = { fg = p.accent },
+      --[[ Treesitter  ]] TreesitterContext= { bg = p.base }, TreesitterContextBottom = { underline = false }, TreesitterContextSeparator = { fg = p.accent, bg = p.base },
+      --[[ WhichKey    ]] WhichKeyBorder= { link = 'FloatBorder' }, WhichKeyNormal = { link = 'NormalFloat' }
    }
 end
 
 local function generate_lualine_theme(p)
    return {
       normal = {
-         a = { bg = p.accent, fg = p.mantle, gui = 'bold' },
-         b = { bg = p.mantle, fg = p.text },
+         a = { bg = p.accent, fg = p.crust, gui = 'bold' },
+         b = { bg = p.crust, fg = p.text },
          c = { bg = p.base, fg = p.text },
       },
       -- Missing sections default to normal mode settings
       insert = {
-         a = { bg = p.cyan, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.cyan, fg = p.crust, gui = 'bold' },
       },
       visual = {
-         a = { bg = p.blue, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.blue, fg = p.crust, gui = 'bold' },
       },
       command = {
-         a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.orange, fg = p.crust, gui = 'bold' },
       },
       terminal = {
-         a = { bg = p.orange, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.orange, fg = p.crust, gui = 'bold' },
       },
       replace = {
-         a = { bg = p.red, fg = p.mantle, gui = 'bold' },
+         a = { bg = p.red, fg = p.crust, gui = 'bold' },
       },
       inactive = {
-         a = { bg = p.mantle, fg = p.subtext },
+         a = { bg = p.crust, fg = p.subtext },
          b = { bg = p.base, fg = p.subtext },
          c = { bg = p.base, fg = p.subtext },
       },
@@ -591,7 +574,7 @@ autocmd('ColorScheme', {
 })
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
--- │                            Plugin Helpers                            │
+-- │                                 LSP                                  │
 -- └──────────────────────────────────────────────────────────────────────┘
 
 local lsps = {
@@ -608,14 +591,16 @@ local lsps = {
    -- 'rust-analyzer' (handled by rustaceanvim)
 }
 
-local non_lsps = {
-   'stylua',
-   'debugpy',
-   'markdownlint',
-   'prettier',
-   'shellcheck',
-   'shfmt',
-   'codelldb',
+local tools = {
+   --stylua: ignore start
+   { 'stylua',       filetypes = { 'lua' } },
+   { 'debugpy',      filetypes = { 'python' } },
+   { 'markdownlint', filetypes = { 'markdown' } },
+   { 'prettier',     filetypes = { 'markdown' } },
+   { 'shellcheck',   filetypes = { 'sh', 'bash', 'zsh' } },
+   { 'shfmt',        filetypes = { 'sh', 'bash', 'zsh' } },
+   { 'codelldb',     filetypes = { 'c', 'cpp' } },
+   --stylua: ignore end
 }
 
 vim.filetype.add({
@@ -625,8 +610,6 @@ vim.filetype.add({
       end,
    },
 })
-
-vim.g.all_tools = vim.iter({ lsps, non_lsps }):flatten():totable()
 
 local formatters_by_ft = {
    --stylua: ignore start
@@ -676,7 +659,7 @@ local function lsp_inlay_hints(event)
          local is_enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf })
          vim.lsp.inlay_hint.enable(not is_enabled)
          vim.notify('Inlay Hints: ' .. tostring(not is_enabled))
-      end, { buffer = event.buf, desc = 'LSP: Toggle Inlay Hints' })
+      end, { buffer = event.buf, desc = 'Toggle Inlay Hints' })
    end
 end
 
@@ -706,9 +689,6 @@ local core_plugins = {
       'echasnovski/mini.nvim',
       dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
       config = function()
-         -- Enhanced jump motions
-         require('mini.jump').setup()
-
          -- Add/delete/replace surroundings (brackets, quotes, etc.)
          require('mini.surround').setup()
 
@@ -741,19 +721,8 @@ local core_plugins = {
          -- Git tools, used for inline diffs
          local diff = require('mini.diff')
          diff.setup({
-            mappings = {
-               apply = '<Leader>gS',
-               reset = '<Leader>gR',
-            },
-            view = {
-               style = 'sign',
-               priority = 5,
-               signs = {
-                  add = '▎',
-                  change = '▎',
-                  delete = '',
-               },
-            },
+            mappings = { apply = '<Leader>gS', reset = '<Leader>gR' },
+            view = { style = 'sign', priority = 5, signs = { add = '▎', change = '▎', delete = '' } },
             options = { linematch = 0, wrap_goto = true },
          })
          keymap('n', '<Leader>gd', diff.toggle_overlay, { desc = 'Toggle Git Overlay' })
@@ -781,20 +750,10 @@ local core_plugins = {
          vim.opt.sessionoptions:remove('blank')
 
          local function postread()
-            if vim.g.SidekickTool ~= nil and vim.g.SidekickTool ~= '' then
-               require('sidekick.cli').show({ name = vim.g.SidekickTool, focus = false, filter = { cwd = true } })
-            end
-            if vim.g.NeotreeOpen == 1 then
-               vim.schedule(function()
-                  vim.cmd('Neotree show')
-                  require('neo-tree.sources.manager').refresh('filesystem')
-               end)
-            end
+            if vim.g.NeotreeOpen == 1 then vim.schedule(function() vim.cmd('Neotree show') end) end
          end
 
          local function prewrite()
-            local term = require('sidekick.cli.terminal').sessions()[1]
-            vim.g.SidekickTool = term and term.tool.name or ''
             vim.g.NeotreeOpen = vim.iter(vim.api.nvim_list_wins())
                :any(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].ft == 'neo-tree' end) and 1 or 0
             require('neogit').close()
@@ -804,10 +763,7 @@ local core_plugins = {
          sessions.setup({
             autowrite = true,
             force = { delete = true },
-            hooks = {
-               pre = { write = prewrite },
-               post = { read = postread },
-            },
+            hooks = { pre = { write = prewrite }, post = { read = postread } },
          })
 
          local function session_name() return vim.fn.fnamemodify(vim.uv.cwd() or '', ':t') end
@@ -870,10 +826,7 @@ local core_plugins = {
             pattern = 'SnacksDashboardClosed',
             callback = function()
                vim.fn.clearmatches()
-               vim.schedule(function()
-                  vim.cmd('Neotree show')
-                  require('neo-tree.sources.manager').refresh('filesystem')
-               end)
+               if vim.o.columns >= 200 then vim.schedule(function() vim.cmd('Neotree show') end) end
             end,
          })
       end,
@@ -973,80 +926,48 @@ local core_plugins = {
          })
 
          -- Custom pickers
-         ---@diagnostic disable: inject-field
-         fzf.magic_colorschemes = function()
+         local magic_colorschemes = function()
             local display_names = vim.iter(colorschemes):map(function(c) return c[2] end):totable()
             return fzf.fzf_exec(display_names, {
                winopts = { width = unit_width, height = unit_width / 2, row = 0.5, col = 0.5 },
                actions = { ['enter'] = function(selected, _) sync_theme(display_to_name[selected[1]]) end },
             })
          end
-         fzf.nerdfont = function()
-            local cache = vim.fn.stdpath('cache') .. '/nerdfont-glyphs.json'
-            local url = 'https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/glyphnames.json'
-            vim.system({ 'find', cache, '-mtime', '+30', '-delete' }):wait()
-            vim.system({ 'sh', '-c', ('[ -s %s ] || curl -fsSL %s -o %s'):format(cache, url, cache) }):wait()
-            local cmd = [[jq -r 'to_entries[]|select(.key|startswith("METADATA")|not)|"\(.value.char)    \(.key)"' ]]
-            local put = function(s) vim.api.nvim_put({ s[1]:match('^(%S+)') }, 'c', true, true) end
-            local fmt = function(x) return (x:gsub('^(%S+)(%s+)(.*)$', '\27[93m%1\27[0m%2\27[2m%3\27[0m')) end
-            fzf.fzf_exec(cmd .. cache, {
-               prompt = 'Icon❯ ',
-               actions = { default = put },
-               winopts = { width = unit_width * 1.5 },
-               fn_transform = fmt,
-            })
-         end
-         fzf.plugins = function()
+         local plugins = function()
             local roots = { vim.fn.stdpath('data') .. '/lazy' }
             local dev = vim.fn.expand('~/nvim-plugins')
             if vim.uv.fs_stat(dev) then table.insert(roots, dev) end
             fzf.files({ search_paths = roots })
          end
-         fzf.files_in_dir = function()
+         local files_in_dir = function()
             vim.ui.input({ prompt = 'Directory: ', completion = 'dir' }, function(dir)
                if dir and dir ~= '' then fzf.files({ cwd = vim.fn.expand(dir) }) end
             end)
          end
-         fzf.dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
-         ---@diagnostic enable: inject-field
+         local dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
 
          --stylua: ignore start
          keymap('n', '<Leader>/'       , fzf.lgrep_curbuf           , { desc = 'FzfLua: Current Buffer' })
          keymap('n', '<Leader><Leader>', fzf.buffers                , { desc = 'FzfLua: Open Buffers' })
          keymap('n', '<Leader>sb'      , fzf.builtin                , { desc = 'FzfLua: Builtin' })
-         keymap('n', '<Leader>sc'      , fzf.magic_colorschemes     , { desc = 'FzfLua: Magic Colorschemes' })
-         keymap('n', '<Leader>sd'      , fzf.dotfiles               , { desc = 'FzfLua: Dotfiles' })
+         keymap('n', '<Leader>sc'      , magic_colorschemes         , { desc = 'FzfLua: Magic Colorschemes' })
+         keymap('n', '<Leader>sd'      , dotfiles                   , { desc = 'FzfLua: Dotfiles' })
          keymap('n', '<Leader>sf'      , fzf.files                  , { desc = 'FzfLua: Files' })
+         keymap('n', '<Leader>sF'      , files_in_dir               , { desc = 'FzfLua: Files' })
          keymap('n', '<Leader>sg'      , fzf.live_grep              , { desc = 'FzfLua: Grep' })
          keymap('n', '<Leader>sh'      , fzf.helptags               , { desc = 'FzfLua: Help' })
-         keymap('n', '<Leader>si'      , fzf.nerdfont               , { desc = 'FzfLua: Nerd Font Icons' })
+         keymap('n', '<Leader>sH'      , fzf.highlights             , { desc = 'FzfLua: Highlights' })
          keymap('n', '<Leader>sk'      , fzf.keymaps                , { desc = 'FzfLua: Keymaps' })
          keymap('n', '<Leader>so'      , fzf.oldfiles               , { desc = 'FzfLua: Oldfiles' })
-         keymap('n', '<Leader>sp'      , fzf.plugins                , { desc = 'FzfLua: Plugins' })
+         keymap('n', '<Leader>sp'      , plugins                    , { desc = 'FzfLua: Plugins' })
          keymap('n', '<Leader>sr'      , fzf.resume                 , { desc = 'FzfLua: Resume' })
          keymap('n', '<Leader>sw'      , fzf.grep_cword             , { desc = 'FzfLua: Current Word' })
          keymap('v', '<Leader>ss'      , fzf.grep_visual            , { desc = 'FzfLua: Selection' })
-         keymap('n', '<Leader>sH'      , fzf.highlights             , { desc = 'FzfLua: Highlights' })
          keymap('n', '<Leader>sq'      , '<Cmd>Namu diagnostics<CR>', { desc = 'FzfLua: Search Diagnostics' })
          keymap('n', '<Leader>ss'      , '<Cmd>Namu symbols<CR>'    , { desc = 'FzfLua: Search Symbols Buffer' })
-         keymap('n', '<Leader>st'      , '<Cmd>TodoFzfLua<CR>'      , { desc = 'FzfLua: Search Todos' })
          keymap('n', '<Leader>sS'      , '<Cmd>Namu workspace<CR>'  , { desc = 'FzfLua: Search Symbols Workspace' })
+         keymap('n', '<Leader>st'      , '<Cmd>TodoFzfLua<CR>'      , { desc = 'FzfLua: Search Todos' })
          --stylua: ignore end
-
-         -- Patch fzf-lua to be circular-safe. This prevents a stack overflow
-         -- when using ui_select with complex objects (like Sidekick's).
-         local utils = require('fzf-lua.utils')
-         utils.tbl_deep_clone = function(t, seen)
-            if type(t) ~= 'table' then return t end
-            seen = seen or {}
-            if seen[t] then return seen[t] end
-            local clone = {}
-            seen[t] = clone
-            for k, v in pairs(t) do
-               clone[k] = utils.tbl_deep_clone(v, seen)
-            end
-            return clone
-         end
       end,
    },
 
@@ -1120,6 +1041,23 @@ local core_plugins = {
       config = true,
    },
 
+   --Flash
+   {
+      'folke/flash.nvim',
+      event = 'VeryLazy',
+      ---@type Flash.Config
+      opts = {
+         modes = { search = { enabled = false } },
+         label = { uppercase = false },
+      },
+      keys = {
+         { 'gs', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
+         { 'gS', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash Treesitter' },
+         { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote Flash' },
+         { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter Search' },
+      },
+   },
+
    --GuessIndent
    {
       'nmac427/guess-indent.nvim',
@@ -1181,8 +1119,6 @@ local utility_plugins = {
                },
             },
          })
-         override_winhl({ 'codediff-explorer' })
-         override_winhl({ 'codediff-help' }, winhl({ Normal = 'NormalFloat' }))
       end,
    },
 
@@ -1191,7 +1127,6 @@ local utility_plugins = {
       'zbirenbaum/copilot.lua',
       cmd = 'Copilot',
       keys = { { '<Leader>Tc', desc = 'Toggle Copilot' } },
-      build = ':Copilot auth',
       init = function() vim.g.copilot_enabled = false end,
       config = function()
          require('copilot').setup({
@@ -1209,7 +1144,7 @@ local utility_plugins = {
          keymap('n', '<Leader>Tc', function()
             vim.g.copilot_enabled = not vim.g.copilot_enabled
             vim.cmd('Copilot ' .. (vim.g.copilot_enabled and 'enable' or 'disable'))
-            vim.notify('Copilot: ' .. tostring(vim.g.copilot_enabled))
+            vim.notify('Copilot: ' .. (vim.g.copilot_enabled and 'Enabled' or 'Disabled'))
          end, { desc = 'Toggle Copilot' })
       end,
    },
@@ -1223,22 +1158,9 @@ local utility_plugins = {
          sidekick.setup({
             cli = {
                picker = 'fzf-lua',
-               mux = { enabled = true, backend = 'tmux' },
-               tools = { claude = { native_scroll = true } },
-               win = {
-                  split = { width = 0 },
-                  wo = { winfixwidth = false },
-               },
+               mux = { enabled = true, backend = 'tmux', create = 'split', split = { size = 0.33 } },
             },
          })
-
-         local session = require('sidekick.cli.session')
-         local sid = session.sid
-         session.sid = function(opts) return '_' .. sid(opts) end
-
-         local terminal = require('sidekick.cli.terminal')
-         terminal.keys = function() end
-         terminal.fix_cursorline = function() end
 
          local cli = require('sidekick.cli')
          local nes = require('sidekick.nes')
@@ -1249,53 +1171,13 @@ local utility_plugins = {
          keymap('n', '<Leader>ad', function() cli.close() end, { desc = 'Detach a CLI Session' })
          keymap('n', '<Leader>af', function() cli.send({ msg = '{file}' }) end, { desc = 'Send File' })
          keymap('x', '<Leader>av', function() cli.send({ msg = '{selection}' }) end, { desc = 'Send Visual Selection' })
-         keymap('n', '<Leader>au', function() require('floaterm').send('npx --yes tokscale', 'tokscale') end, { desc = 'See token usage' })
+         keymap('n', '<Leader>au', function() require('floaterm').send('npx --yes tokscale', { name = 'tokscale' }) end, { desc = 'See token usage' })
          keymap({ 'n', 'x' }, '<Leader>ap', function() cli.prompt() end, { desc = 'Select Prompt' })
          keymap({ 'n', 'x' }, '<Leader>at', function() cli.send({ msg = '{this}' }) end, { desc = 'Send This' })
          keymap('n', '<Tab>', function()
             if nes.have() then nes.jump(); nes.apply() else return '<Tab>' end
          end, { desc = 'Goto/Apply Next Edit Suggestion', expr = true })
          --stylua: ignore end
-
-         local function tui_tool(buf)
-            local tool = vim.b[buf].sidekick_cli or vim.w[vim.api.nvim_get_current_win()].sidekick_cli
-            return tool and vim.tbl_contains({ 'claude', 'opencode' }, tool.name)
-         end
-
-         local function scroll_wheel(dir)
-            local r, c = unpack(vim.api.nvim_win_get_position(0))
-            local h, w = vim.fn.winheight(0), vim.fn.winwidth(0)
-            r, c = r + math.floor(h / 2), c + math.floor(w / 2)
-            for _ = 1, 3 do
-               vim.api.nvim_input_mouse('wheel', dir, '', 0, r, c)
-            end
-         end
-
-         -- Much better ergonomics in TUIs
-         autocmd('FileType', {
-            pattern = { 'sidekick_terminal' },
-            group = augroup('sidekick-scroll', { clear = true }),
-            callback = function(args)
-               local buf = args.buf
-               vim.schedule(function()
-                  if not tui_tool(buf) then return end
-                  keymap('t', '<C-u>', function() scroll_wheel('up') end, { buffer = buf })
-                  keymap('t', '<C-d>', function() scroll_wheel('down') end, { buffer = buf })
-                  keymap('n', '<ScrollWheelUp>', function() vim.cmd('startinsert') end, { buffer = buf })
-                  keymap('n', '<ScrollWheelDown>', function() vim.cmd('startinsert') end, { buffer = buf })
-               end)
-            end,
-         })
-
-         override_winhl(
-            'sidekick_terminal',
-            winhl({
-               Normal = 'SidekickChat',
-               NormalNC = 'SidekickChat',
-               EndOfBuffer = 'SidekickChat',
-               SignColumn = 'SidekickChat',
-            })
-         )
       end,
    },
 
@@ -1317,7 +1199,12 @@ local utility_plugins = {
             size = { h = pct, w = unit_width * 5, max_w = pct },
          })
 
-         keymap('n', '<Leader>jj', function() floaterm.send('jj', { persist = true }) end, { desc = 'Jujutsu' })
+         keymap(
+            'n',
+            '<Leader>jj',
+            function() floaterm.send('jj && jj st', { name = 'jj', persist = true }) end,
+            { desc = 'Jujutsu' }
+         )
       end,
    },
 
@@ -1330,7 +1217,6 @@ local utility_plugins = {
       opts = {
          outline_window = {
             split_command = unit_width .. 'vsplit',
-            winhl = winhl({ Normal = 'NormalSidebar' }),
          },
          outline_items = { show_symbol_details = false },
          preview_window = {
@@ -1367,11 +1253,23 @@ local utility_plugins = {
          },
          enable_git_status = true,
          enable_diagnostics = false,
-         window = { width = unit_width },
+         window = {
+            width = unit_width,
+            mappings = {
+               ['Y'] = {
+                  function(state) vim.fn.setreg('+', state.tree:get_node().path) end,
+                  desc = 'copy path to clipboard',
+               },
+            },
+         },
+         enable_cursor_hijack = true,
          event_handlers = {
             {
                event = 'neo_tree_window_after_open',
-               handler = function(_) vim.cmd('wincmd =') end,
+               handler = function(_)
+                  vim.cmd('wincmd =')
+                  vim.schedule(function() require('neo-tree.sources.manager').refresh('filesystem') end)
+               end,
             },
          },
       },
@@ -1401,21 +1299,11 @@ local language_plugins = {
             group = augroup('lsp-attach', { clear = true }),
             callback = function(event)
                local fzf = require('fzf-lua')
-               keymap('n', '<Leader>cd', fzf.lsp_definitions, { buffer = event.buf, desc = 'LSP: Code Definition' })
-               keymap(
-                  'n',
-                  '<Leader>cD',
-                  vim.lsp.buf.declaration,
-                  { buffer = event.buf, desc = 'LSP: Code Declaration' }
-               )
-               keymap('n', '<Leader>cr', fzf.lsp_references, { buffer = event.buf, desc = 'LSP: Code References' })
-               keymap('n', '<Leader>cv', vim.lsp.buf.rename, { buffer = event.buf, desc = 'LSP: Code Variable Rename' })
-               keymap(
-                  { 'n', 'x' },
-                  '<Leader>ca',
-                  fzf.lsp_code_actions,
-                  { buffer = event.buf, desc = 'LSP: Code Action' }
-               )
+               keymap('n', '<Leader>cd', fzf.lsp_definitions, { buffer = event.buf, desc = 'Code Definition' })
+               keymap('n', '<Leader>cD', vim.lsp.buf.declaration, { buffer = event.buf, desc = 'Code Declaration' })
+               keymap('n', '<Leader>cr', fzf.lsp_references, { buffer = event.buf, desc = 'Code References' })
+               keymap('n', '<Leader>cv', vim.lsp.buf.rename, { buffer = event.buf, desc = 'Code Variable Rename' })
+               keymap({ 'n', 'x' }, '<Leader>ca', fzf.lsp_code_actions, { buffer = event.buf, desc = 'Code Action' })
                -- <Leader>cf = Code Format (Conform)
 
                lsp_highlight_symbols(event)
@@ -1431,32 +1319,17 @@ local language_plugins = {
 
    --Mason
    {
-      'williamboman/mason.nvim',
-      lazy = true,
-      keys = { { '<Leader>im', '<Cmd>Mason<CR>', desc = 'Mason' } },
-      config = true,
-   },
-   {
-      'williamboman/mason-lspconfig.nvim',
-      lazy = true,
-      dependencies = {
-         'williamboman/mason.nvim',
-         'saghen/blink.cmp',
-      },
-      opts = { automatic_enable = lsps },
-   },
-   {
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
+      'owallb/mason-auto-install.nvim',
       event = 'VeryLazy',
-      cmd = 'MasonToolsUpdateSync',
       dependencies = {
-         'williamboman/mason.nvim',
-         'williamboman/mason-lspconfig.nvim',
+         { 'williamboman/mason.nvim', opts = { ui = { backdrop = 100 } } },
+         { 'williamboman/mason-lspconfig.nvim', opts = { automatic_enable = lsps } },
+         'neovim/nvim-lspconfig',
       },
       config = function()
-         local mti = require('mason-tool-installer')
-         mti.setup({ ensure_installed = vim.g.all_tools })
-         mti.check_install()
+         local to_package = require('mason-lspconfig.mappings').get_mason_map().lspconfig_to_package
+         local packages = vim.list_extend(vim.tbl_map(function(s) return to_package[s] or s end, lsps), tools)
+         require('mason-auto-install').setup({ packages = packages })
       end,
    },
 
@@ -1591,7 +1464,6 @@ local language_plugins = {
       keys = '<Leader>t',
       dependencies = {
          'nvim-neotest/nvim-nio',
-         'nvim-lua/plenary.nvim',
          'nvim-treesitter/nvim-treesitter',
          'nvim-neotest/neotest-python',
       },
@@ -1620,7 +1492,6 @@ local language_plugins = {
             pattern = { 'neotest-output', 'neotest-summary' },
             callback = function() vim.wo.wrap = false end,
          })
-         override_winhl('neotest-summary')
       end,
    },
 
@@ -1629,6 +1500,7 @@ local language_plugins = {
       'linux-cultist/venv-selector.nvim',
       dependencies = { 'ibhagwan/fzf-lua' },
       ft = 'python',
+      keys = { { '<Leader>v', '<Cmd>VenvSelect<CR>', desc = 'Select Python Venv' } },
       opts = {
          options = {
             on_venv_activate_callback = function()
@@ -1636,6 +1508,9 @@ local language_plugins = {
                if venv and venv ~= '' then
                   vim.notify(' activated: ' .. vim.fn.fnamemodify(venv, ':t'), vim.log.levels.INFO)
                end
+            end,
+            on_fd_result_callback = function(filename)
+               return filename:gsub(os.getenv('HOME'), '~'):gsub('/bin/python', '')
             end,
          },
       },
@@ -1679,6 +1554,7 @@ local language_plugins = {
    {
       'MeanderingProgrammer/render-markdown.nvim',
       ft = { 'markdown' },
+      keys = { { '<Leader>Tm', '<Cmd>RenderMarkdown toggle<CR>', desc = 'Toggle Markdown Rendering' } },
       dependencies = {
          'nvim-treesitter/nvim-treesitter',
          'nvim-tree/nvim-web-devicons',
@@ -1814,11 +1690,7 @@ local colorscheme_plugins = {
    {
       'catppuccin/nvim',
       name = 'catppuccin',
-      opts = {
-         flavour = 'mocha',
-         default_integrations = true,
-         auto_integrations = true,
-      },
+      opts = { flavour = 'mocha' },
    },
 
    --Tokyonight
@@ -1929,17 +1801,10 @@ local ui_plugins = {
                return ok and status.get() ~= nil
             end,
          }
-         local sidekick_cli_name = function()
-            local win = vim.api.nvim_get_current_win()
-            local buf = vim.api.nvim_win_get_buf(win)
-            local cli = vim.b[buf].sidekick_cli or vim.w[win].sidekick_cli
-            return cli.name:gsub('^%l', string.upper)
-         end
-
          -- Custom extensions
          local minimal = {
-            winbar = { lualine_b = { 'filetype' } },
-            inactive_winbar = { lualine_a = { 'filetype' } },
+            winbar = { lualine_b = { 'filetype' }, lualine_c = { empty } },
+            inactive_winbar = { lualine_a = { 'filetype' }, lualine_c = { empty } },
             filetypes = {
                'Outline',
                'checkhealth',
@@ -1959,14 +1824,6 @@ local ui_plugins = {
             },
             filetypes = { 'terminal' },
          }
-         local sidekick = {
-            winbar = {
-               lualine_a = { text(copilot_icon) },
-               lualine_c = { sidekick_cli_name },
-            },
-            filetypes = { 'sidekick_terminal' },
-         }
-
          -- Lualine config
          require('lualine').setup({
             options = {
@@ -1983,7 +1840,7 @@ local ui_plugins = {
                   },
                },
             },
-            extensions = { minimal, terminal, sidekick },
+            extensions = { minimal, terminal },
             sections = {},
             inactive_sections = {},
             winbar = {
@@ -2207,6 +2064,7 @@ require('lazy').setup(specs, {
    defaults = { version = nil },
    headless = { task = false },
    rocks = { enabled = false },
+   ui = { backdrop = 100 },
    dev = {
       path = '~/nvim-plugins/',
       fallback = true,

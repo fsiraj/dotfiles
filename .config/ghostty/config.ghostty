@@ -8,11 +8,12 @@ cursor-style = bar
 cursor-style-blink = true
 
 # Styling - Window
-title = " "
+title = "󰊠"
 window-theme = ghostty
 window-padding-x = 32
 window-padding-y = 0,16
 window-padding-balance = true
+
 macos-titlebar-proxy-icon = hidden
 gtk-tabs-location = hidden
 gtk-toolbar-style = flat
@@ -39,8 +40,11 @@ keybind = ctrl+shift+l=goto_split:right
 keybind = ctrl+shift+x=close_surface
 keybind = ctrl+shift+equal=equalize_splits
 
-# Tabs (Windows)
+# Tabs
 keybind = ctrl+shift+t=new_tab
+
+# Windows
+keybind = ctrl+shift+enter=toggle_fullscreen
 
 # Resolves conflicts with other things
 keybind = alt+equal=increase_font_size:2
@@ -49,3 +53,4 @@ keybind = ctrl+equal=unbind
 keybind = ctrl++=unbind
 keybind = ctrl+-=unbind
 keybind = ctrl+minus=unbind
+keybind = ctrl+enter=unbind

@@ -51,8 +51,8 @@
         {
           "type": "session",
           "style": "plain",
-          "template": "{{ if .SSHSession }}{{ .UserName }}@{{ index (splitList \".\" .HostName) 0 }}{{ end }} ",
-          "foreground": "yellow"
+          "template": "{{ if .SSHSession }}{{ index (splitList \".\" .HostName) 0 }} <default>•</> {{ end }}",
+          "foreground": "magenta"
         },
         {
           "type": "path",
