@@ -1,0 +1,16 @@
+hooks = ["tmux source-file \"$HOME/.config/tmux/tmux.conf\" 2>/dev/null || true"]
+
+[[items]]
+path = "https://github.com/tinted-theming/tinted-terminal"
+name = "tinted-terminal"
+themes-dir = "themes/ghostty"
+hook = "$HOME/.config/tinted-theming/tinted.sh sync-ghostty"
+supported-systems = ["base16", "base24"]
+
+[[items]]
+name = "tinted-claude-code"
+path = "https://github.com/tinted-theming/tinted-claude-code"
+themes-dir = "scripts"
+theme-file-extension = ".js"
+supported-systems = ["base16", "base24", "tinted8"]
+hook = "$HOME/.config/tinted-theming/tinted.sh sync-claude"

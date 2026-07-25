@@ -1,39 +1,28 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "allow": [
-      "Bash(* --version)",
-      "Bash(* --help *)"
-    ],
     "deny": [
       "Read(**/.env*)",
+      "Read(**/.ssh/**)",
+      "Read(**/.aws/**)",
       "Read(**/*.pem)",
       "Read(**/*.key)",
-      "Read(**/id_rsa*)",
-      "Read(**/id_ed25519*)",
-      "Read(**/*secret*)",
-      "Read(**/*credential*)",
-      "Read(**/.aws/**)",
-      "Read(**/.ssh/**)",
-      "Read(**/.netrc)",
-      "Read(**/.npmrc)",
-      "Read(**/.pypirc)",
       "Bash(git push *)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
+  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.config/claude/statusline.sh\""
   },
   "enabledPlugins": {
-    "pyright-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true
   },
   "feedbackSurveyRate": 0,
-  "effortLevel": "high",
   "tui": "fullscreen",
   "autoMemoryEnabled": true,
-  "theme": "auto",
-  "skipAutoPermissionPrompt": true,
-  "model": "opus"
+  "theme": "custom:tinted",
+  "skipAutoPermissionPrompt": true
 }

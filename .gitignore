@@ -1,7 +1,6 @@
 test/
 **.log
 
-.config/nvim/theme.lua
 .config/tmux/plugins/
 .config/ghostty/theme.ghostty
 
@@ -14,9 +13,6 @@ test/
 
 .config/claude/*
 !.config/claude/settings.json
-!.config/claude/keybindings.json
 !.config/claude/statusline.sh
-!.config/claude/themes/
-!.config/claude/themes/**
 
 **/.DS_Store
