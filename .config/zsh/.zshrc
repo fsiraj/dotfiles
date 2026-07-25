@@ -47,17 +47,14 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview '
     eza -aT --level=2 --color=always --icons=always $realpath
 '                                                               # show directory preview on cd
 
-# Custom functions and aliases
+# Functions
+
 tinted() {
     "$HOME/.config/tinted-theming/tinted.sh" "$@"
 }
 
 theme() {
-    local theme="${1:-$(tinted list | fzf --reverse --prompt "Select colorscheme: " \
-        --preview-window=up,21,nowrap,noinfo,border-none \
-        --preview "$HOME/.config/tinted-theming/tinted.sh preview {}")}"
-    [[ -z "$theme" ]] && return
-    tinted apply "$theme"
+    tinted apply "$1"
 }
 
 attach() {
@@ -71,6 +68,14 @@ attach() {
         tmux new -A -s "$1"
     fi
 }
+
+resurrect() {
+    tmux has-session 2>/dev/null || tmux new -d
+    tmux run-shell "$TMUX_PLUGIN_DIR/tmux-resurrect/scripts/restore.sh"
+    [[ -n "$TMUX" ]] || tmux attach
+}
+
+# Aliases
 
 alias clear="clear -x"
 alias reload="clear -x && NO_FF=1 exec zsh"
