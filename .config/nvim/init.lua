@@ -2,10 +2,6 @@
 -- │                               Options                                │
 -- └──────────────────────────────────────────────────────────────────────┘
 
--- Colorscheme
-local theme_file = vim.fn.stdpath('config') .. '/theme.lua'
-vim.g.colorscheme = vim.uv.fs_stat(theme_file) and dofile(theme_file) or 'default'
-
 -- Set these before plugins are loaded
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ','
@@ -86,8 +82,6 @@ vim.diagnostic.config({
 local keymap = vim.keymap.set
 
 -- Neovim <-> Tmux Navigation
-local vim_tmux_dirs = { { 'h', 'L' }, { 'j', 'D' }, { 'k', 'U' }, { 'l', 'R' } }
-
 local function move(dv, dt)
    local prev = vim.api.nvim_get_current_win()
    vim.cmd('wincmd ' .. dv)
@@ -96,7 +90,7 @@ local function move(dv, dt)
    end
 end
 
-for _, dirs in ipairs(vim_tmux_dirs) do
+for _, dirs in ipairs({ { 'h', 'L' }, { 'j', 'D' }, { 'k', 'U' }, { 'l', 'R' } }) do
    local dv, dt = unpack(dirs)
    local lhs = '<C-' .. dv .. '>'
    keymap('n', lhs, function() move(dv, dt) end, { desc = 'Navigate ' .. dv })
@@ -218,31 +212,6 @@ autocmd('FileChangedShell', {
 --- To make UIs multiples of consistent width
 local unit_width = 40
 
---- All supported colorschemes, paired with a display name
---stylua: ignore
-local colorschemes = {
-   { 'default'             , 'Neovim Dark' },
-   { 'github_dark_default' , 'Github Dark' },
-   { 'github_light_default', 'Github Light' },
-   { 'rose-pine-main'      , 'Rosé Pine' },
-   { 'rose-pine-moon'      , 'Rosé Pine Moon' },
-   { 'rose-pine-dawn'      , 'Rosé Pine Dawn' },
-   { 'tokyonight-night'    , 'Tokyo Night' },
-   { 'tokyonight-storm'    , 'Tokyo Night Storm' },
-   { 'tokyonight-moon'     , 'Tokyo Night Moon' },
-   { 'tokyonight-day'      , 'Tokyo Night Day' },
-   { 'catppuccin-mocha'    , 'Catppuccin Mocha' },
-   { 'catppuccin-macchiato', 'Catppuccin Macchiato' },
-   { 'catppuccin-frappe'   , 'Catppuccin Frappé' },
-   { 'catppuccin-latte'    , 'Catppuccin Latte' },
-}
-
-local name_to_display, display_to_name = {}, {}
-for _, c in ipairs(colorschemes) do
-   name_to_display[c[1]] = c[2]
-   display_to_name[c[2]] = c[1]
-end
-
 --- Dashboard Header
 local neovim_logo = [[
         @@@           @@        
@@ -265,7 +234,7 @@ local neovim_logo = [[
 ]]
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
--- │                             UI: Helpers                              │
+-- │                                Theme                                 │
 -- └──────────────────────────────────────────────────────────────────────┘
 
 local get_hl = vim.api.nvim_get_hl
@@ -282,118 +251,15 @@ local function winhl(links)
    return table.concat(vim.iter(links):map(function(from, to) return from .. ':' .. to end):totable(), ',')
 end
 
-local function emit_cursor_color()
-   local osc = string.format('\27]12;%s\7', get_hl_attr('Cursor', 'bg'))
-   if vim.env.TMUX then osc = '\27Ptmux;' .. osc:gsub('\27', '\27\27') .. '\27\\' end
-   io.stdout:write(osc)
-end
-
-local function background(colorscheme)
-   return vim.tbl_contains({
-      'catppuccin-latte',
-      'tokyonight-day',
-      'rose-pine-dawn',
-      'github_light_default',
-   }, colorscheme) and 'light' or 'dark'
-end
-
--- ┌──────────────────────────────────────────────────────────────────────┐
--- │                        UI: Palette Generation                        │
--- └──────────────────────────────────────────────────────────────────────┘
-
-local function get_palette(colorscheme)
-   local palette
-   --stylua: ignore start
-   if string.find(colorscheme, 'catppuccin') then
-      local flavor = vim.split(colorscheme, '-')[2]
-      local p = require('catppuccin.palettes').get_palette(flavor)
-      palette = {
-         accent = p.mauve   , orange = p.peach,
-         text   = p.text    , base   = p.base , crust = p.mantle, subtext = p.subtext0,
-         black  = p.surface1, white  = p.text , red   = p.red   , yellow  = p.yellow  ,
-         green  = p.green   , cyan   = p.teal , blue  = p.blue  , magenta = p.mauve   ,
-      }
-   elseif string.find(colorscheme, 'tokyonight') then
-      local flavor = vim.split(colorscheme, '-')[2]
-      local p = require('tokyonight.colors.' .. flavor)
-      if type(p) == 'function' then p = p({}) end
-      palette = {
-         accent = p.cyan           , orange = p.orange,
-         text   = p.fg             , base   = p.bg    , crust = p.bg_dark  , subtext = p.comment,
-         black  = p.terminal_black , white  = p.fg    , red   = p.magenta2 , yellow  = p.yellow ,
-         green  = p.teal           , cyan   = p.cyan  , blue  = p.blue     , magenta = p.magenta,
-      }
-   elseif string.find(colorscheme, 'rose') then
-      local p = require('rose-pine.palette')
-      palette = {
-         accent = p.rose, text  = p.text,
-         base   = p.base, crust = p._nc , subtext = p.subtle, black   = p.highlight_med,
-         white  = p.text, red   = p.love, orange  = p.gold  , yellow  = p.gold         ,
-         green  = p.leaf, cyan  = p.foam, blue    = p.pine  , magenta = p.iris         ,
-      }
-   elseif string.find(colorscheme, 'github') then
-      local p = require('github-theme.palette').load(colorscheme)
-      palette = {
-         accent = p.accent.fg    , orange = p.orange        ,
-         text   = p.fg.default   , base   = p.canvas.default, crust = p.canvas.inset, subtext = p.fg.subtle   ,
-         black  = p.neutral.muted, white  = p.fg.default    , red   = p.red.base    , yellow  = p.yellow.base ,
-         green  = p.green.base   , cyan   = p.cyan.base     , blue  = p.blue.base   , magenta = p.magenta.base,
-      }
-   elseif colorscheme == 'default' then
-      local p = vim.api.nvim_get_color_map()
-      palette = {
-         accent = p.NvimLightCyan , orange = p.Burlywood1    ,
-         text   = p.NvimLightGrey2, base   = p.NvimDarkGrey2 , crust = p.NvimDarkGrey1, subtext = p.NvimLightGrey4  ,
-         black  = p.NvimDarkGrey3 , white  = p.NvimLightGrey2, red   = p.NvimLightRed , yellow  = p.NvimLightYellow ,
-         green  = p.NvimLightGreen, cyan   = p.NvimLightCyan , blue  = p.NvimLightBlue, magenta = p.NvimLightMagenta,
-      }
-   else
-      error('Unsupported colorscheme: ' .. tostring(colorscheme))
-   end
-   --stylua: ignore end
-   for k, v in pairs(palette) do
-      if type(v) == 'number' then palette[k] = string.format('#%06x', v) end
-   end
-   return palette
-end
-
-local function generate_ansi_palette(p)
-   local color = require('volt.color')
-   local function brighten(hex, ds, dl)
-      ds, dl = ds or 10, dl or 4
-      return color.change_hex_saturation(color.change_hex_lightness(hex, dl), ds)
-   end
+local function get_palette(base)
+   base = base or require('osc-colors').get_palette()
    --stylua: ignore
-   local base16 = {
-      p.black, p.red, p.green, p.yellow, p.blue, p.magenta, p.cyan, p.white,
-      brighten(p.black, 0), brighten(p.red)    , brighten(p.green), brighten(p.yellow)  ,
-      brighten(p.blue)    , brighten(p.magenta), brighten(p.cyan) , brighten(p.white, 0),
+   return {
+      accent = (base.extras and base.extras.accent) or base.base0E    , orange  = base.base09,
+      text   = base.base05, base   = base.base00, crust  = base.base01, subtext = base.base03,
+      black  = base.base02, white  = base.base05, red    = base.base08, yellow  = base.base0A,
+      green  = base.base0B, cyan   = base.base0C, blue   = base.base0D, magenta = base.base0E,
    }
-   local palette = {}
-   for i, c in ipairs(base16) do
-      palette[i] = { i - 1, c }
-   end
-   --stylua: ignore
-   local extra = {
-      { 51, p.accent }, { 232, p.crust }, { 233, p.base },
-   }
-   palette = vim.list_extend(palette, extra)
-   return palette
-end
-
-local function generate_ghostty_theme(p)
-   local theme = {
-      { 'background', p.base },
-      { 'foreground', p.text },
-      { 'cursor-color', get_hl_attr('Cursor', 'bg') },
-      { 'cursor-text', get_hl_attr('Cursor', 'fg') },
-      { 'selection-background', p.subtext },
-      { 'selection-foreground', p.text },
-   }
-   for _, entry in ipairs(generate_ansi_palette(p)) do
-      theme[#theme + 1] = { 'palette = ' .. entry[1], entry[2] }
-   end
-   return theme
 end
 
 local function generate_nvim_overrides(p)
@@ -404,10 +270,12 @@ local function generate_nvim_overrides(p)
       --[[ Float       ]] FloatBorder= { fg = p.crust, bg = p.crust }, FloatTitle = { fg = p.crust, bg = p.accent, bold = true },
       --[[ Fold        ]] Folded= { bg = p.base },
       --[[ Normal      ]] Normal= { fg = p.text, bg = p.base }, NormalFloat = { bg = p.crust }, NormalNC = { link = 'Normal' },
-      --[[ Pmenu       ]] Pmenu= { link = 'NormalFloat' },
+      --[[ Pmenu       ]] Pmenu= { link = 'NormalFloat' }, PmenuSel = { bg = p.black },
       --[[ Special     ]] Special= { fg = p.cyan },
       --[[ StatusLine  ]] StatusLine= { fg = p.base, bg = p.base }, StatusLineNC = { fg = p.base, bg = p.base }, StatusLineTerm = { link = 'StatusLine' }, StatusLineTermNC = { link = 'StatusLineNC' },
+      --[[ Visual      ]] Visual= { bg = p.black },
       --[[ Window      ]] WinSeparator= { fg = p.crust, bg = p.base },
+      --[[ Semantics   ]] Keyword = {fg = p.accent },
       -- Plugins
       --[[ Blink       ]] BlinkCmpDoc= { link = 'NormalFloat' },
       --[[ Dap         ]] DapBreak= { fg = p.red }, DapStop = { fg = p.yellow },
@@ -429,7 +297,8 @@ local function generate_nvim_overrides(p)
    }
 end
 
-local function generate_lualine_theme(p)
+local function generate_lualine_theme()
+   local p = get_palette()
    return {
       normal = {
          a = { bg = p.accent, fg = p.crust, gui = 'bold' },
@@ -444,134 +313,47 @@ local function generate_lualine_theme(p)
          a = { bg = p.blue, fg = p.crust, gui = 'bold' },
       },
       command = {
-         a = { bg = p.orange, fg = p.crust, gui = 'bold' },
+         a = { bg = p.green, fg = p.crust, gui = 'bold' },
       },
       terminal = {
-         a = { bg = p.orange, fg = p.crust, gui = 'bold' },
+         a = { bg = p.green, fg = p.crust, gui = 'bold' },
       },
       replace = {
          a = { bg = p.red, fg = p.crust, gui = 'bold' },
       },
       inactive = {
-         a = { bg = p.crust, fg = p.subtext },
+         a = { bg = p.crust, fg = p.text },
          b = { bg = p.base, fg = p.subtext },
          c = { bg = p.base, fg = p.subtext },
       },
    }
 end
 
--- ┌──────────────────────────────────────────────────────────────────────┐
--- │                           UI: Theme Sync                             │
--- └──────────────────────────────────────────────────────────────────────┘
-
-local function write_ghostty_theme(path, theme)
-   local lines = { '# Generated on theme sync from Neovim — do not edit, not git-tracked' }
-   for _, kv in ipairs(theme) do
-      lines[#lines + 1] = ('%s = %s'):format(kv[1], kv[2])
-   end
-   local file = assert(io.open(vim.fn.expand(path), 'w'))
-   file:write(table.concat(lines, '\n') .. '\n')
-   file:close()
-end
-
-local function reload_ghostty()
-   -- pkill not portable
-   vim.system({ 'killall', '-SIGUSR2', 'ghostty' })
-end
-
-local function reload_nvim_servers()
-   local servers = vim.fn.glob(vim.fn.fnamemodify(vim.fn.stdpath('run'), ':h') .. '/**/nvim.*', true, true)
-   for _, addr in ipairs(servers) do
-      if addr ~= vim.v.servername then
-         --stylua: ignore
-         vim.system({
-            'nvim', '--server', addr, '--remote-send',
-            '<Cmd>NvimSetTheme ' .. vim.g.colorscheme .. '<CR>',
-         })
-      end
-   end
-end
-
 local function reload_nvim_plugins()
    local vim_notify = vim.notify
    vim.notify = function(...) end
 
-   -- Plugins that work with Lazy's reload feature
-   local plugins_to_reload = { 'fzf-lua', 'tiny-glimmer.nvim' }
-   vim.iter(plugins_to_reload):each(function(p) vim.cmd('Lazy reload ' .. p) end)
+   local plugins_to_reload = { ['fzf-lua'] = 'fzf-lua', ['tiny-glimmer.nvim'] = 'tiny-glimmer' }
+   for lazy_name, module in pairs(plugins_to_reload) do
+      if package.loaded[module] then vim.cmd('Lazy reload ' .. lazy_name) end
+   end
 
-   -- Lualine
-   local config = require('lualine').get_config()
-   config.options.theme = generate_lualine_theme(vim.g.palette)
-   require('lualine').setup(config)
+   if package.loaded['lualine'] then
+      local config = require('lualine').get_config()
+      config.options.theme = generate_lualine_theme()
+      require('lualine').setup(config)
+   end
 
    vim.notify = vim_notify
 end
 
-local function set_theme(colorscheme)
-   vim.g.colorscheme = colorscheme
-   vim.opt.background = background(colorscheme)
-   vim.cmd.colorscheme(vim.g.colorscheme)
-   reload_nvim_plugins()
-   vim.schedule(emit_cursor_color)
-end
-
-local function sync_theme(colorscheme)
-   -- Default to the configured colorscheme
-   if colorscheme == nil or colorscheme == '' then colorscheme = vim.g.colorscheme end
-
-   local display = name_to_display[colorscheme]
-   if not display then
-      vim.notify('Colorscheme ' .. colorscheme .. ' not supported.', 'error')
-      return
-   end
-
-   -- Updates this session, but not persistent
-   vim.notify('✨ Syncing colors to ' .. display .. ' ✨\n', 'info')
-   set_theme(colorscheme)
-   reload_nvim_servers() -- reloads *other* neovim instances (if any)
-
-   -- Palette
-   local p = get_palette(colorscheme)
-
-   -- Nvim
-   vim.fn.writefile({ ('return %q'):format(colorscheme) }, theme_file)
-
-   -- Ghostty
-   if vim.fn.executable('ghostty') == 1 then
-      local ghostty = '~/.config/ghostty/theme.ghostty'
-      local ghostty_theme = generate_ghostty_theme(p)
-      vim.g.ghostty_theme = ghostty_theme
-      write_ghostty_theme(ghostty, ghostty_theme)
-      reload_ghostty()
-   end
-end
+autocmd('ColorScheme', { callback = reload_nvim_plugins })
 
 vim.api.nvim_create_user_command(
-   'NvimSetTheme',
-   function(opts) set_theme(opts.args) end,
-   { nargs = 1, desc = 'Set the Neovim colorscheme and reload styled plugins' }
+   'NvimPalette',
+   function() vim.print(get_palette()) end,
+   { desc = 'Inspect the current semantic palette' }
 )
-
-vim.api.nvim_create_user_command(
-   'NvimSyncTheme',
-   function(opts) sync_theme(display_to_name[opts.args] or opts.args) end,
-   { nargs = '?', desc = 'Sync theme across everything by setting Ghostty palette' }
-)
-
-vim.api.nvim_create_user_command('NvimColorschemes', function()
-   vim.iter(colorschemes):each(function(c) print(c[2]) end)
-end, { desc = 'Print supported colorschemes, one per line' })
-
-autocmd('ColorScheme', {
-   callback = function()
-      local p = get_palette(vim.g.colorscheme)
-      vim.g.palette = vim.deepcopy(p)
-      for hl, col in pairs(generate_nvim_overrides(p)) do
-         vim.api.nvim_set_hl(0, hl, col)
-      end
-   end,
-})
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                                 LSP                                  │
@@ -709,7 +491,6 @@ local core_plugins = {
          fzf.setup({
             defaults = {
                formatter = 'path.filename_first',
-               fd_opts = '--color=never --hidden --type f --type l --exclude .git --exclude .venv',
             },
             winopts = {
                width = width,
@@ -729,6 +510,7 @@ local core_plugins = {
             files = {
                hidden = true,
                follow = true,
+               fd_opts = [[--color=never --type f --type l --exclude .git --exclude .jj --exclude .venv]],
             },
             helptags = {
                actions = { ['enter'] = actions.help_vert },
@@ -736,6 +518,7 @@ local core_plugins = {
             grep = {
                hidden = true,
                rg_glob = true,
+               rg_opts = [[--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -g "!.git" -g "!.jj" -e]],
             },
             buffers = {
                previewer = false,
@@ -748,13 +531,6 @@ local core_plugins = {
          })
 
          -- Custom pickers
-         local magic_colorschemes = function()
-            local display_names = vim.iter(colorschemes):map(function(c) return c[2] end):totable()
-            return fzf.fzf_exec(display_names, {
-               winopts = { width = unit_width, height = unit_width / 2, row = 0.5, col = 0.5 },
-               actions = { ['enter'] = function(selected, _) sync_theme(display_to_name[selected[1]]) end },
-            })
-         end
          local plugins = function()
             local roots = { vim.fn.stdpath('data') .. '/lazy' }
             local dev = vim.fn.expand('~/nvim-plugins')
@@ -767,18 +543,46 @@ local core_plugins = {
             end)
          end
          local dotfiles = function() return fzf.files({ cwd = '~/dotfiles' }) end
+         local themes = function()
+            local script = vim.fn.expand('~/.config/tinted-theming/tinted.sh')
+            fzf.fzf_exec(script .. ' list', {
+               prompt = 'Themes> ',
+               winopts = { width = unit_width },
+               actions = {
+                  ['default'] = function(selected)
+                     if selected[1] then vim.system({ script, 'apply', selected[1] }) end
+                  end,
+               },
+            })
+         end
+         local nerdfont = function()
+            local cache = vim.fn.stdpath('cache') .. '/nerdfont-glyphs.json'
+            local url = 'https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/glyphnames.json'
+            vim.system({ 'find', cache, '-mtime', '+30', '-delete' }):wait()
+            vim.system({ 'sh', '-c', ('[ -s %s ] || curl -fsSL %s -o %s'):format(cache, url, cache) }):wait()
+            local cmd = [[jq -r 'to_entries[]|select(.key|startswith("METADATA")|not)|"\(.value.char)    \(.key)"' ]]
+            local put = function(s) vim.api.nvim_put({ s[1]:match('^(%S+)') }, 'c', true, true) end
+            local fmt = function(x) return (x:gsub('^(%S+)(%s+)(.*)$', '\27[93m%1\27[0m%2\27[2m%3\27[0m')) end
+            fzf.fzf_exec(cmd .. cache, {
+               prompt = 'Icon❯ ',
+               actions = { default = put },
+               winopts = { width = unit_width * 1.5 },
+               fn_transform = fmt,
+            })
+         end
 
          --stylua: ignore start
          keymap('n', '<Leader>/'       , fzf.lgrep_curbuf           , { desc = 'FzfLua: Current Buffer' })
          keymap('n', '<Leader><Leader>', fzf.buffers                , { desc = 'FzfLua: Open Buffers' })
          keymap('n', '<Leader>sb'      , fzf.builtin                , { desc = 'FzfLua: Builtin' })
-         keymap('n', '<Leader>sc'      , magic_colorschemes         , { desc = 'FzfLua: Magic Colorschemes' })
+         keymap('n', '<Leader>sc'      , themes                     , { desc = 'Tinty: Apply Theme' })
          keymap('n', '<Leader>sd'      , dotfiles                   , { desc = 'FzfLua: Dotfiles' })
          keymap('n', '<Leader>sf'      , fzf.files                  , { desc = 'FzfLua: Files' })
          keymap('n', '<Leader>sF'      , files_in_dir               , { desc = 'FzfLua: Files' })
          keymap('n', '<Leader>sg'      , fzf.live_grep              , { desc = 'FzfLua: Grep' })
          keymap('n', '<Leader>sh'      , fzf.helptags               , { desc = 'FzfLua: Help' })
          keymap('n', '<Leader>sH'      , fzf.highlights             , { desc = 'FzfLua: Highlights' })
+         keymap('n', '<Leader>si'      , nerdfont                   , { desc = 'FzfLua: Nerdfont Symbols' })
          keymap('n', '<Leader>sk'      , fzf.keymaps                , { desc = 'FzfLua: Keymaps' })
          keymap('n', '<Leader>so'      , fzf.oldfiles               , { desc = 'FzfLua: Oldfiles' })
          keymap('n', '<Leader>sp'      , plugins                    , { desc = 'FzfLua: Plugins' })
@@ -795,7 +599,7 @@ local core_plugins = {
    --Namu
    {
       'bassamsdata/namu.nvim',
-      cmd = { 'Namu' },
+      cmd = 'Namu',
       opts = {
          namu_symbols = {
             options = {
@@ -867,28 +671,19 @@ local core_plugins = {
          -- Session management
          local sessions = require('mini.sessions')
 
-         vim.opt.sessionoptions:append('globals')
-         vim.opt.sessionoptions:remove('terminal')
-         vim.opt.sessionoptions:remove('blank')
-
-         local function postread()
-            if vim.g.NeotreeOpen == 1 then vim.schedule(function() vim.cmd('Neotree show') end) end
-         end
-
-         local function prewrite()
-            vim.g.NeotreeOpen = vim.iter(vim.api.nvim_list_wins())
-               :any(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].ft == 'neo-tree' end) and 1 or 0
-            require('neogit').close()
-            vim.cmd('helpclose')
+         for _, opt in ipairs({ 'terminal', 'blank', 'help', 'tabpages' }) do
+            vim.opt.sessionoptions:remove(opt)
          end
 
          sessions.setup({
             autowrite = true,
             force = { delete = true },
-            hooks = { pre = { write = prewrite }, post = { read = postread } },
          })
 
-         local function session_name() return vim.fn.fnamemodify(vim.uv.cwd() or '', ':t') end
+         -- stylua: ignore
+         local function session_name()
+            return vim.fn.fnamemodify(vim.uv.cwd() or '', ':t')
+         end
 
          local function with_session(action)
             local name = session_name()
@@ -917,38 +712,39 @@ local core_plugins = {
    --Treesitter
    {
       'nvim-treesitter/nvim-treesitter',
+      cond = vim.fn.executable('tree-sitter') == 1,
       build = ':TSUpdate',
       config = function()
          local treesitter = require('nvim-treesitter')
          local function to_set(list)
-            local set = {}
-            for _, item in ipairs(list) do
+            return vim.iter(list):fold({}, function(set, item)
                set[item] = true
-            end
-            return set
+               return set
+            end)
          end
+         local preinstall = { 'lua', 'python', 'markdown', 'regex', 'bash' }
          local supported = to_set(vim.list_extend(treesitter.get_available(1), treesitter.get_available(2)))
-         local installed = to_set(treesitter.get_installed())
+         local installed = to_set(vim.list_extend(treesitter.get_installed(), preinstall))
          local excluded = { tmux = true }
-         local function ensure(lang)
-            if not installed[lang] then
-               treesitter.install(lang)
-               installed[lang] = true
+
+         local function attach(buf, lang)
+            if not vim.api.nvim_buf_is_valid(buf) or not vim.treesitter.language.add(lang) then return end
+            vim.treesitter.start(buf, lang)
+            if vim.treesitter.query.get(lang, 'indents') then
+               vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
             end
          end
+
          autocmd('FileType', {
             callback = function(args)
-               local lang = vim.bo[args.buf].filetype
-               if supported[lang] and not excluded[lang] then
-                  ensure(lang)
-                  vim.treesitter.start(args.buf, lang)
-                  vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-                  vim.wo.foldmethod = 'expr'
-                  vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-               end
+               local lang = vim.treesitter.language.get_lang(args.match)
+               if not lang or excluded[lang] or not supported[lang] then return end
+               if installed[lang] then return attach(args.buf, lang) end
+               installed[lang] = true
+               treesitter.install(lang):await(function() attach(args.buf, lang) end)
             end,
          })
-         vim.iter({ 'lua', 'python', 'markdown', 'regex', 'bash' }):each(ensure)
+         treesitter.install(preinstall)
       end,
    },
    {
@@ -966,14 +762,13 @@ local core_plugins = {
    --Floaterm
    {
       'fsiraj/floaterm',
-      dev = true,
+      dev = false,
       keys = { '<C-t>', '<Leader>jj', '<Leader>r' },
       dependencies = 'nvzone/volt',
       config = function()
          local floaterm = require('floaterm')
          local pct = 0.85
          floaterm.setup({
-            contrast = 5,
             delay = 300,
             env = { NO_FF = '1' },
             mappings = { toggle = '<C-t>', send = '<Leader>r' },
@@ -984,7 +779,7 @@ local core_plugins = {
          keymap(
             'n',
             '<Leader>jj',
-            function() floaterm.send('jj && jj st', { name = 'jj', persist = true }) end,
+            function() floaterm.send('jj st', { name = 'jj', persist = true }) end,
             { desc = 'Jujutsu' }
          )
       end,
@@ -1028,7 +823,10 @@ local core_plugins = {
       event = 'VeryLazy',
       ---@type Flash.Config
       opts = {
-         modes = { search = { enabled = false } },
+         modes = {
+            search = { enabled = false },
+            char = { highlight = { backdrop = false } },
+         },
          label = { uppercase = false },
       },
       keys = {
@@ -1108,7 +906,8 @@ local core_plugins = {
    {
       'nvim-neo-tree/neo-tree.nvim',
       keys = {
-         { '<leader>ft', '<Cmd>Neotree toggle<CR>', desc = 'File Tree' },
+         { '<leader>ft', '<Cmd>Neotree toggle filesystem left<CR>', desc = 'File Tree' },
+         { '<leader>fo', '<Cmd>Neotree toggle document_symbols right<CR>', desc = 'File Outline' },
       },
       cmd = 'Neotree',
       branch = 'v3.x',
@@ -1118,27 +917,46 @@ local core_plugins = {
          'nvim-tree/nvim-web-devicons',
       },
       opts = {
+         sources = {
+            'filesystem',
+            'document_symbols',
+            'buffers',
+         },
          default_component_configs = {
             indent = { indent_marker = '┊' },
+         },
+         window = {
+            width = unit_width,
+            mappings = {
+               ['<tab>'] = 'toggle_node',
+               ['<esc>'] = 'clear_filter',
+            },
          },
          filesystem = {
             filtered_items = {
                children_inherit_highlights = false,
                hide_dotfiles = false,
+               hide_by_name = { '.git', '.jj', '.venv' },
+            },
+            window = {
+               mappings = {
+                  ['Y'] = {
+                     function(state) vim.fn.setreg('+', state.tree:get_node().path) end,
+                     desc = 'copy path to clipboard',
+                  },
+               },
+            },
+         },
+         document_symbols = {
+            follow_cursor = true,
+            window = {
+               mappings = {
+                  ['/'] = 'filter_as_you_type',
+               },
             },
          },
          enable_git_status = true,
          enable_diagnostics = false,
-         window = {
-            width = unit_width,
-            mappings = {
-               ['Y'] = {
-                  function(state) vim.fn.setreg('+', state.tree:get_node().path) end,
-                  desc = 'copy path to clipboard',
-               },
-            },
-         },
-         enable_cursor_hijack = true,
          event_handlers = {
             {
                event = 'neo_tree_window_after_open',
@@ -1148,26 +966,7 @@ local core_plugins = {
                end,
             },
          },
-      },
-   },
-
-   --Outline
-   {
-      'hedyhli/outline.nvim',
-      keys = {
-         { '<leader>fo', '<cmd>Outline<CR>', desc = 'File Outline' },
-      },
-      opts = {
-         outline_window = {
-            split_command = unit_width .. 'vsplit',
-         },
-         outline_items = { show_symbol_details = false },
-         preview_window = {
-            width = unit_width * 2,
-            relative_width = false,
-            winhl = winhl({ NormalFloat = 'NormalFloat' }),
-         },
-         keymaps = { close = { 'q' } },
+         use_popups_for_input = false,
       },
    },
 
@@ -1351,11 +1150,8 @@ local language_plugins = {
             },
          },
          enabled = function()
-            local disabled_filetypes = { 'gitcommit' }
-            if vim.tbl_contains(disabled_filetypes, vim.bo.filetype) then return false end
-            if vim.bo.buftype ~= 'prompt' then return true end
-            local cmp_dap = package.loaded.cmp_dap
-            return cmp_dap ~= nil and cmp_dap.is_dap_buffer()
+            if vim.tbl_contains({ 'gitcommit' }, vim.bo.filetype) then return false end
+            return true
          end,
          completion = {
             menu = {
@@ -1399,7 +1195,7 @@ local language_plugins = {
    --Conform
    {
       'stevearc/conform.nvim',
-      event = 'VeryLazy',
+      keys = '<Leader>cf',
       init = function() vim.g.format_on_save = false end,
       config = function()
          require('conform').setup({
@@ -1562,19 +1358,10 @@ local language_plugins = {
       },
    },
 
-   --MarkdownPreview
+   --LivePreview
    {
-      'iamcco/markdown-preview.nvim',
-      cmd = {
-         'MarkdownPreviewToggle',
-         'MarkdownPreview',
-         'MarkdownPreviewStop',
-      },
-      ft = { 'markdown' },
-      build = function(plugin) vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install') end,
-      init = function()
-         if vim.fn.executable('npx') then vim.g.mkdp_filetypes = { 'markdown' } end
-      end,
+      'brianhuster/live-preview.nvim',
+      cmd = 'LivePreview',
    },
 
    --Dap
@@ -1667,43 +1454,22 @@ local language_plugins = {
 }
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
--- │                        Plugins: Colorschemes                         │
--- └──────────────────────────────────────────────────────────────────────┘
-
-local colorscheme_plugins = {
-   --Catppuccin
-   {
-      'catppuccin/nvim',
-      name = 'catppuccin',
-      opts = { flavour = 'mocha' },
-   },
-
-   --Tokyonight
-   {
-      'folke/tokyonight.nvim',
-      opts = { style = 'night', plugins = { auto = true }, terminal_colors = false },
-   },
-
-   --RosePine
-   {
-      'rose-pine/neovim',
-      name = 'rose-pine',
-      opts = { variant = 'main', enable = { terminal = false } },
-   },
-
-   --Github
-   {
-      'projekt0n/github-nvim-theme',
-      name = 'github-theme',
-      opts = { options = { terminal_colors = false } },
-   },
-}
-
--- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                             Plugins: UI                              │
 -- └──────────────────────────────────────────────────────────────────────┘
 
 local ui_plugins = {
+   --OscColors
+   {
+      'fsiraj/osc-colors.nvim',
+      dev = false,
+      priority = 1000,
+      lazy = false,
+      opts = {
+         highlights = { overrides = function(base) return generate_nvim_overrides(get_palette(base)) end },
+         extra_colors = { accent = 22 },
+      },
+   },
+
    --Lualine
    {
       'nvim-lualine/lualine.nvim',
@@ -1740,7 +1506,7 @@ local ui_plugins = {
          }
          local dap_status = {
             function() return require('dap').status() end,
-            icon = { ' ', color = { fg = vim.g.palette.red } },
+            icon = { ' ', color = { fg = get_hl_attr('DapBreak', 'fg') } },
             cond = function()
                if not package.loaded.dap then return false end
                return require('dap').session() ~= nil
@@ -1813,7 +1579,7 @@ local ui_plugins = {
          require('lualine').setup({
             options = {
                icons = true,
-               theme = generate_lualine_theme(vim.g.palette),
+               theme = generate_lualine_theme(),
                section_separators = { left = '', right = '' },
                component_separators = { left = '•', right = '•' },
                disabled_filetypes = {
@@ -1943,14 +1709,14 @@ local ui_plugins = {
                enabled = true,
                default_animation = {
                   name = 'fade',
-                  settings = { from_color = color or vim.g.palette.green },
+                  settings = { from_color = color or get_hl_attr('@diff.plus', 'fg') },
                },
             }
          end
 
          require('tiny-glimmer').setup({
             overwrite = {
-               yank = animation(vim.g.palette.accent),
+               yank = animation(get_hl_attr('CursorLineNr', 'fg')),
                paste = animation(),
                undo = animation(),
                redo = animation(),
@@ -2035,7 +1801,7 @@ local ui_plugins = {
       'aikhe/wrapped.nvim',
       dependencies = { 'nvzone/volt' },
       keys = { { '<leader>iw', '<Cmd>NvimWrapped<CR>', desc = 'NvimWrapped' } },
-      cmd = { 'NvimWrapped' },
+      cmd = 'NvimWrapped',
    },
 }
 
@@ -2046,7 +1812,6 @@ local ui_plugins = {
 local specs = vim.iter({
    core_plugins,
    language_plugins,
-   colorscheme_plugins,
    ui_plugins,
 })
    :flatten()
@@ -2062,4 +1827,3 @@ require('lazy').setup(specs, {
       fallback = true,
    },
 })
-vim.cmd.colorscheme(vim.g.colorscheme)

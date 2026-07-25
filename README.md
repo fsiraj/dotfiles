@@ -98,15 +98,13 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 ## 🌈 Theme System
 
-> Works perfectly for the 5 themes and their variants showcased above
+**Synchronized theming across Neovim, Ghostty, and tmux — powered by [tinty](https://github.com/tinted-theming/tinty)!**
 
-**Synchronized theming across all applications!**
+> Switch between 300+ [base16](https://github.com/tinted-theming/schemes) schemes with the shell command `theme` or the Neovim picker <kbd>\<space\>sc</kbd>. Applying a scheme updates ghostty, tmux, and every neovim instance instantly.
 
-> Switch themes instantly using the shell command `theme` or Neovim colorscheme picker <kbd>\<space\>sc</kbd> and watch as the entire development environment adapts seamlessly.
+**Want a different theme?**
 
-**Want to add more themes?**
-
-> Use any existing theme as a template.
+> Browse the [gallery](https://tinted-theming.github.io/tinted-gallery/) and run `tinty apply base16-<name>`. The five themes showcased above are just a starting point.
 
 ---
 

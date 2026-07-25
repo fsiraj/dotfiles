@@ -9,7 +9,7 @@
   },
   "transient_prompt": {
     "template": "╰─ {{ .Segments.Executiontime.FormattedMs }}{{ .Segments.Status.Text }}\n╭─ ",
-    "foreground": "darkGray"
+    "foreground": "8"
   },
   "blocks": [
     {
@@ -20,7 +20,7 @@
           "type": "executiontime",
           "style": "plain",
           "template": "╰─ {{ .FormattedMs }}",
-          "foreground": "darkGray",
+          "foreground": "8",
           "options": {
             "always_enabled": true,
             "style": "austin",
@@ -31,7 +31,7 @@
           "type": "status",
           "style": "plain",
           "template": "{{ if .Error }} [{{ reason .Code }}] {{ end }}\n",
-          "foreground": "darkGray",
+          "foreground": "8",
           "options": {
             "always_enabled": true
           }
@@ -46,7 +46,7 @@
           "type": "text",
           "style": "plain",
           "template": "╭─ ",
-          "foreground": "magenta"
+          "foreground": "22"
         },
         {
           "type": "session",
@@ -66,7 +66,7 @@
         {
           "type": "jujutsu",
           "style": "plain",
-          "template": "<default>•</> 󰁥 {{.ChangeID}}{{if .Working.Changed}} {{ .Working.String }}{{ end }}{{ if .ClosestBookmarks }} <d>{{ .ClosestBookmarks }}</>{{ end }}",
+          "template": "<default>•</> @ {{.ChangeID}}<d>{{if .Working.Changed}} {{ .Working.String }}{{ end }}{{ if .ClosestBookmarks }} {{ .ClosestBookmarks }}{{ end }}</>",
           "foreground": "blue",
           "options": {
             "fetch_status": true,
@@ -110,7 +110,7 @@
           "type": "text",
           "style": "plain",
           "template": "╰─",
-          "foreground": "magenta"
+          "foreground": "22"
         }
       ],
       "newline": true
