@@ -13,6 +13,7 @@ mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_BIN_HOME"
 BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
 CARGO_BINSTALL_URL="https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh"
+OH_MY_POSH_INSTALL_URL="https://ohmyposh.dev/install.sh"
 
 COLOR_STEP="1;35"     # Magenta
 COLOR_SUCCESS="1;32"  # Green
@@ -35,11 +36,12 @@ installed() {
 clone_or_pull() {
     local url="$1"
     local dest="$2"
+    local vcs="${3:-git}"
 
-    if [ ! -d "$dest" ]; then
-        git clone "$url" "$dest"
+    if [ "$vcs" = "jj" ]; then
+        [ ! -d "$dest" ] && jj git clone --colocate "$url" "$dest" || jj -R "$dest" git fetch
     else
-        git -C "$dest" pull
+        [ ! -d "$dest" ] && git clone "$url" "$dest" || git -C "$dest" pull
     fi
 }
 
@@ -90,12 +92,12 @@ install_macos_packages() {
         xcode-select --install 2>/dev/null || true
     fi
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
+
     brew install --quiet \
-        git make unzip gnu-sed tmux stow \
+        git make unzip gnu-sed stow \
+        tmux neovim \
         fzf zoxide eza fd ripgrep bat btop jq jj \
-        node imagemagick \
-        oh-my-posh fastfetch \
-        neovim \
+        node imagemagick fastfetch \
         2>/dev/null
     brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
     ln -sf "$(brew --prefix)/bin/gsed" "$XDG_BIN_HOME/sed"
@@ -115,12 +117,11 @@ install_ubuntu_packages() {
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
+
     brew install --quiet \
-        tmux \
+        tmux neovim \
         fzf zoxide eza fd ripgrep bat btop jq jj \
-        node imagemagick \
-        oh-my-posh fastfetch \
-        neovim \
+        node imagemagick fastfetch \
         2>/dev/null
     brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
 
@@ -134,15 +135,11 @@ install_arch_packages() {
 
     sudo pacman -Syu --needed --noconfirm \
         base-devel git unzip \
-        zsh tmux stow fastfetch ghostty \
+        tmux neovim \
+        zsh stow fastfetch ghostty \
         fzf zoxide eza fd ripgrep bat btop jq jujutsu \
         nodejs npm imagemagick \
-        neovim \
         ttf-jetbrains-mono-nerd
-
-    if ! installed oh-my-posh; then
-        curl -s https://ohmyposh.dev/install.sh | bash -s
-    fi
 
     success "arch packages installed!"
 }
@@ -159,10 +156,15 @@ install_packages() {
         install_ubuntu_packages
         ;;
     esac
+    install_standalone_tools
 }
 
-setup_language_tools() {
-    step "Setting up language tools..."
+install_standalone_tools() {
+    step "Installing tools via their own installer scripts..."
+
+    install_or_update "oh-my-posh" \
+        "curl -s $OH_MY_POSH_INSTALL_URL | bash -s"
+    ok "oh-my-posh installed!"
 
     install_or_update "uv" \
         "curl -LsSf https://astral.sh/uv/install.sh | sh" \
@@ -172,7 +174,7 @@ setup_language_tools() {
 
     install_or_update "rustup" \
         "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path" \
-        "rustup update"
+        "rustup update 2>/dev/null"
     ok "rustup installed!"
     [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
@@ -210,9 +212,6 @@ setup_shell() {
     zsh -ic "zinit update --quiet && compinit"
     ok "zsh plugins updated!"
 
-    # Live reload prompts on theme change
-    oh-my-posh enable reload
-
     # Use clean nvim as git editor
     git config --global core.editor "nvim --clean"
 }
@@ -220,7 +219,7 @@ setup_shell() {
 setup_dotfiles() {
     step "Setting up dotfiles..."
 
-    clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
+    clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles" jj
     stow -v -d "$HOME/dotfiles" -t "$HOME/.config" .config
 
     ok "dotfiles stowed!"
@@ -231,6 +230,8 @@ setup_tmux_plugins() {
 
     clone_or_pull "https://github.com/tmux-plugins/tmux-resurrect" \
         "$HOME/.config/tmux/plugins/tmux-resurrect"
+    clone_or_pull "https://github.com/tmux-plugins/tmux-continuum" \
+        "$HOME/.config/tmux/plugins/tmux-continuum"
 
     ok "tmux plugins installed!"
 }
@@ -239,18 +240,28 @@ setup_neovim_plugins() {
     step "Setting up neovim..."
 
     nvim --headless "+Lazy! restore" +qa && echo
-    nvim --headless "+NvimSyncTheme" +qa && echo
+
     ok "neovim plugins installed!"
+}
+
+setup_tinty() {
+    step "Setting up tinty..."
+
+    cargo binstall -y tinty
+    tinty sync
+    tinty apply "$(tinty current 2>/dev/null || echo base16-catppuccin-mocha)"
+
+    ok "tinty installed!"
 }
 
 main() {
     detect_os
     install_packages
-    setup_language_tools
     setup_dotfiles
     setup_shell
     setup_tmux_plugins
     setup_neovim_plugins
+    setup_tinty
     finish "Setup complete!"
 }
 
