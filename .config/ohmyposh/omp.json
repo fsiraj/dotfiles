@@ -54,7 +54,7 @@
         {
           "type": "session",
           "style": "plain",
-          "template": "{{ if .SSHSession }}{{ index (splitList \".\" .HostName) 0 }} <default>•</> {{ end }}",
+          "template": "{{ .HostName }} <default>•</> ",
           "foreground": "22"
         },
         {

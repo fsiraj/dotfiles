@@ -1,12 +1,10 @@
 #!/bin/zsh -f
-# Theme helpers for the tinty-based setup. One file, several subcommands:
-#   tinted.sh list                  -> scheme names, base24 preferred over base16
-#   tinted.sh apply <name>          -> apply base24-<name> if it exists, else base16-<name>
-#   tinted.sh preview <name>        -> prompt and syntax samples in the scheme's colors
-#   tinted.sh accent [--hex|--ansi] -> curated accent's color in base16/24 slot, hex, or ansi
-#   tinted.sh palette [-a|idx]      -> print the terminal color palette
+# Theme helpers for the tinty-based setup.
 
 accent_idx=22
+script="${0:A}"
+
+# ── Scheme selection ─────────────────────────────────────────────────────────
 
 list() {
     tinty list | sed -nE 's/^base(16|24)-//p' | sort -u
@@ -16,15 +14,23 @@ resolve() {
     tinty list | grep -qx "base24-$1" && echo "base24-$1" || echo "base16-$1"
 }
 
+pick() {
+    list | fzf --reverse --prompt "Select colorscheme: " \
+        --preview-window=up,21,nowrap,noinfo,border-none \
+        --preview "$script preview {}"
+}
+
 apply() {
-    [ -z "$1" ] && return
-    tinty apply "$(resolve "$1")"
+    local name="${1:-$(pick)}"
+    [[ -z $name ]] && return
+    tinty apply "$(resolve "$name")"
 }
 
 preview() {
-    [ -z "$1" ] && return
+    local name="${1:-$(pick)}"
+    [[ -z $name ]] && return
     local -A c; local k v n
-    local scheme="$(resolve "$1")"
+    local scheme="$(resolve "$name")"
     # Map each slot (00..0F, 10..17) to its fg escape, lifted from tinty's swatch column
     tinty info "$scheme" | sed -nE 's/.*\[(38;2;[0-9;]+)m.*base(..) .*/\2 \1/p' |
         while read k v; do c[$k]=$'\e['${v}m; done
@@ -41,29 +47,29 @@ preview() {
         printf -v v '%s%s %3d ' "${c[$k]/38/48}" "${c[05]}" "$n"
         swatches[n/8+1]+=$v
     done
-    # Rust token colors match test/test.html; use scheme slots instead of its Ayu RGBs.
+    # Rust sample colored by each slot's base16 syntax role.
     local -a code=(
         ""
         " ${comment}# Zsh$noitalic"
         # A completed command, then the full Oh My Posh prompt with sample segments.
-        " $c[03]╭─ $c[05]tinted palette"
+        " ${c[03]}╭─ ${c[05]}tinted palette"
         " ${swatches[1]}$bg"
         " ${swatches[2]}$bg"
-        " $c[03]╰─ 16ms"
+        " ${c[03]}╰─ 16ms"
         ""
-        " ${a}╭─ devbox $c[05]• $c[0B]~/dotfiles $c[05]• $c[0D]@ p${dim} ~5 main${nodim} $c[05]• $c[0E] ${dim}.venv${nodim} "
+        " ${a}╭─ devbox ${c[05]}• ${c[0B]}~/dotfiles ${c[05]}• ${c[0D]}@ p${dim} ~5 main${nodim} ${c[05]}• ${c[0E]} ${dim}.venv${nodim} "
         " ${a}╰─ "
         ""
         " ${comment}// Neovim$noitalic"
-        " $c[0D]use $c[08]tinty$c[0F]::$c[05]{$c[0A]Scheme$c[0F], $c[0A]Theme$c[05]}$c[0F];"
+        " ${c[0D]}use ${c[08]}tinty${c[0F]}::${c[05]}{${c[0A]}Scheme${c[0F]}, ${c[0A]}Theme${c[05]}}${c[0F]};"
         ""
-        " $c[0E]fn $c[0D]apply$c[05]($c[08]name$c[0F]: $c[05]&$c[0A]str$c[05]) $c[0F]-> $c[0A]Option$c[05]<$c[0A]Theme$c[05]> {"
-        " $c[05]    $c[0E]let $c[05]scheme = $c[0A]Scheme$c[0F]::$c[0D]load$c[05](name)?$c[0F];"
-        " $c[05]    $c[0E]let $c[05]theme = scheme$c[0F].$c[0D]with_base$c[05]($c[09]16$c[05])$c[0F].$c[0D]build$c[05]()$c[0F];"
-        " $c[05]    theme$c[0F].$c[0D]apply$c[05]()$c[0F];"
-        " $c[05]    $c[08]println!$c[05]($c[0B]\"applied: {}\"$c[0F], $c[05]theme$c[0F].$c[0D]name$c[05]())$c[0F];"
-        " $c[05]    $c[09]Some$c[05](theme)"
-        " $c[05]}"
+        " ${c[0E]}fn ${c[0D]}apply${c[05]}(${c[08]}name${c[0F]}: ${c[05]}&${c[0A]}str${c[05]}) ${c[0F]}-> ${c[0A]}Option${c[05]}<${c[0A]}Theme${c[05]}> {"
+        " ${c[05]}    ${c[0E]}let ${c[05]}scheme = ${c[0A]}Scheme${c[0F]}::${c[0D]}load${c[05]}(name)?${c[0F]};"
+        " ${c[05]}    ${c[0E]}let ${c[05]}theme = scheme${c[0F]}.${c[0D]}with_base${c[05]}(${c[09]}16${c[05]})${c[0F]}.${c[0D]}build${c[05]}()${c[0F]};"
+        " ${c[05]}    theme${c[0F]}.${c[0D]}apply${c[05]}()${c[0F]};"
+        " ${c[05]}    ${c[08]}println!${c[05]}(${c[0B]}\"applied: {}\"${c[0F]}, ${c[05]}theme${c[0F]}.${c[0D]}name${c[05]}())${c[0F]};"
+        " ${c[05]}    ${c[09]}Some${c[05]}(theme)"
+        " ${c[05]}}"
         ""
     )
     # Paint base00 behind each line; \e[K extends it to the edge
@@ -71,18 +77,7 @@ preview() {
     printf '\e[0m'
 }
 
-sync_ghostty() {
-    dst="$HOME/.config/ghostty/theme.ghostty"
-    [ -n "$TINTY_THEME_FILE_PATH" ] && cp -f "$TINTY_THEME_FILE_PATH" "$dst"
-    printf 'palette = %s=%s\n' "$accent_idx" "$(accent --hex)" >> "$dst"
-    killall -SIGUSR2 ghostty 2>/dev/null || true
-}
-
-sync_claude() {
-    [ -n "$CLAUDE_CONFIG_DIR" ] || return 0
-    mkdir -p "$CLAUDE_CONFIG_DIR/themes"
-    node "$TINTY_THEME_FILE_PATH" > "$CLAUDE_CONFIG_DIR/themes/tinted.json"
-}
+# ── Accent ───────────────────────────────────────────────────────────────────
 
 accent_slot() {
     local slot
@@ -107,41 +102,61 @@ accent() {
     fi
 }
 
+# ── Palette ──────────────────────────────────────────────────────────────────
+
+_cell() {
+    printf "\e[48;5;%dm %3d \e[0m" $1 $1
+}
+
 palette() {
     local all i r b bc t
-    [[ $1 == -a || $1 == --all ]] && all=1
-    # Print one cell: the index over its color as background
-    cell() printf "\e[48;5;%dm %3d \e[0m" $1 $1
+    [[ $1 == --all ]] && all=1
     # Single index: print its cell, then query the terminal for its hex
     if [[ $1 == <-> ]]; then
-        cell $1; unfunction cell
+        _cell $1
         printf '\e]4;%d;?\e\\' $1; read -rs -d '\' -t 0.2 r
         printf '%s\n' "$r" | sed -E 's/.*rgb:(..)..\/(..)..\/(..).*/: #\1\2\3/'
         return
     fi
     # Base 16: two rows of 8
     for ((i = 0; i < 16; i++)); do
-        cell $i; (((i + 1) % 8 == 0)) && echo
+        _cell $i; (((i + 1) % 8 == 0)) && echo
     done
-    if [[ -n $all ]]; then
-        echo
-        # 6x6x6 cube (16-231): 2x3 grid of 6x6 blocks
-        for ((t = 0; t < 12; t++)); do
-            for ((bc = 0; bc < 3; bc++)); do
-                r=$((t / 6 * 3 + bc))
-                for ((b = 0; b < 6; b++)); do cell $((16 + 36 * r + 6 * (t % 6) + b)); done
-                ((bc < 2)) && printf "  "
-            done
-            echo; ((t == 5)) && echo
+    [[ -z $all ]] && return
+    echo
+    # 6x6x6 cube (16-231): 2x3 grid of 6x6 blocks
+    for ((t = 0; t < 12; t++)); do
+        for ((bc = 0; bc < 3; bc++)); do
+            r=$((t / 6 * 3 + bc))
+            for ((b = 0; b < 6; b++)); do _cell $((16 + 36 * r + 6 * (t % 6) + b)); done
+            ((bc < 2)) && printf "  "
         done
-        echo
-        # Grayscale 232-255: two rows of 12
-        for ((i = 232; i < 256; i++)); do
-            cell $i; (((i - 231) % 8 == 0)) && echo
-        done
-    fi
-    unfunction cell
+        echo; ((t == 5)) && echo
+    done
+    echo
+    # Grayscale 232-255: two rows of 12
+    for ((i = 232; i < 256; i++)); do
+        _cell $i; (((i - 231) % 12 == 0)) && echo
+    done
 }
+
+# ── Tinty hooks (run by tinty/config.toml, not by hand) ──────────────────────
+
+sync_ghostty() {
+    [[ -n $TINTY_THEME_FILE_PATH ]] || return 0
+    local dst="$HOME/.config/ghostty/theme.ghostty"
+    cp -f "$TINTY_THEME_FILE_PATH" "$dst"
+    printf 'palette = %s=%s\n' "$accent_idx" "$(accent --hex)" >> "$dst"
+    killall -SIGUSR2 ghostty 2>/dev/null || true
+}
+
+sync_claude() {
+    [[ -n $CLAUDE_CONFIG_DIR && -n $TINTY_THEME_FILE_PATH ]] || return 0
+    mkdir -p "$CLAUDE_CONFIG_DIR/themes"
+    node "$TINTY_THEME_FILE_PATH" > "$CLAUDE_CONFIG_DIR/themes/tinted.json"
+}
+
+# ── Dispatch ─────────────────────────────────────────────────────────────────
 
 case "$1" in
     list   ) list         ;;
@@ -151,5 +166,22 @@ case "$1" in
     palette) palette "$2" ;;
     sync-ghostty) sync_ghostty ;;
     sync-claude ) sync_claude  ;;
-    *) echo "usage: tinted.sh {list|apply <name>|preview <name>|accent [--hex|--ansi]|palette [-a|<index>]}" >&2; exit 1 ;;
+    *) cat >&2 <<'EOF'
+Theme helpers for the tinty-based setup.
+
+USAGE:
+  tinted.sh <subcommand> [flags]
+
+COMMANDS:
+  list                     -> scheme names, without the base16-/base24- prefix
+  apply   [name]           -> apply base24-<name> if it exists, else base16-<name>; fzf picks if omitted
+  preview [name]           -> prompt and syntax samples in the scheme's colors; fzf picks if omitted
+  accent  [--hex|--ansi]   -> curated accent's color in base16/24 slot, hex, or ansi
+  palette [--all|<index>]  -> print the terminal color palette
+
+HOOKS (run by tinty):
+  sync-ghostty             -> copy the theme into Ghostty with the accent slot, then reload it
+  sync-claude              -> render the Claude Code theme from the tinty template
+EOF
+       exit 1 ;;
 esac
