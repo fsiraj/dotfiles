@@ -1,3 +1,8 @@
+local keymap = vim.keymap.set
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+local usercmd = vim.api.nvim_create_user_command
+
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                               Options                                │
 -- └──────────────────────────────────────────────────────────────────────┘
@@ -77,8 +82,6 @@ vim.diagnostic.config({
 -- │                               Keymaps                                │
 -- └──────────────────────────────────────────────────────────────────────┘
 
-local keymap = vim.keymap.set
-
 -- Neovim <-> Tmux Navigation
 local function move(dv, dt)
    local prev = vim.api.nvim_get_current_win()
@@ -139,9 +142,6 @@ keymap('n', '<Leader>im', '<Cmd>Mason<CR>', { desc = 'Mason' })
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                             Autocommands                             │
 -- └──────────────────────────────────────────────────────────────────────┘
-
-local autocmd = vim.api.nvim_create_autocmd
-local augroup = vim.api.nvim_create_augroup
 
 autocmd('TermOpen', {
    desc = 'Set buffer local options for terminals',
@@ -245,10 +245,8 @@ local neovim_logo = [[
 -- │                                Theme                                 │
 -- └──────────────────────────────────────────────────────────────────────┘
 
-local get_hl = vim.api.nvim_get_hl
-
 local function get_hl_attr(name, attr)
-   local value = get_hl(0, { name = name, link = false })[attr]
+   local value = vim.api.nvim_get_hl(0, { name = name, link = false })[attr]
    if (attr == 'fg' or attr == 'bg' or attr == 'sp') and type(value) == 'number' then
       return string.format('#%06x', value)
    end
@@ -294,11 +292,7 @@ local function generate_nvim_overrides(p)
    }
 end
 
-vim.api.nvim_create_user_command(
-   'Palette',
-   function() vim.print(get_palette()) end,
-   { desc = 'Inspect the current semantic palette' }
-)
+usercmd('Palette', function() vim.print(get_palette()) end, { desc = 'Inspect the current semantic palette' })
 
 -- ┌──────────────────────────────────────────────────────────────────────┐
 -- │                                 LSP                                  │
@@ -492,11 +486,16 @@ local core_plugins = {
                fn_transform = fmt,
             })
          end
+         local themes = function()
+            local cmd = '"$HOME/.config/tinted-theming/tinted.sh" apply'
+            require('floaterm').send(cmd, { name = 'theme' })
+         end
 
          --stylua: ignore start
          keymap('n', '<Leader>/'       , fzf.lgrep_curbuf           , { desc = 'FzfLua: Current Buffer'         })
          keymap('n', '<Leader><Leader>', fzf.buffers                , { desc = 'FzfLua: Open Buffers'           })
          keymap('n', '<Leader>sb'      , fzf.builtin                , { desc = 'FzfLua: Builtin'                })
+         keymap('n', '<Leader>sc'      , themes                     , { desc = 'See token usage'                })
          keymap('n', '<Leader>sd'      , dotfiles                   , { desc = 'FzfLua: Dotfiles'               })
          keymap('n', '<Leader>sf'      , fzf.files                  , { desc = 'FzfLua: Files'                  })
          keymap('n', '<Leader>sF'      , files_in_dir               , { desc = 'FzfLua: Files'                  })
@@ -541,8 +540,10 @@ local core_plugins = {
 
          -- Delete buffers and preserve window layout
          require('mini.bufremove').setup()
-         keymap('ca', 'bd', 'lua MiniBufremove.delete()')
-         keymap('ca', 'bw', 'lua MiniBufremove.wipeout()')
+         usercmd('Bdelete', function(opts) MiniBufremove.delete(0, opts.bang) end, { bang = true })
+         usercmd('Bwipeout', function(opts) MiniBufremove.wipeout(0, opts.bang) end, { bang = true })
+         keymap('ca', 'bd', 'Bdelete')
+         keymap('ca', 'bw', 'Bwipeout')
 
          -- Align text
          require('mini.align').setup({
@@ -591,28 +592,20 @@ local core_plugins = {
 
          -- Session management
          local sessions = require('mini.sessions')
+         sessions.setup({ autowrite = true, force = { delete = true } })
 
          for _, opt in ipairs({ 'terminal', 'blank', 'tabpages' }) do
             vim.opt.sessionoptions:remove(opt)
          end
 
-         sessions.setup({
-            autowrite = true,
-            force = { delete = true },
-         })
-
-         -- stylua: ignore
-         local function session_name()
-            return vim.fn.fnamemodify(vim.uv.cwd() or '', ':t')
-         end
+         local function session_name() return vim.fn.fnamemodify(vim.uv.cwd() or '', ':t') end
 
          local function with_session(action)
             local name = session_name()
-            if sessions.detected[name] then
-               action(name)
-            else
-               vim.notify('No session found for "' .. name .. '"', vim.log.levels.WARN)
+            if not sessions.detected[name] then
+               return vim.notify('No session found for "' .. name .. '"', vim.log.levels.WARN)
             end
+            action(name)
          end
 
          keymap('n', '<Leader>Sw', function() sessions.write(session_name()) end, { desc = 'Session Write' })
@@ -620,7 +613,7 @@ local core_plugins = {
          keymap('n', '<Leader>Sd', function() with_session(sessions.delete) end, { desc = 'Session Delete' })
          keymap('n', '<Leader>R', vim.cmd.restart, { desc = 'Session Restart', nowait = true })
 
-         vim.api.nvim_create_user_command('RestoreSession', function() with_session(sessions.read) end, {})
+         usercmd('RestoreSession', function() with_session(sessions.read) end, {})
       end,
    },
 
@@ -924,10 +917,7 @@ local core_plugins = {
          })
          autocmd('User', {
             pattern = 'SnacksDashboardClosed',
-            callback = function()
-               vim.fn.clearmatches()
-               if vim.o.columns >= 200 then vim.schedule(function() vim.cmd('Neotree show') end) end
-            end,
+            callback = function() vim.fn.clearmatches() end,
          })
       end,
    },

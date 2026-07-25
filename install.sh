@@ -3,6 +3,8 @@
 # shellcheck disable=SC2015
 
 OS=""
+GUI=0
+SUDO=0
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -39,12 +41,18 @@ installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
+require() {
+    installed "$1" && return 0
+    error "skipped: $1 is not installed"
+    return 1
+}
+
 clone_or_pull() {
     local url="$1"
     local dest="$2"
     local vcs="${3:-git}"
 
-    if [ "$vcs" = "jj" ]; then
+    if [ "$vcs" = "jj" ] && installed jj; then
         [ ! -d "$dest" ] && jj git clone --colocate "$url" "$dest" || jj -R "$dest" git fetch
     else
         [ ! -d "$dest" ] && git clone "$url" "$dest" || git -C "$dest" pull
@@ -63,8 +71,8 @@ install_or_update() {
     fi
 }
 
-detect_os() {
-    step "Detecting operating system..."
+detect_env() {
+    step "Detecting environment..."
 
     if [ "$(uname)" = "Darwin" ]; then
         OS="macos"
@@ -86,23 +94,39 @@ detect_os() {
     esac
 
     success "detected: $OS"
+
+    if [ "$OS" = "macos" ] || [ -n "$DISPLAY$WAYLAND_DISPLAY" ]; then
+        GUI=1
+        success "detected: gui"
+    else
+        GUI=0
+        success "detected: headless"
+    fi
+
+    if installed sudo && sudo -v; then
+        SUDO=1
+        success "detected: sudo"
+    else
+        SUDO=0
+        error "no sudo: skipping system packages and chsh"
+    fi
 }
 
 install_tools() {
-    case "$OS" in
-        macos) install_macos_packages ;;
-        arch) install_arch_packages ;;
-        ubuntu) install_ubuntu_packages ;;
-    esac
+    if [ "$SUDO" = 1 ]; then
+        case "$OS" in
+            arch) install_arch_packages ;;
+            macos) install_macos_packages ;;
+            ubuntu) install_ubuntu_packages ;;
+        esac
+    else
+        error "no sudo: skipped $OS packages"
+    fi
     install_standalone_tools
 }
 
 install_macos_packages() {
     step "Installing packages for macOS..."
-
-    if ! xcode-select -p >/dev/null 2>&1; then
-        xcode-select --install 2>/dev/null || true
-    fi
 
     install_brew
     brew install --quiet \
@@ -111,7 +135,7 @@ install_macos_packages() {
         fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick fastfetch \
         2>/dev/null
-    brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
+    [ "$GUI" = 1 ] && brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
     ln -sf "$(brew --prefix)/bin/gsed" "$XDG_BIN_HOME/sed"
 
     success "macOS packages installed!"
@@ -121,7 +145,7 @@ install_ubuntu_packages() {
     step "Installing packages for ubuntu..."
 
     sudo apt update -qq
-    sudo apt install -y -qq build-essential git unzip curl zsh xsel stow
+    sudo apt install -y -qq build-essential git unzip curl zsh stow
 
     install_brew
     brew install --quiet \
@@ -129,22 +153,26 @@ install_ubuntu_packages() {
         fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick fastfetch \
         2>/dev/null
-    brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
 
-    # ghostty (stable)
-    /bin/bash -c "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
+    if [ "$GUI" = 1 ]; then
+        sudo apt install -y -qq wl-clipboard
+        brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
+        /bin/bash -c "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
+    fi
     success "ubuntu packages installed!"
 }
 
 install_arch_packages() {
     step "Installing packages for arch..."
+
     sudo pacman -Syu --needed --noconfirm \
         base-devel git unzip less \
         tmux neovim \
-        zsh stow fastfetch ghostty \
+        zsh stow fastfetch \
         fzf zoxide eza fd ripgrep bat btop jq jujutsu \
-        nodejs npm imagemagick \
-        ttf-jetbrains-mono-nerd
+        nodejs npm imagemagick
+    [ "$GUI" = 1 ] && sudo pacman -S --needed --noconfirm \
+        ghostty ttf-jetbrains-mono-nerd wl-clipboard
 
     success "arch packages installed!"
 }
@@ -189,6 +217,7 @@ install_standalone_tools() {
 
 symlink_dotfiles() {
     step "Setting up dotfiles..."
+    require stow || return
 
     clone_or_pull "$DOTFILES_REPO_URL" "$HOME/dotfiles" jj
     stow -v -d "$HOME/dotfiles" -t "$XDG_CONFIG_HOME" .config
@@ -207,6 +236,7 @@ setup_tools() {
 
 install_zsh_plugins() {
     step "Setting up zsh plugins..."
+    require zsh || return
 
     ZINIT_HOME="$XDG_DATA_HOME/zinit/zinit.git"
     mkdir -p "$(dirname "$ZINIT_HOME")"
@@ -231,6 +261,7 @@ install_tmux_plugins() {
 
 install_neovim_plugins() {
     step "Setting up neovim..."
+    require nvim || return
 
     nvim --headless "+Lazy! restore" +qa && echo
 
@@ -240,11 +271,16 @@ install_neovim_plugins() {
 setup_zsh() {
     step "Setting up zsh..."
 
-    if [[ "${SHELL##*/}" != zsh ]]; then
+    require zsh || return
+    [[ "${SHELL##*/}" == zsh ]] && { success "shell already zsh!"; return; }
+
+    if [ "$SUDO" = 1 ] && grep -q "^$(id -un):" /etc/passwd; then
         sudo chsh -s "$(command -v zsh)" "$(id -un)"
+        ok "shell set to zsh!"
+        return
     fi
 
-    success "shell set to zsh!"
+    error "can't chsh: add 'exec zsh -l' to ~/.bash_profile to switch at login"
 }
 
 setup_tinty() {
@@ -257,7 +293,7 @@ setup_tinty() {
 }
 
 main() {
-    detect_os
+    detect_env
 
     install_tools
     symlink_dotfiles

@@ -20,6 +20,7 @@
     "lua-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true
   },
+  "outputStyle": "Concise",
   "feedbackSurveyRate": 0,
   "tui": "fullscreen",
   "autoMemoryEnabled": true,
