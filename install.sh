@@ -35,11 +35,12 @@ installed() {
 clone_or_pull() {
     local url="$1"
     local dest="$2"
+    local vcs="${3:-git}"
 
-    if [ ! -d "$dest" ]; then
-        git clone "$url" "$dest"
+    if [ "$vcs" = "jj" ]; then
+        [ ! -d "$dest" ] && jj git clone --colocate "$url" "$dest" || jj -R "$dest" git fetch
     else
-        git -C "$dest" pull
+        [ ! -d "$dest" ] && git clone "$url" "$dest" || git -C "$dest" pull
     fi
 }
 
@@ -90,6 +91,7 @@ install_macos_packages() {
         xcode-select --install 2>/dev/null || true
     fi
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
+
     brew install --quiet \
         git make unzip gnu-sed tmux stow \
         fzf zoxide eza fd ripgrep bat btop jq jj \
@@ -115,6 +117,7 @@ install_ubuntu_packages() {
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     HOMEBREW_NO_UPDATE_REPORT_NEW=1 brew update --quiet
+
     brew install --quiet \
         tmux \
         fzf zoxide eza fd ripgrep bat btop jq jj \
@@ -172,7 +175,7 @@ setup_language_tools() {
 
     install_or_update "rustup" \
         "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path" \
-        "rustup update"
+        "rustup update 2>/dev/null"
     ok "rustup installed!"
     [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
@@ -210,9 +213,6 @@ setup_shell() {
     zsh -ic "zinit update --quiet && compinit"
     ok "zsh plugins updated!"
 
-    # Live reload prompts on theme change
-    oh-my-posh enable reload
-
     # Use clean nvim as git editor
     git config --global core.editor "nvim --clean"
 }
@@ -220,7 +220,7 @@ setup_shell() {
 setup_dotfiles() {
     step "Setting up dotfiles..."
 
-    clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles"
+    clone_or_pull "https://github.com/fsiraj/dotfiles.git" "$HOME/dotfiles" jj
     stow -v -d "$HOME/dotfiles" -t "$HOME/.config" .config
 
     ok "dotfiles stowed!"
@@ -231,6 +231,8 @@ setup_tmux_plugins() {
 
     clone_or_pull "https://github.com/tmux-plugins/tmux-resurrect" \
         "$HOME/.config/tmux/plugins/tmux-resurrect"
+    clone_or_pull "https://github.com/tmux-plugins/tmux-continuum" \
+        "$HOME/.config/tmux/plugins/tmux-continuum"
 
     ok "tmux plugins installed!"
 }
@@ -239,8 +241,18 @@ setup_neovim_plugins() {
     step "Setting up neovim..."
 
     nvim --headless "+Lazy! restore" +qa && echo
-    nvim --headless "+NvimSyncTheme" +qa && echo
+
     ok "neovim plugins installed!"
+}
+
+setup_tinty() {
+    step "Setting up tinty..."
+
+    cargo binstall -y tinty
+    tinty sync
+    tinty apply "$(tinty current 2>/dev/null || echo base16-catppuccin-mocha)"
+
+    ok "tinty installed!"
 }
 
 main() {
@@ -251,6 +263,7 @@ main() {
     setup_shell
     setup_tmux_plugins
     setup_neovim_plugins
+    setup_tinty
     finish "Setup complete!"
 }
 

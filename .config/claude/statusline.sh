@@ -12,7 +12,7 @@ effort=$(echo "$input" | jq -r '.effort.level // empty')
 
 # ANSI colors
 red='\033[31m'
-orange='\033[38;5;214m'
+accent='\033[38;5;22m'
 yellow='\033[33m'
 reset='\033[0m'
 
@@ -34,7 +34,7 @@ color_for_pct() {
 # cwd · model (with effort level if present)
 model_label="$model"
 [ -n "$effort" ] && model_label="${model}-${effort}"
-parts="${orange}${model_label}${reset} · ${cwd}"
+parts="${accent}${model_label}${reset} · ${cwd}"
 
 # ctx x%
 if [ -n "$ctx_used" ]; then
