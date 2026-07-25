@@ -46,10 +46,4 @@ keybind = ctrl+shift+t=new_tab
 keybind = ctrl+shift+enter=toggle_fullscreen
 
 # Resolves conflicts with other things
-keybind = alt+equal=increase_font_size:2
-keybind = alt+minus=decrease_font_size:2
-keybind = ctrl+equal=unbind
-keybind = ctrl++=unbind
-keybind = ctrl+-=unbind
-keybind = ctrl+minus=unbind
 keybind = ctrl+enter=unbind

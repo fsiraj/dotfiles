@@ -1,0 +1,108 @@
+{
+  "$schema": "file:///home/farzad/.local/share/gnome-shell/extensions/forge@jmmaranan.com/config/keybindings.schema.json",
+  "version": 1,
+  "mod-mask-mouse-tile": "None",
+  "bindings": {
+    "focus-border-toggle": [],
+    "window-gap-size-increase": [],
+    "window-gap-size-decrease": [],
+    "con-split-layout-toggle": [
+      "<Alt>slash"
+    ],
+    "con-split-horizontal": [
+      "<Ctrl><Alt>minus"
+    ],
+    "con-split-vertical": [
+      "<Ctrl><Alt>backslash"
+    ],
+    "con-stacked-layout-toggle": [],
+    "con-tabbed-layout-toggle": [
+      "<Alt>comma"
+    ],
+    "con-tabbed-showtab-decoration-toggle": [],
+    "window-swap-left": [],
+    "window-swap-down": [],
+    "window-swap-up": [],
+    "window-swap-right": [],
+    "window-move-left": [
+      "<Ctrl><Alt>h"
+    ],
+    "window-move-down": [
+      "<Ctrl><Alt>j"
+    ],
+    "window-move-up": [
+      "<Ctrl><Alt>k"
+    ],
+    "window-move-right": [
+      "<Ctrl><Alt>l"
+    ],
+    "window-focus-left": [
+      "<Alt>h"
+    ],
+    "window-focus-down": [
+      "<Alt>j"
+    ],
+    "window-focus-up": [
+      "<Alt>k"
+    ],
+    "window-focus-right": [
+      "<Alt>l"
+    ],
+    "window-toggle-float": [
+      "<Ctrl><Alt>f"
+    ],
+    "window-toggle-always-float": [
+      "<Shift><Ctrl><Alt>f"
+    ],
+    "workspace-active-tile-toggle": [
+      "<Ctrl><Alt>w"
+    ],
+    "prefs-open": [
+      "<Super>comma"
+    ],
+    "prefs-tiling-toggle": [],
+    "window-swap-last-active": [],
+    "window-focus-next": [],
+    "window-focus-prev": [],
+    "window-swap-next": [],
+    "window-swap-prev": [],
+    "window-snap-one-third-right": [],
+    "window-snap-two-third-right": [],
+    "window-snap-one-third-left": [],
+    "window-snap-two-third-left": [],
+    "window-snap-center": [
+      "<Ctrl><Alt>c"
+    ],
+    "window-resize-left-increase": [],
+    "window-resize-left-decrease": [],
+    "window-resize-bottom-increase": [],
+    "window-resize-bottom-decrease": [],
+    "window-resize-top-increase": [],
+    "window-resize-top-decrease": [],
+    "window-resize-right-increase": [],
+    "window-resize-right-decrease": [],
+    "window-reset-sizes": [
+      "<Alt>r"
+    ],
+    "window-golden-ratio": [],
+    "prefs-config-reload": [
+      "<Shift><Super>comma"
+    ],
+    "prefs-config-export": [],
+    "window-pointer-to-focus": [],
+    "workspace-monocle-toggle": [
+      "<Alt>f"
+    ],
+    "window-expand": [
+      "<Alt>equal"
+    ],
+    "window-shrink": [
+      "<Alt>minus"
+    ],
+    "prefs-app-launch": [],
+    "prefs-cheatsheet-toggle": [
+      "<Shift><Super>question"
+    ],
+    "prefs-lock-screen": []
+  }
+}

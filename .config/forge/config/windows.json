@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/jcrussell/forge/e8c782937fce75eec055ce7747502b648b006162/config/windows.schema.json",
+    "overrides": [
+        {
+            "wmClass": "org.gnome.Nautilus",
+            "mode": "float"
+        },
+        {
+            "wmClass": "org.gnome.Settings",
+            "mode": "float"
+        },
+        {
+            "wmClass": "com.mitchellh.ghostty",
+            "wmId": 970509907,
+            "mode": "tile"
+        },
+        {
+            "wmClass": "com.mitchellh.ghostty",
+            "wmId": 970510022,
+            "mode": "tile"
+        }
+    ]
+}

@@ -1,15 +1,17 @@
 #!/bin/zsh -f
-# Theme helpers for the tinty-based setup. One file, several subcommands:
-#   tinted.sh list                  -> scheme names, base24 preferred over base16
-#   tinted.sh apply <name>          -> apply base24-<name> if it exists, else base16-<name>
-#   tinted.sh preview <name>        -> prompt and syntax samples in the scheme's colors
-#   tinted.sh accent [--hex|--ansi] -> curated accent's color in base16/24 slot, hex, or ansi
-#   tinted.sh palette [-a|idx]      -> print the terminal color palette
+# Theme helpers for the tinty-based setup.
 
 accent_idx=22
+script="${0:A}"
 
 list() {
     tinty list | sed -nE 's/^base(16|24)-//p' | sort -u
+}
+
+pick() {
+    list | fzf --reverse --prompt "Select colorscheme: " \
+        --preview-window=up,21,nowrap,noinfo,border-none \
+        --preview "$script preview {}"
 }
 
 resolve() {
@@ -17,14 +19,16 @@ resolve() {
 }
 
 apply() {
-    [ -z "$1" ] && return
-    tinty apply "$(resolve "$1")"
+    local name="${1:-$(pick)}"
+    [ -z "$name" ] && return
+    tinty apply "$(resolve "$name")"
 }
 
 preview() {
-    [ -z "$1" ] && return
+    local name="${1:-$(pick)}"
+    [ -z "$name" ] && return
     local -A c; local k v n
-    local scheme="$(resolve "$1")"
+    local scheme="$(resolve "$name")"
     # Map each slot (00..0F, 10..17) to its fg escape, lifted from tinty's swatch column
     tinty info "$scheme" | sed -nE 's/.*\[(38;2;[0-9;]+)m.*base(..) .*/\2 \1/p' |
         while read k v; do c[$k]=$'\e['${v}m; done
@@ -109,7 +113,7 @@ accent() {
 
 palette() {
     local all i r b bc t
-    [[ $1 == -a || $1 == --all ]] && all=1
+    [[ $1 == --all ]] && all=1
     # Print one cell: the index over its color as background
     cell() printf "\e[48;5;%dm %3d \e[0m" $1 $1
     # Single index: print its cell, then query the terminal for its hex
@@ -151,5 +155,18 @@ case "$1" in
     palette) palette "$2" ;;
     sync-ghostty) sync_ghostty ;;
     sync-claude ) sync_claude  ;;
-    *) echo "usage: tinted.sh {list|apply <name>|preview <name>|accent [--hex|--ansi]|palette [-a|<index>]}" >&2; exit 1 ;;
+    *) cat >&2 <<'EOF'
+Theme helpers for the tinty-based setup.
+
+USAGE:
+  tinted.sh <subcommand> [flags]  
+
+COMMANDS:
+  list                     -> scheme names, base24 preferred over base16
+  apply   [name]           -> apply base24-<name> if it exists, else base16-<name>; fzf picks if omitted
+  preview [name]           -> prompt and syntax samples in the scheme's colors; fzf picks if omitted
+  accent  [--hex|--ansi]   -> curated accent's color in base16/24 slot, hex, or ansi
+  palette [--all|<index>]  -> print the terminal color palette
+EOF
+       exit 1 ;;
 esac

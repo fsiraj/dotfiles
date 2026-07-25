@@ -1,0 +1,54 @@
+{
+  "$schema": "file:///home/farzad/.local/share/gnome-shell/extensions/forge@jmmaranan.com/config/settings.schema.json",
+  "version": 1,
+  "behavior": {
+    "tiling-mode-enabled": true,
+    "focus-on-hover-enabled": false,
+    "move-pointer-focus-enabled": false,
+    "auto-split-enabled": false,
+    "stacked-tiling-mode-enabled": false,
+    "tabbed-tiling-mode-enabled": true,
+    "auto-exit-tabbed": true,
+    "auto-reorient-on-close": false,
+    "default-window-layout": "tiled",
+    "dnd-center-layout": "tabbed",
+    "float-always-on-top-enabled": true,
+    "auto-unmaximize-for-tiling": true,
+    "focus-on-hover-tiling-only": false,
+    "disable-edge-tiling": true,
+    "new-window-placement": "pointer"
+  },
+  "appearance": {
+    "focus-border-toggle": true,
+    "focus-border-radius": 16,
+    "split-border-toggle": false,
+    "window-gap-size": 8,
+    "window-gap-size-increment": 1,
+    "window-gap-hidden-on-single": false,
+    "window-maximize-on-single": false,
+    "focus-border-hidden-on-single": true,
+    "window-margin-top": 0,
+    "window-margin-bottom": 8,
+    "window-margin-left": 8,
+    "window-margin-right": 8,
+    "preview-hint-enabled": true,
+    "showtab-decoration-enabled": true,
+    "tabbed-tab-margin": 4,
+    "stacked-tab-bar-height": 32,
+    "tab-position": "top",
+    "quick-settings-enabled": true,
+    "tray-icon-enabled": true
+  },
+  "workspaces": {
+    "workspace-skip-tile": "",
+    "monitor-skip-tile": ""
+  },
+  "development": {
+    "log-level": 0,
+    "logging-enabled": false
+  },
+  "other": {
+    "resize-amount": 50,
+    "launch-app-command": "ghostty"
+  }
+}
