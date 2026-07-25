@@ -9,6 +9,8 @@ export XDG_BIN_HOME="$HOME/.local/bin"
 
 # User specific
 export EDITOR="nvim"
+export TMUX_PLUGIN_DIR="$XDG_CONFIG_HOME/tmux/plugins"
+
 export FZF_DEFAULT_OPTS="\
 --cycle --color=base16,pointer:22,separator:0,info:-1:dim,gutter:232,bg+:232 \
 --bind tab:down,btab:up,ctrl-space:toggle,change:top \
