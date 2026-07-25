@@ -1,23 +1,22 @@
 # Styling - Editor
-font-family = JetBrainsMono Nerd Font
+font-family = JetBrainsMono Nerd Font Mono
 font-size = 14
 adjust-cell-width = -10%
 adjust-cell-height = 10%
-custom-shader = cursor-trail.glsl
 cursor-style = bar
 cursor-style-blink = true
+# custom-shader = cursor-trail.glsl
 
 # Styling - Window
 title = "󰊠"
 window-theme = ghostty
-window-padding-x = 32
-window-padding-y = 0,16
+window-padding-x = 16
+window-padding-y = 16
 window-padding-balance = true
 
-macos-titlebar-proxy-icon = hidden
-gtk-tabs-location = hidden
-gtk-toolbar-style = flat
-gtk-titlebar-hide-when-maximized = true
+# Styling - System Specific
+gtk-titlebar = false
+macos-titlebar-style = hidden
 
 # Colors (auto generated on theme sync)
 config-file = ?theme.ghostty

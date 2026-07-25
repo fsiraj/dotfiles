@@ -1,27 +1,13 @@
-# XDG directories created in install.sh and set in .zshenv
-
-# Keep PATH unique
-typeset -U path PATH
-path=("$XDG_BIN_HOME" "$MASON_BIN" $path)
-
-# Source local shell customizations if present (needed here for linux brew)
-if [ -f "$HOME/.zshrc.local" ]; then
-    source "$HOME/.zshrc.local"
-fi
+# See .zshenv as well
 
 # Keep zsh in emacs mode, not vi
 bindkey -e
 
-# Custom completions
-fpath=(~/.zfunc $fpath)
+# Free up C-s for nested tmux prefix
+stty -ixon
 
 # Load prompt
 eval "$(oh-my-posh init zsh --config "$HOME"/.config/ohmyposh/omp.json)"
-
-# Restore a steady bar cursor whenever the shell prompt returns.
-autoload -Uz add-zsh-hook
-restore_bar_cursor() { printf '\e[5 q'; }
-add-zsh-hook precmd restore_bar_cursor
 
 # History
 HISTSIZE=10000
@@ -37,8 +23,8 @@ source "${ZINIT_HOME}/zinit.zsh"
 _zsh_setup_completions() {
     zicompinit
     zicdreplay
-    eval "$(zoxide init --cmd cd zsh)"
-    source <(fzf --zsh)
+    source <(zoxide init --cmd cd zsh)  # Tab + Space-Tab completion for cd
+    source <(fzf --zsh)                 # Hijacks Tab completion and sets keybinds 
     bindkey -r '^[c'
 }
 
@@ -46,63 +32,32 @@ _zsh_setup_completions() {
 zinit wait lucid light-mode for \
     atload'_zsh_setup_completions' zsh-users/zsh-completions \
                                    Aloxaf/fzf-tab \
-                                   zsh-users/zsh-syntax-highlighting \
-    atload'_zsh_autosuggest_start' zsh-users/zsh-autosuggestions
+    atload'_zsh_autosuggest_start' zsh-users/zsh-autosuggestions \
+                                   zsh-users/zsh-syntax-highlighting
 
 # Configure completion behavior
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
 bindkey "^[[Z" autosuggest-accept                               # shift + tab
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' # case insensitive matching
 zstyle ':completion:*' list-colors '${(s.:.)LS_COLORS}'         # show color for matches
 zstyle ':completion:*' menu no                                  # disable defualt in favour of fzf-tab
+zstyle ':fzf-tab:*' use-fzf-default-opts yes                    # inherit opts from fzf env vars
 zstyle ':fzf-tab:complete:cd:*' fzf-preview '
     eza -aT --level=2 --color=always --icons=always $realpath
 '                                                               # show directory preview on cd
 
 # Custom functions and aliases
-theme() {
-    local theme="${1:-$(
-        nvim --headless "+NvimColorschemes" +qa 2>&1 |
-            fzf --reverse --height=16 --prompt "Select colorscheme: "
-    )}"
-    [[ -z "$theme" ]] && return
-    nvim --headless "+NvimSyncTheme $theme" +qa
+tinted() {
+    "$HOME/.config/tinted-theming/tinted.sh" "$@"
 }
 
-palette() {
-    local all i r b bc t
-    [[ $1 == -a || $1 == --all ]] && all=1
-    # Print one cell: the index over its color as background
-    cell() printf "\e[48;5;%dm %3d \e[0m" $1 $1
-    # Single index: print its cell, then query the terminal for its hex
-    if [[ $1 == <-> ]]; then
-        cell $1; unfunction cell
-        printf '\e]4;%d;?\e\\' $1; read -rs -d '\' -t 0.2 r
-        printf '%s\n' "$r" | sed -E 's/.*rgb:(..)..\/(..)..\/(..).*/: #\1\2\3/'
-        return
-    fi
-    # Base 16: two rows of 8
-    for ((i = 0; i < 16; i++)); do
-        cell $i; (((i + 1) % 8 == 0)) && echo
-    done
-    if [[ -n $all ]]; then
-        echo
-        # 6x6x6 cube (16-231): 2x3 grid of 6x6 blocks
-        for ((t = 0; t < 12; t++)); do
-            for ((bc = 0; bc < 3; bc++)); do
-                r=$((t / 6 * 3 + bc))
-                for ((b = 0; b < 6; b++)); do cell $((16 + 36 * r + 6 * (t % 6) + b)); done
-                ((bc < 2)) && printf "  "
-            done
-            echo; ((t == 5)) && echo
-        done
-        echo
-        # Grayscale 232-255: two rows of 12
-        for ((i = 232; i < 256; i++)); do
-            cell $i; (((i - 231) % 8 == 0)) && echo
-        done
-    fi
-    unfunction cell
+theme() {
+    local theme="${1:-$(tinted list | fzf --reverse --prompt "Select colorscheme: " \
+        --preview-window=up,21,nowrap,noinfo,border-none \
+        --preview "$HOME/.config/tinted-theming/tinted.sh preview {}")}"
+    [[ -z "$theme" ]] && return
+    tinted apply "$theme"
 }
 
 attach() {
@@ -118,16 +73,17 @@ attach() {
 }
 
 alias clear="clear -x"
-alias reload="clear -x && exec zsh"
+alias reload="clear -x && NO_FF=1 exec zsh"
 alias install="bash ~/dotfiles/install.sh"
 
-alias ls="eza --group-directories-first --color=auto --icons=auto"
-alias ll="ls -l --time-style=relative"
-alias la="ls -a"
-alias lt="ls -T"
-alias lla="ls -al"
+if command -v eza &>/dev/null; then
+    alias ls="eza --group-directories-first --color=auto --icons=auto"
+    alias ll="ls -l --time-style=relative"
+    alias la="ls -a"
+    alias lt="ls -T"
+    alias lla="ls -al"
+fi
 
-alias jjs="jj && jj st"
 alias ga="git add -v"
 alias gc="git commit -vm"
 alias gca="git commit --amend"
@@ -146,9 +102,15 @@ alias grs="git restore --staged"
 
 alias venv="source .venv/bin/activate"
 
+# System Info
 if command -v fastfetch &>/dev/null; then
     ff() { fastfetch --config "$HOME"/.config/fastfetch/ff.jsonc "$@"; }
     if [[ $- == *i* && $COLUMNS -ge 100 && -z $NO_FF ]]; then
         ff
     fi
+fi
+
+# Source local shell customizations if present
+if [ -f "$HOME/.zshrc.local" ]; then
+    source "$HOME/.zshrc.local"
 fi
