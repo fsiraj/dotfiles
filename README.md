@@ -61,7 +61,7 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 > The install script detects your OS, installs your tooling, and deploys the dotfiles. Before running it, download it and read the `main()` function. Everything is modular, so you can comment out any step you don't want. For example, `setup_language_tools` installs Rust and Python tooling — skip it if you don't need either.
 >
-> The same goes for `install_packages`, which pulls in a lot that isn't strictly required. It installs `node`, for instance, which many Neovim plugins and LSPs rely on — but you'll still get a very usable IDE without it. It also installs `ghostty`, which you can drop if you'd rather keep your current terminal or are working over SSH.
+> The same goes for `install_packages`, which pulls in a lot that isn't strictly required. It installs `node`, for instance, which many Neovim plugins and LSPs rely on — but you'll still get a very usable IDE without it.
 >
 > You can skip the script entirely and treat it as a reference, running only the commands relevant to you. It's nothing complicated — it just exists to save you the trouble of tracking every requirement and dependency by hand.
 >
@@ -75,14 +75,13 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 #### 💻 **Terminal & Shell**
 
-> - **Terminal:** [Ghostty](https://ghostty.org/) - Lightning fast GPU-accelerated terminal
+> - **Terminal & Multiplexing:** [Rex](https://www.superlogical.com/rex) - Terminal and multiplexer in one (macOS)
 > - **Shell:** [ZSH](https://www.zsh.org/) - Fast UNIX shell with modern enhancements
 > - **Prompt:** [Oh My Posh](https://ohmyposh.dev/) - Beautiful, customizable prompt
 
 #### ⚡ **Development**
 
 > - **Editor:** [Neovim](https://neovim.io/) - The hyperextensible Vim-based text editor
-> - **Multiplexing:** [tmux](https://github.com/tmux/tmux) - Terminal workspace management
 > - **AI:** Integrated into Neovim with [sidekick.nvim](https://github.com/folke/sidekick.nvim)
 
 #### 🔧 **Languages**
@@ -98,9 +97,9 @@ bash <(curl -fsSL https://fsiraj.github.io/dotfiles/install.sh)
 
 ## 🌈 Theme System
 
-**Synchronized theming across Neovim, Ghostty, Tmux, and more — powered by [tinty](https://github.com/tinted-theming/tinty)!**
+**Synchronized theming across Neovim, Rex, and more — powered by [tinty](https://github.com/tinted-theming/tinty)!**
 
-> Switch between 500+ schemes with the shell command `theme`. Applying a scheme updates ghostty, tmux, and every neovim instance.
+> Switch between 500+ schemes with the shell command `theme`. Applying a scheme updates Rex and every neovim instance.
 
 ---
 

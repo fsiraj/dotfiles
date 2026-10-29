@@ -3,7 +3,7 @@
 # Keep zsh in emacs mode, not vi
 bindkey -e
 
-# Free up C-s for nested tmux prefix
+# Free up C-s (disable XON/XOFF flow control)
 stty -ixon
 
 # Load prompt
@@ -55,24 +55,6 @@ tinted() {
 
 theme() {
     tinted apply "$1"
-}
-
-attach() {
-    if [[ -z "$1" ]]; then
-        local sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -v '^_')
-        [[ -z "$sessions" ]] && echo "No tmux sessions." && return 1
-        local session=$(echo "$sessions" | fzf --reverse --height=16 --prompt "Session: ")
-        [[ -z "$session" ]] && return 1
-        tmux attach -t "$session"
-    else
-        tmux new -A -s "$1"
-    fi
-}
-
-resurrect() {
-    tmux has-session 2>/dev/null || tmux new -d
-    tmux run-shell "$TMUX_PLUGIN_DIR/tmux-resurrect/scripts/restore.sh"
-    [[ -n "$TMUX" ]] || tmux attach
 }
 
 # Aliases

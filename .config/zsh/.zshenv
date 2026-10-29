@@ -9,7 +9,6 @@ export XDG_BIN_HOME="$HOME/.local/bin"
 
 # User specific
 export EDITOR="nvim"
-export TMUX_PLUGIN_DIR="$XDG_CONFIG_HOME/tmux/plugins"
 
 export FZF_DEFAULT_OPTS="\
 --cycle --color=base16,pointer:22,separator:0,info:-1:dim,gutter:232,bg+:232 \
@@ -20,7 +19,6 @@ export FZF_DEFAULT_OPTS="\
 export HOMEBREW_NO_ENV_HINTS=true
 export MASON_BIN="$HOME/.local/share/nvim/mason/bin"
 export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
-export CLAUDE_CODE_TMUX_TRUECOLOR=1
 
 # Keep PATHs unique
 typeset -U path PATH

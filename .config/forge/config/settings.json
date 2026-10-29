@@ -49,6 +49,6 @@
   },
   "other": {
     "resize-amount": 50,
-    "launch-app-command": "ghostty"
+    "launch-app-command": "x-terminal-emulator"
   }
 }

@@ -14,14 +14,11 @@ mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_BIN_HOME"
 PATH=$PATH:$XDG_BIN_HOME
 
 BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-GHOSTTY_INSTALL_URL="https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh"
 CARGO_BINSTALL_URL="https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh"
 OH_MY_POSH_INSTALL_URL="https://ohmyposh.dev/install.sh"
 
 ZINIT_REPO_URL="https://github.com/zdharma-continuum/zinit.git"
 DOTFILES_REPO_URL="https://github.com/fsiraj/dotfiles.git"
-TMUX_RESURRECT_REPO_URL="https://github.com/tmux-plugins/tmux-resurrect"
-TMUX_CONTINUUM_REPO_URL="https://github.com/tmux-plugins/tmux-continuum"
 
 COLOR_STEP="1;35"     # Magenta
 COLOR_SUCCESS="1;32"  # Green
@@ -131,12 +128,15 @@ install_macos_packages() {
     install_brew
     brew install --quiet \
         git make unzip gnu-sed stow \
-        tmux neovim \
+        neovim \
         fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick fastfetch \
         2>/dev/null
-    [ "$GUI" = 1 ] && brew install --quiet --cask ghostty font-jetbrains-mono-nerd-font 2>/dev/null
+    [ "$GUI" = 1 ] && brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
     ln -sf "$(brew --prefix)/bin/gsed" "$XDG_BIN_HOME/sed"
+
+    local rex="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+    [ -x "$rex" ] && ln -sf "$rex" "$XDG_BIN_HOME/rex"
 
     success "macOS packages installed!"
 }
@@ -149,7 +149,7 @@ install_ubuntu_packages() {
 
     install_brew
     brew install --quiet \
-        tmux neovim \
+        neovim \
         fzf zoxide eza fd ripgrep bat btop jq jj \
         node imagemagick fastfetch \
         2>/dev/null
@@ -157,7 +157,6 @@ install_ubuntu_packages() {
     if [ "$GUI" = 1 ]; then
         sudo apt install -y -qq wl-clipboard
         brew install --quiet --cask font-jetbrains-mono-nerd-font 2>/dev/null
-        /bin/bash -c "$(curl -fsSL "$GHOSTTY_INSTALL_URL")"
     fi
     success "ubuntu packages installed!"
 }
@@ -167,12 +166,12 @@ install_arch_packages() {
 
     sudo pacman -Syu --needed --noconfirm \
         base-devel git unzip less \
-        tmux neovim \
+        neovim \
         zsh stow fastfetch \
         fzf zoxide eza fd ripgrep bat btop jq jujutsu \
         nodejs npm imagemagick
     [ "$GUI" = 1 ] && sudo pacman -S --needed --noconfirm \
-        ghostty ttf-jetbrains-mono-nerd wl-clipboard
+        ttf-jetbrains-mono-nerd wl-clipboard
 
     success "arch packages installed!"
 }
@@ -228,7 +227,6 @@ symlink_dotfiles() {
 
 setup_tools() {
     install_zsh_plugins
-    install_tmux_plugins
     install_neovim_plugins
     setup_zsh
     setup_tinty
@@ -246,17 +244,6 @@ install_zsh_plugins() {
     zsh -ic "zinit update --quiet && compinit"
 
     ok "zsh plugins installed!"
-}
-
-install_tmux_plugins() {
-    step "Setting up tmux plugins..."
-
-    TMUX_PLUGIN_DIR="$XDG_CONFIG_HOME/tmux/plugins"
-
-    clone_or_pull "$TMUX_RESURRECT_REPO_URL" "$TMUX_PLUGIN_DIR/tmux-resurrect"
-    clone_or_pull "$TMUX_CONTINUUM_REPO_URL" "$TMUX_PLUGIN_DIR/tmux-continuum"
-
-    ok "tmux plugins installed!"
 }
 
 install_neovim_plugins() {

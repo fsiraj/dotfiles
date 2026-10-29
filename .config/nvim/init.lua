@@ -82,23 +82,22 @@ vim.diagnostic.config({
 -- │                               Keymaps                                │
 -- └──────────────────────────────────────────────────────────────────────┘
 
--- Neovim <-> Tmux Navigation
-local function move(dv, dt)
+-- Neovim <-> Rex Navigation
+local function move(dv, dr)
    local prev = vim.api.nvim_get_current_win()
    vim.cmd.wincmd(dv)
-   if prev == vim.api.nvim_get_current_win() and vim.env.TMUX then
-      vim.fn.system({ 'tmux', 'select-pane', '-' .. dt })
+   if prev == vim.api.nvim_get_current_win() and vim.env.REX_BLOCK then
+      vim.fn.system({ 'rex', 'focus', dr })
    end
 end
 
-for _, dirs in ipairs({ { 'h', 'L' }, { 'j', 'D' }, { 'k', 'U' }, { 'l', 'R' } }) do
-   local dv, dt = unpack(dirs)
+for dv, dr in pairs({ h = 'left', j = 'down', k = 'up', l = 'right' }) do
    local lhs = '<C-' .. dv .. '>'
-   keymap('n', lhs, function() move(dv, dt) end, { desc = 'Navigate ' .. dv })
+   keymap('n', lhs, function() move(dv, dr) end, { desc = 'Navigate ' .. dr })
    keymap('t', lhs, function()
       vim.cmd.stopinsert()
-      move(dv, dt)
-   end, { desc = 'Navigate ' .. dt })
+      move(dv, dr)
+   end, { desc = 'Navigate ' .. dr })
 end
 
 -- Buffer Navigation
@@ -705,7 +704,7 @@ local core_plugins = {
          sidekick.setup({
             cli = {
                picker = 'fzf-lua',
-               mux = { enabled = true, backend = 'tmux', create = 'split', split = { size = 0.33 } },
+               mux = { enabled = vim.env.REX_SESSION ~= nil, backend = 'rex', create = 'split', split = { size = 0.33 } },
             },
          })
 

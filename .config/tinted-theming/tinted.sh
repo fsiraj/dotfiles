@@ -93,7 +93,6 @@ accent_slot() {
 }
 
 accent() {
-    [[ $1 == --ansi ]] && { printf 'colour%s' "$accent_idx"; return; }
     local slot="$(accent_slot "$(tinty current 2>/dev/null)")"
     if [[ $1 == --hex ]]; then
         tinty info 2>/dev/null | awk -F'|' -v s="base$slot" '$3~s{gsub(/ /,"",$4);print $4;exit}'
@@ -142,12 +141,14 @@ palette() {
 
 # ── Tinty hooks (run by tinty/config.toml, not by hand) ──────────────────────
 
-sync_ghostty() {
-    [[ -n $TINTY_THEME_FILE_PATH ]] || return 0
-    local dst="$HOME/.config/ghostty/theme.ghostty"
+sync_rex() {
+    [[ -n $TINTY_THEME_FILE_PATH ]] && command -v rex &>/dev/null || return 0
+    local dst="$HOME/.config/rex/tinted.ghostty"
     cp -f "$TINTY_THEME_FILE_PATH" "$dst"
     printf 'palette = %s=%s\n' "$accent_idx" "$(accent --hex)" >> "$dst"
-    killall -SIGUSR2 ghostty 2>/dev/null || true
+    # Needs Remote Control on in Rex.app; re-importing the same name replaces it
+    THEME="$dst" rex --autostart=false do \
+        -e "rex.client.queue('client.theme.import', { path = os.getenv('THEME') })" &>/dev/null || true
 }
 
 sync_claude() {
@@ -164,7 +165,7 @@ case "$1" in
     preview) preview "$2" ;;
     accent ) accent  "$2" ;;
     palette) palette "$2" ;;
-    sync-ghostty) sync_ghostty ;;
+    sync-rex    ) sync_rex     ;;
     sync-claude ) sync_claude  ;;
     *) cat >&2 <<'EOF'
 Theme helpers for the tinty-based setup.
@@ -176,11 +177,11 @@ COMMANDS:
   list                     -> scheme names, without the base16-/base24- prefix
   apply   [name]           -> apply base24-<name> if it exists, else base16-<name>; fzf picks if omitted
   preview [name]           -> prompt and syntax samples in the scheme's colors; fzf picks if omitted
-  accent  [--hex|--ansi]   -> curated accent's color in base16/24 slot, hex, or ansi
+  accent  [--hex]          -> curated accent's color in base16/24 slot, or hex
   palette [--all|<index>]  -> print the terminal color palette
 
 HOOKS (run by tinty):
-  sync-ghostty             -> copy the theme into Ghostty with the accent slot, then reload it
+  sync-rex                 -> import the theme into Rex.app with the accent slot
   sync-claude              -> render the Claude Code theme from the tinty template
 EOF
        exit 1 ;;

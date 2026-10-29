@@ -1,8 +1,7 @@
 test/
 **.log
 
-.config/tmux/plugins/
-.config/ghostty/theme.ghostty
+.config/rex/tinted.ghostty
 
 .config/jj/*
 !.config/jj/config.toml

@@ -1,10 +1,8 @@
-hooks = ["tmux source-file \"$HOME/.config/tmux/tmux.conf\" 2>/dev/null || true"]
-
 [[items]]
 path = "https://github.com/tinted-theming/tinted-terminal"
 name = "tinted-terminal"
 themes-dir = "themes/ghostty"
-hook = "$HOME/.config/tinted-theming/tinted.sh sync-ghostty"
+hook = "$HOME/.config/tinted-theming/tinted.sh sync-rex"
 supported-systems = ["base16", "base24"]
 
 [[items]]
